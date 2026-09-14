@@ -28,6 +28,7 @@ input:focus,select:focus{border-color:#4da3ff}
 .row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:#aab4cc}.row b{color:#fff}
 .btn{width:100%;height:46px;border:0;border-radius:11px;background:#ff4757;color:#fff;font-weight:800}
 .btn.secondary{background:#1d2740;border:1px solid #303b59}.btn.danger{background:transparent;border:1px solid #65313a;color:#ff7b89}
+.awake-quick-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.awake-quick-buttons .btn{font-size:13px;padding:0 6px}
 .manager-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.search-wrap{display:flex;gap:8px;align-items:center}.search-wrap input{flex:1}
 .mtab{height:40px;border:1px solid #303b59;border-radius:10px;background:#1d2740;color:#aab4cc;font-size:12px;font-weight:800}
 .mtab.active{border-color:#4da3ff;color:#fff}
@@ -102,12 +103,12 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="group">
 <label>覚醒補正（%・ステータス別手動入力）</label>
 <div class="rune-grid awakening-grid">
-<div><span>HP (%)</span><input id="awakeHp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>SP (%)</span><input id="awakeSp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>攻撃力 (%)</span><input id="awakeAtk" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：10"></div>
-<div><span>防御力 (%)</span><input id="awakeDef" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>素早さ (%)</span><input id="awakeSpd" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>クリティカル (%)</span><input id="awakeCrit" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
+<div><span>HP (%)</span><input id="awakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>SP (%)</span><input id="awakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>攻撃力 (%)</span><input id="awakeAtk" type="number" step="0.1" inputmode="decimal" placeholder="例：10"></div>
+<div><span>防御力 (%)</span><input id="awakeDef" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>素早さ (%)</span><input id="awakeSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>クリティカル (%)</span><input id="awakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div>
 <small>各ステータスの覚醒率を個別に入力できます。例：攻撃力10 → +10%。</small>
 </div>
@@ -121,12 +122,12 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="group">
 <label>装備用覚醒補正（%・ステータス別手動入力）</label>
 <div class="rune-grid awakening-grid">
-<div><span>HP (%)</span><input id="weaponAwakeHp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>SP (%)</span><input id="weaponAwakeSp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>攻撃力 (%)</span><input id="weaponAwakeAtk" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：10"></div>
-<div><span>防御力 (%)</span><input id="weaponAwakeDef" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>素早さ (%)</span><input id="weaponAwakeSpd" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>クリティカル (%)</span><input id="weaponAwakeCrit" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
+<div><span>HP (%)</span><input id="weaponAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>SP (%)</span><input id="weaponAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>攻撃力 (%)</span><input id="weaponAwakeAtk" type="number" step="0.1" inputmode="decimal" placeholder="例：10"></div>
+<div><span>防御力 (%)</span><input id="weaponAwakeDef" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>素早さ (%)</span><input id="weaponAwakeSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>クリティカル (%)</span><input id="weaponAwakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div><small>装備の各ステータスに個別で％補正をかけます。</small>
 </div>
 <div class="group"><label>タリスマン</label>
@@ -139,12 +140,12 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="group">
 <label>タリスマン用覚醒補正（%・ステータス別手動入力）</label>
 <div class="rune-grid awakening-grid">
-<div><span>HP (%)</span><input id="talismanAwakeHp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>SP (%)</span><input id="talismanAwakeSp" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>攻撃力 (%)</span><input id="talismanAwakeAtk" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：10"></div>
-<div><span>防御力 (%)</span><input id="talismanAwakeDef" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>素早さ (%)</span><input id="talismanAwakeSpd" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
-<div><span>クリティカル (%)</span><input id="talismanAwakeCrit" type="number" step="0.1" inputmode="decimal" value="0" placeholder="例：5"></div>
+<div><span>HP (%)</span><input id="talismanAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>SP (%)</span><input id="talismanAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>攻撃力 (%)</span><input id="talismanAwakeAtk" type="number" step="0.1" inputmode="decimal" placeholder="例：10"></div>
+<div><span>防御力 (%)</span><input id="talismanAwakeDef" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>素早さ (%)</span><input id="talismanAwakeSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
+<div><span>クリティカル (%)</span><input id="talismanAwakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div><small>タリスマンの各ステータスに個別で％補正をかけます。</small>
 </div>
 <div class="group">
@@ -185,6 +186,10 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <small>モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：初期値から手動入力・数値加算</small>
 </div>
 <button id="resetCalc" class="btn secondary" type="button">入力をリセット</button>
+<div class="awake-quick-buttons">
+<button id="setAwakeZero" class="btn secondary" type="button">覚醒値をすべて0</button>
+<button id="setAwakeHundred" class="btn secondary" type="button">覚醒値をすべて100</button>
+</div>
 </section>
 
 <section id="dataPage" class="page" style="display:none">
@@ -596,11 +601,18 @@ $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){pa
   $("characterSearch").value="";
   $("weaponSearch").value="";
   $("talismanSearch").value="";
-  ["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"].forEach(function(id){$(id).value="0"});
+  ["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"].forEach(function(id){$(id).value=""});
   $("runeHp").value=3648;$("runeSp").value=3624;$("runeAtk").value=2328;$("runeDef").value=2160;$("runeSpd").value=2328;$("runeCrit").value=96;
   if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
   calc();
 };
+var awakeningInputIds=["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"];
+function setAllAwakeningValues(value){
+  awakeningInputIds.forEach(function(id){$(id).value=String(value)});
+  calc();
+}
+$("setAwakeZero").onclick=function(){setAllAwakeningValues(0)};
+$("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
 $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$("file").onchange=restore;
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
