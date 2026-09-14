@@ -19,7 +19,10 @@ header{text-align:center;padding:8px 0 14px}h1{font-size:22px;margin:0 0 4px}.su
 .group{margin-bottom:13px}.group:last-child{margin-bottom:0}
 label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
 input,select{width:100%;height:47px;border:1px solid #303b59;border-radius:11px;background:#1d2740;color:#fff;padding:0 12px;font-size:16px;outline:none}
-input:focus,select:focus{border-color:#4da3ff}
+textarea{width:100%;min-height:150px;resize:vertical;border:1px solid #303b59;border-radius:11px;background:#1d2740;color:#fff;padding:12px;font-size:15px;line-height:1.55;outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#4da3ff}
+textarea[readonly]{cursor:default;background:#192238;color:#e7edf7;border-color:#303b59}
+body[data-page="data"] #resetCalc,body[data-page="data"] .awake-quick-buttons{display:none!important}
 .result{background:#142946;border:1px solid #315c88;border-radius:16px;padding:18px;text-align:center;margin-bottom:12px}
 .status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.status-card{background:#1d2740;border:1px solid #303b59;border-radius:12px;padding:11px;text-align:center}.status-card.main{border-color:#4da3ff;background:#173455}.status-label{font-size:12px;color:#b9c9df;font-weight:800}.status-value{font-size:27px;font-weight:900;color:#fff;margin-top:3px}.status-card.main .status-value{font-size:31px;color:#62b5ff}
 
@@ -208,6 +211,11 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
   </div>
   <div style="font-size:11px;color:#9ca8c0;margin-top:8px">一般ユーザーはログイン不要です。追加・編集・削除は管理者ログイン後に行います。</div>
 </div>
+<div class="card" id="announcementCard" style="margin-bottom:12px">
+  <div style="font-weight:900;margin-bottom:8px">お知らせ</div>
+  <textarea id="announcementText" placeholder="お知らせ内容を入力"></textarea>
+  <div id="announcementStatus" style="font-size:11px;color:#9ca8c0;margin-top:7px">全端末共通のお知らせです。</div>
+</div>
 <div class="card" id="cloudStatus" style="margin-bottom:12px">☁️ 共通データベース：接続確認中…</div>
 <div class="manager-tabs">
 <button class="mtab active" data-type="characters" type="button">キャラ</button>
@@ -250,6 +258,7 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 (function(){
 "use strict";
 var KEY="monbus_stats_db_v1";
+var ADMIN_EMAIL="koki.ayaka1016@gmail.com";
 var STAT_KEYS=["hp","sp","atk","def","spd","crit"];
 var STAT_LABELS={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
 function item(id,name,stats){return {id:id,name:name,stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
@@ -294,6 +303,33 @@ function showSupabaseError(action,type,e){
  console.error(action,type,e);
  alert(action+"に失敗しました。\n\nテーブル："+type+"\nログイン："+(currentUser&&currentUser.email||"なし")+"\n\n"+formatSupabaseError(e));
 }
+async function loadAnnouncement(){
+ try{
+  var r=await supabaseClient.from("announcements").select("id,content,updated_at").eq("id",1).maybeSingle();
+  if(r.error)throw r.error;
+  var el=$("announcementText"),st=$("announcementStatus");
+  if(el)el.value=(r.data&&r.data.content)||"";
+  if(st)st.textContent="全端末共通のお知らせです。";
+ }catch(e){
+  console.error("お知らせ取得エラー",e);
+  if($("announcementStatus"))$("announcementStatus").textContent="⚠️ お知らせを取得できません。Supabase設定を確認してください。";
+ }
+}
+async function saveAnnouncement(){
+ var isAdmin=!!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase());
+ if(!isAdmin)return;
+ var el=$("announcementText"),st=$("announcementStatus");
+ if(!el)return;
+ if(st)st.textContent="保存中…";
+ try{
+  var r=await supabaseClient.from("announcements").upsert({id:1,content:el.value,updated_at:new Date().toISOString()},{onConflict:"id"});
+  if(r.error)throw r.error;
+  if(st)st.textContent="保存済み（全端末共通）";
+ }catch(e){
+  console.error("お知らせ保存エラー",e);
+  if(st)st.textContent="⚠️ 保存に失敗しました。Supabase設定を確認してください。";
+ }
+}
 async function fetchCloud(){
  try{
   var results=await Promise.all([
@@ -321,10 +357,12 @@ async function load(){
  }catch(e){}
  normalizeDb();
  await fetchCloud();
+ await loadAnnouncement();
 }
 async function refreshAuth(){
  var r=await supabaseClient.auth.getUser();currentUser=r.data&&r.data.user?r.data.user:null;
- var out=$("loggedOutBox"),inn=$("loggedInBox"),addBtn=$("addButton");
+ var out=$("loggedOutBox"),inn=$("loggedInBox"),addBtn=$("addButton"),announcementCard=$("announcementCard"),announcement=$("announcementText");
+ var isAdmin=!!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase());
  if(currentUser){
   if(out)out.style.display="none";if(inn)inn.style.display="block";
   if($("authUser"))$("authUser").textContent="ログイン中："+(currentUser.email||currentUser.id);
@@ -333,6 +371,15 @@ async function refreshAuth(){
   if(out)out.style.display="block";if(inn)inn.style.display="none";
   if(addBtn)addBtn.style.display="none";
  }
+ if(announcementCard)announcementCard.style.display="block";
+ if(announcement){
+  announcement.readOnly=!isAdmin;
+  announcement.setAttribute("aria-readonly",isAdmin?"false":"true");
+  announcement.placeholder=isAdmin?"お知らせ内容を入力":"現在お知らせはありません";
+ }
+ if($("announcementStatus"))$("announcementStatus").textContent=isAdmin?"管理者のみ編集できます。入力内容は全端末共通で自動保存されます。":"閲覧専用です。お知らせの編集は管理者のみ可能です。";
+ await loadAnnouncement();
+ if($("announcementStatus"))$("announcementStatus").textContent=isAdmin?"管理者のみ編集できます。入力内容は全端末共通で自動保存されます。":"閲覧専用です。お知らせの編集は管理者のみ可能です。";
  render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -556,8 +603,7 @@ async function remove(id){
 }
 async function seedCloud(){
  if(!currentUser){alert("管理者ログインが必要です");return}
- var adminEmail="koki.ayaka1016@gmail.com";
- if((currentUser.email||"").toLowerCase()!==adminEmail){alert("この操作は管理者アカウントのみ実行できます。\n現在のログイン："+(currentUser.email||"不明"));return}
+ if((currentUser.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){alert("この操作は管理者アカウントのみ実行できます。\n現在のログイン："+(currentUser.email||"不明"));return}
  if(!confirm("現在の計算機に入っているキャラ・武器・タリスマンを共通データベースへ登録します。既存データは更新されます。続行しますか？"))return;
  try{normalizeDb();
   var types=["characters","weapons","talismans"];
@@ -623,6 +669,15 @@ document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setM
  var el=$(id);
  if(el){el.addEventListener("change",calc);el.addEventListener("input",calc);}
 });
+var announcementText=$("announcementText"),announcementTimer=null;
+if(announcementText){
+ announcementText.addEventListener("input",function(){
+  if(!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase()))return;
+  if($("announcementStatus"))$("announcementStatus").textContent="入力中…";
+  clearTimeout(announcementTimer);
+  announcementTimer=setTimeout(saveAnnouncement,700);
+ });
+}
 calc();
 })();
 </script>
