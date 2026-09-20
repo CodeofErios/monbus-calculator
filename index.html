@@ -116,6 +116,14 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <small>各ステータスの覚醒率を個別に入力できます。例：攻撃力10 → +10%。</small>
 </div>
 <div class="group"><label>メイン武器</label>
+<div class="group" style="margin-bottom:8px">
+  <label style="font-size:12px;color:#aab4cc">武器種からリスト選択</label>
+  <select id="weaponTypeFilter">
+    <option value="">武器種を選択</option>
+    <option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option>
+    <option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option>
+  </select>
+</div>
 <div class="unified-select" id="weaponPicker">
   <input id="weaponSearch" type="text" placeholder="武器名を入力・検索" autocomplete="off">
   <button class="picker-arrow" type="button" aria-label="武器一覧を開く">▼</button>
@@ -154,13 +162,48 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="group">
 <label>パッシブキャラクター（最大5体）</label>
 <div class="passive-select-grid">
-<div><span>1体目</span><select id="passive1"></select></div>
-<div><span>2体目</span><select id="passive2"></select></div>
-<div><span>3体目</span><select id="passive3"></select></div>
-<div><span>4体目</span><select id="passive4"></select></div>
-<div><span>5体目</span><select id="passive5"></select></div>
+<div><span>1体目</span>
+  <div class="unified-select" id="passivePicker1">
+    <input id="passiveSearch1" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="1体目のパッシブ一覧を開く">▼</button>
+    <div id="passiveDropdown1" class="picker-dropdown"></div>
+  </div>
+  <select id="passive1" style="display:none"></select>
 </div>
-<div class="hint">選択したパッシブ5体分の各ステータス補正を合計し、これまでと同じパッシブ計算方法で最終ステータスに反映します。</div>
+<div><span>2体目</span>
+  <div class="unified-select" id="passivePicker2">
+    <input id="passiveSearch2" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="2体目のパッシブ一覧を開く">▼</button>
+    <div id="passiveDropdown2" class="picker-dropdown"></div>
+  </div>
+  <select id="passive2" style="display:none"></select>
+</div>
+<div><span>3体目</span>
+  <div class="unified-select" id="passivePicker3">
+    <input id="passiveSearch3" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="3体目のパッシブ一覧を開く">▼</button>
+    <div id="passiveDropdown3" class="picker-dropdown"></div>
+  </div>
+  <select id="passive3" style="display:none"></select>
+</div>
+<div><span>4体目</span>
+  <div class="unified-select" id="passivePicker4">
+    <input id="passiveSearch4" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="4体目のパッシブ一覧を開く">▼</button>
+    <div id="passiveDropdown4" class="picker-dropdown"></div>
+  </div>
+  <select id="passive4" style="display:none"></select>
+</div>
+<div><span>5体目</span>
+  <div class="unified-select" id="passivePicker5">
+    <input id="passiveSearch5" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="5体目のパッシブ一覧を開く">▼</button>
+    <div id="passiveDropdown5" class="picker-dropdown"></div>
+  </div>
+  <select id="passive5" style="display:none"></select>
+</div>
+</div>
+<div class="hint">名前を入力して検索するか、▼から一覧を開いて選択できます。選択した最大5体分の各ステータス補正を合計して最終ステータスに反映します。</div>
 </div>
 </div>
 <div class="group">
@@ -241,6 +284,9 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="modal-box">
 <div id="modalTitle" class="modal-title">データを追加</div>
 <div class="group"><label>名前</label><input id="dataName" maxlength="80" placeholder="例：新キャラ"></div>
+<div class="group" id="weaponTypeModalGroup" style="display:none"><label>武器種</label><select id="dataWeaponType">
+<option value="">未設定</option><option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option><option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option>
+</select></div>
 <div class="group"><label>HP</label><input id="statHp" type="number" min="0" step="1" inputmode="decimal" value="0"></div>
 <div class="group"><label>SP</label><input id="statSp" type="number" min="0" step="1" inputmode="decimal" value="0"></div>
 <div class="group"><label>攻撃力</label><input id="statAtk" type="number" min="0" step="1" inputmode="decimal" value="0"></div>
@@ -261,7 +307,7 @@ var KEY="monbus_stats_db_v1";
 var ADMIN_EMAIL="koki.ayaka1016@gmail.com";
 var STAT_KEYS=["hp","sp","atk","def","spd","crit"];
 var STAT_LABELS={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
-function item(id,name,stats){return {id:id,name:name,stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
+function item(id,name,stats,weaponType){return {id:id,name:name,weapon_type:weaponType||"",stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
 var db={
  passives:[],
  characters:[item(1,"アストラルヴィシュヌ",{hp:7656,sp:6223,atk:5423,def:6706,spd:3808,crit:0}),item(2,"深淵同調サタン",{hp:8834,sp:4088,atk:6831,def:4761,spd:4554,crit:0}),item(3,"ヴィシュヌ",{hp:7411,sp:6119,atk:5050,def:6582,spd:3684,crit:0}),item(4,"お日様散々ミネルヴァ",{hp:7411,sp:4895,atk:5464,def:4595,spd:5299,crit:0}),item(5,"安全祈願ヨルズ",{hp:8981,sp:4140,atk:6251,def:6913,spd:1324,crit:0}),item(6,"ラブハリケーンマナナン",{hp:7803,sp:4400,atk:4636,def:6127,spd:4015,crit:0}),item(7,"アテン",{hp:8147,sp:4166,atk:6127,def:5175,spd:3312,crit:0}),item(8,"邪神ちゃん",{hp:14184,sp:1119,atk:6458,def:869,spd:4264,crit:0}),item(9,"ぺこら",{hp:7509,sp:4921,atk:4719,def:6541,spd:3022,crit:0}),item(10,"サンタヘスティアー",{hp:8147,sp:3984,atk:5009,def:7203,spd:2277,crit:0}),item(11,"ウィル・オ・テューポーン",{hp:10208,sp:1041,atk:6499,def:6458,spd:2277,crit:0}),item(12,"シスター・オーディン",{hp:6969,sp:4400,atk:5589,def:3891,spd:5547,crit:0}),item(13,"ナアマ〖ひな祭りver〗",{hp:6969,sp:4530,atk:3550,def:6789,spd:4512,crit:0}),item(14,"メタトロン",{hp:5644,sp:4739,atk:5713,def:3229,spd:6996,crit:0}),item(15,"カオス・エレボス",{hp:7214,sp:4609,atk:4885,def:5589,spd:4015,crit:0}),item(16,"ブライダル・メティス",{hp:7509,sp:4504,atk:4719,def:6541,spd:3022,crit:0}),item(17,"だいろ神",{hp:9128,sp:2968,atk:3726,def:8611,spd:1821,crit:0}),item(18,"サレオスの姉御",{hp:9570,sp:1744,atk:6706,def:4554,spd:3601,crit:0}),item(19,"イルミネーション如来",{hp:8392,sp:2864,atk:5878,def:6582,spd:2401,crit:0}),item(20,"真っ逆サマーエストリエ",{hp:6969,sp:4661,atk:5878,def:4140,spd:4347,crit:0}),item(21,"爆発寸前ヌアザ",{hp:9423,sp:2083,atk:6168,def:6044,spd:2277,crit:0}),item(22,"おめがリオ",{hp:8049,sp:4687,atk:5464,def:5464,spd:2318,crit:0}),item(23,"女媧",{hp:9521,sp:3202,atk:5878,def:5920,spd:1449,crit:0}),item(24,"ツチミカド",{hp:6920,sp:4557,atk:5009,def:5506,spd:3974,crit:0}),item(25,"サタン",{hp:7067,sp:3046,atk:5920,def:4678,spd:5216,crit:0}),item(26,"ヤンデレ・ツクヨミ",{hp:7656,sp:4192,atk:5547,def:5754,spd:2773,crit:0}),item(27,"聖夜のアイドル乙姫",{hp:7509,sp:4296,atk:4015,def:7410,spd:2525,crit:0}),item(28,"暴君花嫁スカジ",{hp:9030,sp:2005,atk:6292,def:5175,spd:3229,crit:0}),item(29,"笑門来福タナトス",{hp:7607,sp:3593,atk:6292,def:4305,spd:3891,crit:0}),item(30,"お月見ティアマト",{hp:7901,sp:4270,atk:2691,def:7990,spd:2773,crit:0}),item(31,"ハツヒノメイデン",{hp:6723,sp:4374,atk:4512,def:8652,spd:1324,crit:0}),item(32,"風神Pwithおに☆むす",{hp:8490,sp:2135,atk:6292,def:4678,spd:3974,crit:0}),item(33,"テューポーン",{hp:8687,sp:2265,atk:6085,def:5506,spd:2980,crit:0}),item(34,"サマースルト",{hp:10159,sp:1510,atk:6706,def:5837,spd:1283,crit:0}),item(35,"天使長ミカエル",{hp:8147,sp:2369,atk:5009,def:5009,spd:4885,crit:0}),item(36,"内気な花嫁ソロネ",{hp:7067,sp:3619,atk:5589,def:3974,spd:5133,crit:0}),item(37,"幻の花嫁クサビラ神",{hp:8490,sp:4478,atk:4968,def:6582,spd:828,crit:0}),item(38,"本気Dオオゲツヒメ",{hp:10110,sp:2786,atk:3974,def:7700,spd:745,crit:0}),item(39,"雪アリス",{hp:6871,sp:3932,atk:3394,def:6541,spd:4554,crit:0}),item(40,"アラハバキ〖ゴールドver〗",{hp:9276,sp:2109,atk:5837,def:6251,spd:1780,crit:0}),item(41,"秋振舞ナアマ",{hp:7116,sp:4478,atk:3312,def:6251,spd:4057,crit:0}),item(42,"ヌアザ",{hp:9325,sp:1953,atk:5671,def:6044,spd:2152,crit:0}),item(43,"新春スマッシュワッカ＆カムイ",{hp:6969,sp:3463,atk:3353,def:6706,spd:4636,crit:0}),item(44,"釈迦如来",{hp:8392,sp:2630,atk:5464,def:6417,spd:2152,crit:0}),item(45,"キョンキョン",{hp:6674,sp:2213,atk:6251,def:4802,spd:5092,crit:0}),item(46,"マナナン",{hp:7509,sp:3775,atk:5382,def:5175,spd:3187,crit:0}),item(47,"エレボス",{hp:7165,sp:3489,atk:4885,def:5506,spd:3974,crit:0}),item(48,"独り占めヘカトンケイル",{hp:9227,sp:2317,atk:5589,def:7038,spd:828,crit:0}),item(49,"黒引振袖女郎蜘蛛",{hp:8196,sp:2682,atk:6085,def:6127,spd:1863,crit:0}),item(50,"雪兎ちゃう",{hp:5987,sp:4661,atk:4968,def:3312,spd:6003,crit:0}),item(51,"バカンスメイデン",{hp:6380,sp:4452,atk:3767,def:8652,spd:1656,crit:0}),item(52,"霜の巨人ユミル〖七五三ver〗",{hp:8981,sp:2031,atk:5961,def:5713,spd:2194,crit:0}),item(53,"スルト",{hp:9914,sp:1458,atk:6582,def:5589,spd:1283,crit:0}),item(54,"サマービーチスター・ラー",{hp:8196,sp:2942,atk:6624,def:4885,spd:2152,crit:0}),item(55,"狼男ヘラクレス",{hp:8932,sp:2161,atk:5754,def:6085,spd:1821,crit:0}),item(56,"アマテラス〖ブルマver〗",{hp:6674,sp:3202,atk:5837,def:5050,spd:3974,crit:0}),item(57,"おめがレイ",{hp:9177,sp:1588,atk:6748,def:4595,spd:2608,crit:0}),item(58,"友チョコアンドロメダ",{hp:6920,sp:2994,atk:3063,def:6375,spd:3353,crit:0}),item(59,"フランケンタロス",{hp:9325,sp:1119,atk:6375,def:4471,spd:1407,crit:0}),item(60,"春暁スサノオ",{hp:7656,sp:1926,atk:6417,def:3808,spd:2815,crit:0}),item(61,"本気グレープ",{hp:7312,sp:1666,atk:5630,def:2566,spd:5423,crit:0}),item(62,"ノトス",{hp:6184,sp:2708,atk:4595,def:3850,spd:5257,crit:0}),item(63,"アムルタート",{hp:6723,sp:3775,atk:2194,def:4885,spd:5009,crit:0}),item(64,"ティアマト",{hp:6625,sp:3541,atk:2525,def:7617,spd:2277,crit:0}),item(65,"ベルゼブブ",{hp:6036,sp:2369,atk:6085,def:2194,spd:5878,crit:0}),item(66,"わくどきファフニール",{hp:7165,sp:1926,atk:5713,def:2318,spd:5423,crit:0}),item(67,"ナアマ",{hp:5006,sp:4036,atk:3560,def:6003,spd:3891,crit:0}),item(68,"ブライダル・アールマティ",{hp:6331,sp:2942,atk:4678,def:4885,spd:3643,crit:0}),item(69,"女郎蜘蛛",{hp:7607,sp:2421,atk:5837,def:5506,spd:1076,crit:0}),item(70,"ナイチンゲール〖シスターver〗",{hp:5840,sp:3359,atk:4347,def:5299,spd:3601,crit:0}),item(71,"獅子舞ヘラクレス",{hp:8098,sp:1926,atk:5754,def:4926,spd:1697,crit:0}),item(72,"マリーアントワネット〖一発芸ver〗",{hp:6233,sp:2916,atk:3933,def:4802,spd:4512,crit:0}),item(73,"ブラフマー",{hp:5398,sp:3333,atk:4802,def:4388,spd:4471,crit:0}),item(74,"風神",{hp:7018,sp:1796,atk:5796,def:2442,spd:5299,crit:0}),item(75,"魔女っ子アリス",{hp:6723,sp:2734,atk:3229,def:5299,spd:4305,crit:0}),item(76,"チビサタン",{hp:6969,sp:2682,atk:3684,def:5589,spd:3353,crit:0}),item(77,"イーリス",{hp:5202,sp:3437,atk:4802,def:2773,spd:6044,crit:0}),item(78,"はっちゃけランダ",{hp:5006,sp:3176,atk:5092,def:3187,spd:5671,crit:0}),item(79,"サンダードラゴン",{hp:7607,sp:833,atk:5050,def:2898,spd:1573,crit:0}),item(80,"夢喰いバク",{hp:8392,sp:833,atk:3353,def:4719,spd:621,crit:0}),item(81,"デカラビア",{hp:6184,sp:2031,atk:4968,def:4057,spd:496,crit:0}),item(82,"金太郎",{hp:7116,sp:1067,atk:4761,def:2856,spd:1904,crit:0}),item(83,"やる気のない金太郎",{hp:7116,sp:1067,atk:4761,def:2856,spd:1904,crit:0}),item(84,"キョンシー",{hp:4662,sp:2057,atk:4512,def:1324,spd:5133,crit:0}),item(85,"ブライダル・サハギン",{hp:5300,sp:2239,atk:3560,def:3312,spd:3270,crit:0}),item(86,"フランケンシュタイン",{hp:6429,sp:1614,atk:4554,def:3353,spd:1614,crit:0}),item(87,"ユバンラダケ",{hp:6233,sp:1432,atk:5009,def:2359,spd:2525,crit:0}),item(88,"ブライダル・雪女",{hp:4908,sp:2291,atk:4429,def:2649,spd:3270,crit:0}),item(89,"ベビモス",{hp:8098,sp:729,atk:3891,def:3933,spd:869,crit:0}),item(90,"ラミエル",{hp:4613,sp:2499,atk:4140,def:2856,spd:3353,crit:0}),item(91,"エンジェル",{hp:3730,sp:2239,atk:2608,def:2152,spd:3519,crit:0}),item(92,"ジャージーデビル",{hp:4417,sp:1536,atk:4595,def:952,spd:2732,crit:0}),item(93,"クシナダヒメ",{hp:2895,sp:2890,atk:1780,def:2856,spd:3643,crit:0}),item(94,"インキュバス",{hp:2748,sp:2630,atk:3229,def:1697,spd:3353,crit:0}),item(95,"ハーピー",{hp:3435,sp:1822,atk:3105,def:538,spd:4636,crit:0}),item(96,"ロビンフッド",{hp:2846,sp:2369,atk:2856,def:1242,spd:4181,crit:0}),item(97,"ホワイトガネーシャ",{hp:1619,sp:859,atk:1366,def:1366,spd:1366,crit:0}),item(98,"ピカユッキー",{hp:5742,sp:1770,atk:3933,def:3229,spd:1738,crit:0}),item(99,"ヤミユッキー",{hp:5791,sp:1692,atk:4347,def:3022,spd:1531,crit:0}),item(100,"ミドユッキー",{hp:5595,sp:1744,atk:3933,def:3022,spd:1738,crit:0}),item(101,"アオユッキー",{hp:5742,sp:1744,atk:3933,def:3299,spd:1531,crit:0}),item(102,"チビ寿",{hp:6429,sp:1432,atk:3394,def:3684,spd:1200,crit:0}),item(103,"アカユッキー",{hp:5742,sp:1614,atk:4554,def:2815,spd:1324,crit:0}),item(104,"ムジユッキー",{hp:5644,sp:1666,atk:4347,def:2815,spd:1531,crit:0}),item(105,"ピカタマちゃん",{hp:5398,sp:1822,atk:3519,def:3022,spd:2194,crit:0}),item(106,"チビ弁財天",{hp:5889,sp:552,atk:2856,def:3312,spd:2318,crit:0}),item(107,"キイユッキー",{hp:5546,sp:1692,atk:4140,def:2815,spd:1738,crit:0}),item(108,"コザクラグモたん",{hp:4554,sp:2135,atk:4140,def:2318,spd:2773,crit:0}),item(109,"ヤミタマちゃん",{hp:5447,sp:1744,atk:3933,def:2815,spd:1987,crit:0}),item(110,"コナスグモたん",{hp:4613,sp:2057,atk:4554,def:2111,spd:2566,crit:0}),item(111,"チビ布袋尊",{hp:6184,sp:1406,atk:3519,def:3270,spd:1490,crit:0}),item(112,"チビ沙門天",{hp:6282,sp:1302,atk:3974,def:3063,spd:1242,crit:0}),item(113,"小黒天",{hp:5938,sp:1406,atk:3684,def:2773,spd:2028,crit:0}),item(114,"オーク",{hp:5889,sp:677,atk:1863,def:2608,spd:910,crit:0}),item(115,"シェルミー",{hp:4171,sp:1666,atk:1821,def:2898,spd:662,crit:0}),item(116,"リトルスイカリアン",{hp:4319,sp:1354,atk:2608,def:2152,spd:621,crit:0}),item(117,"マンドレイク",{hp:3730,sp:1926,atk:2277,def:2856,spd:248,crit:0}),item(118,"コボルト",{hp:4073,sp:1328,atk:1945,def:1780,spd:1656,crit:0}),item(119,"ヌエ",{hp:4662,sp:520,atk:2566,def:455,spd:2359,crit:0}),item(120,"ウォータールーパー",{hp:3484,sp:1692,atk:1738,def:1987,spd:1656,crit:0}),item(121,"キネコ",{hp:2895,sp:2187,atk:2691,def:2277,spd:414,crit:0}),item(122,"ゴブリン",{hp:3386,sp:1692,atk:1780,def:1780,spd:1821,crit:0}),item(123,"ボクサーラビット",{hp:3779,sp:1041,atk:2566,def:496,spd:2318,crit:0}),item(124,"モフモフ",{hp:2257,sp:2243,atk:1738,def:1987,spd:1656,crit:0}),item(125,"ライトバット",{hp:2993,sp:1510,atk:1738,def:869,spd:2773,crit:0}),item(126,"ダークバット",{hp:2993,sp:1510,atk:1738,def:869,spd:2773,crit:0}),item(127,"キラービー",{hp:2944,sp:1484,atk:1904,def:662,spd:2815,crit:0}),item(128,"ゴールドミミック",{hp:4073,sp:1380,atk:1242,def:2691,spd:207,crit:0}),item(129,"イビルアイ",{hp:2061,sp:2057,atk:3312,def:703,spd:1366,crit:0}),item(130,"ライトゴースト",{hp:1619,sp:2447,atk:1242,def:1449,spd:2691,crit:0}),item(131,"ウォーターゴースト",{hp:1521,sp:2499,atk:1035,def:1449,spd:2898,crit:0}),item(132,"ゴースト",{hp:1472,sp:2447,atk:1242,def:1242,spd:2898,crit:0})],
@@ -276,20 +322,20 @@ var cloudReady=false, currentUser=null;
 function $(id){return document.getElementById(id)}
 function normalizeItem(a){
  if(!a)return item(0,"");
- return item(Number(a.id)||Date.now(),a.name,{hp:Number(a.hp)||0,sp:Number(a.sp)||0,atk:Number(a.atk)||0,def:Number(a.def)||0,spd:Number(a.spd)||0,crit:Number(a.crit)||0});
+ return item(Number(a.id)||Date.now(),a.name,{hp:Number(a.hp)||0,sp:Number(a.sp)||0,atk:Number(a.atk)||0,def:Number(a.def)||0,spd:Number(a.spd)||0,crit:Number(a.crit)||0},a.weapon_type||"");
 }
 function normalizeDb(){
  ["characters","weapons","talismans","passives"].forEach(function(type){
    if(!Array.isArray(db[type])) db[type]=[];
    db[type]=db[type].map(function(a){
-     if(a.stats){return item(Number(a.id)||Date.now(),a.name,a.stats)}
+     if(a.stats){return item(Number(a.id)||Date.now(),a.name,a.stats,a.weapon_type||"")}
      return normalizeItem(a);
    });
  });
 }
 function saveLocal(){localStorage.setItem(KEY,JSON.stringify(db))}
 function setCloudStatus(msg){var el=$("cloudStatus");if(el)el.textContent=msg}
-function toRow(a){return {id:Number(a.id),name:a.name,hp:Number(a.stats.hp)||0,sp:Number(a.stats.sp)||0,atk:Number(a.stats.atk)||0,def:Number(a.stats.def)||0,spd:Number(a.stats.spd)||0,crit:Number(a.stats.crit)||0}}
+function toRow(a,type){var row={id:Number(a.id),name:a.name,hp:Number(a.stats.hp)||0,sp:Number(a.stats.sp)||0,atk:Number(a.stats.atk)||0,def:Number(a.stats.def)||0,spd:Number(a.stats.spd)||0,crit:Number(a.stats.crit)||0};if(type==="weapons")row.weapon_type=a.weapon_type||"";return row}
 function formatSupabaseError(e){
  if(!e)return "不明なエラー";
  return [
@@ -332,12 +378,18 @@ async function saveAnnouncement(){
 }
 async function fetchCloud(){
  try{
-  var results=await Promise.all([
-   supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit").order("id"),
-   supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit").order("id"),
-   supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit").order("id"),
-   supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit").order("id")
-  ]);
+  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+  var weaponReq=supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,weapon_type").order("id");
+  var talismanReq=supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+  var passiveReq=supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+  var results=await Promise.all([characterReq,weaponReq,talismanReq,passiveReq]);
+  var weaponTypeMissing=false;
+  if(results[1].error && (results[1].error.code==="42703" || String(results[1].error.message||"").includes("weapon_type"))){
+    results[1]=await supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+    if(results[1].data)results[1].data.forEach(function(x){x.weapon_type=""});
+    weaponTypeMissing=true;
+    setCloudStatus("⚠️ 武器種列が未設定です。SupabaseでSQLを実行してください。");
+  }
   for(var i=0;i<results.length;i++){if(results[i].error){showSupabaseError("データ取得",["characters","weapons","talismans","passives"][i],results[i].error);throw results[i].error}}
   var empty=results.slice(0,3).every(function(r){return !r.data||r.data.length===0});
   if(empty){setCloudStatus("☁️ 共通データベース：接続済み（まだデータがありません）");return false}
@@ -346,7 +398,7 @@ async function fetchCloud(){
   db.talismans=(results[2].data||[]).map(normalizeItem);
   db.passives=(results[3].data||[]).map(normalizeItem);
   normalizeDb();saveLocal();
-  setCloudStatus("☁️ 共通データベース：接続済み（全員共通データ）");
+  if(!weaponTypeMissing)setCloudStatus("☁️ 共通データベース：接続済み（全員共通データ）");
   return true;
  }catch(e){console.error(e);setCloudStatus("⚠️ 共通データベース：接続エラー");return false}
 }
@@ -475,7 +527,7 @@ function calc(){
     if(!input||!dropdown||!select) return;
 
     function options(){
-      return Array.from(select.options).filter(function(o){ return o.value !== ""; });
+      return Array.from(select.options).filter(function(o){ return o.value !== "" && !o.disabled; });
     }
     function render(){
       var q=(input.value||"").trim().toLowerCase();
@@ -513,8 +565,13 @@ function calc(){
       dropdown.classList.add("open");
       var q=input.value.trim().toLowerCase();
       var exact=options().find(function(o){return o.text.toLowerCase()===q;});
-      if(exact && select.value!==exact.value){
-        select.value=exact.value;
+      if(exact){
+        if(select.value!==exact.value){
+          select.value=exact.value;
+          select.dispatchEvent(new Event("change",{bubbles:true}));
+        }
+      }else if(select.value!==""){
+        select.value="";
         select.dispatchEvent(new Event("change",{bubbles:true}));
       }
     });
@@ -535,10 +592,49 @@ function calc(){
     }};
   }
 
+  function setupWeaponPicker(){
+    var input=$("weaponSearch"),dropdown=$("weaponDropdown"),select=$("weapon"),typeFilter=$("weaponTypeFilter");
+    if(!input||!dropdown||!select||!typeFilter)return setupUnifiedPicker("weaponSearch","weaponDropdown","weapon");
+    function allOptions(){return Array.from(select.options).filter(function(o){return o.value!=="";});}
+    function weaponForOption(o){return db.weapons.find(function(w){return String(w.id)===String(o.value)});}
+    function render(mode){
+      var q=(input.value||"").trim().toLowerCase();
+      var list=allOptions();
+      if(mode==="list"){
+        var type=typeFilter.value;
+        dropdown.innerHTML="";
+        if(!type){dropdown.innerHTML='<div class="picker-empty">先に武器種を選択してください</div>';return;}
+        list=list.filter(function(o){var w=weaponForOption(o);return w&&(w.weapon_type||"")===type;});
+      }else{
+        list=list.filter(function(o){return !q||o.text.toLowerCase().includes(q);});
+      }
+      dropdown.innerHTML="";
+      if(!list.length){dropdown.innerHTML='<div class="picker-empty">該当する武器がありません</div>';return;}
+      list.slice(0,150).forEach(function(o){
+        var b=document.createElement("button");b.type="button";b.className="picker-option";b.textContent=o.text;
+        b.onclick=function(){select.value=o.value;input.value=o.text;dropdown.classList.remove("open");select.dispatchEvent(new Event("change",{bubbles:true}));};
+        dropdown.appendChild(b);
+      });
+    }
+    function openList(){render("list");dropdown.classList.add("open");}
+    input.addEventListener("input",function(){render("search");dropdown.classList.add("open");var q=input.value.trim().toLowerCase();var exact=allOptions().find(function(o){return o.text.toLowerCase()===q;});if(exact){select.value=exact.value;select.dispatchEvent(new Event("change",{bubbles:true}));}else if(select.value!==""){select.value="";select.dispatchEvent(new Event("change",{bubbles:true}));}});
+    input.addEventListener("focus",function(){if(input.value.trim()) {render("search");dropdown.classList.add("open");}});
+    var picker=input.closest(".unified-select"),arrow=picker&&picker.querySelector(".picker-arrow");
+    if(arrow)arrow.addEventListener("click",function(e){e.stopPropagation();openList();input.focus();});
+    typeFilter.addEventListener("change",function(){input.value="";select.value="";calc();openList();});
+    document.addEventListener("click",function(e){if(!e.target.closest("#weaponPicker")&&!e.target.closest("#weaponTypeFilter"))dropdown.classList.remove("open");});
+    return {render:function(){},sync:function(){var o=allOptions().find(function(x){return x.value===select.value;});if(o)input.value=o.text;},openList:openList};
+  }
+
   window.__unifiedPickers = {
     character: setupUnifiedPicker("characterSearch","characterDropdown","character"),
-    weapon: setupUnifiedPicker("weaponSearch","weaponDropdown","weapon"),
-    talisman: setupUnifiedPicker("talismanSearch","talismanDropdown","talisman")
+    weapon: setupWeaponPicker(),
+    talisman: setupUnifiedPicker("talismanSearch","talismanDropdown","talisman"),
+    passive1: setupUnifiedPicker("passiveSearch1","passiveDropdown1","passive1"),
+    passive2: setupUnifiedPicker("passiveSearch2","passiveDropdown2","passive2"),
+    passive3: setupUnifiedPicker("passiveSearch3","passiveDropdown3","passive3"),
+    passive4: setupUnifiedPicker("passiveSearch4","passiveDropdown4","passive4"),
+    passive5: setupUnifiedPicker("passiveSearch5","passiveDropdown5","passive5")
   };
 
   window.__refreshUnifiedPickers=function(){
@@ -566,19 +662,42 @@ function setManager(t){manager=t;document.querySelectorAll(".mtab").forEach(func
 function render(){
  var box=$("list"),arr=(db[manager]||[]).slice(),title=manager==="characters"?"キャラ":manager==="weapons"?"武器":manager==="talismans"?"タリスマン":"パッシブ";
  arr.sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ja")});
- box.innerHTML='<div class="card"><div style="font-weight:900">登録データ：'+title+'（'+arr.length+'件）</div><div class="sort-bar"><select id="dataSort"><option value="name_asc">名前：昇順</option><option value="name_desc">名前：降順</option><option value="id_asc">登録順</option></select></div></div>';
- var sort=$("dataSort");sort.onchange=function(){var v=this.value;if(v==="name_desc")arr.sort(function(a,b){return String(b.name).localeCompare(String(a.name),"ja")});else if(v==="id_asc")arr.sort(function(a,b){return Number(a.id)-Number(b.id)});else arr.sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ja")});draw();};
- function draw(){Array.from(box.querySelectorAll(".item")).forEach(function(e){e.remove()});arr.forEach(function(x){var el=document.createElement("div");el.className="item";var stats='<div class="stats">';STAT_KEYS.forEach(function(k){stats+='<span><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});stats+='</div>';el.innerHTML='<div class="item-top"><div><div class="name">'+esc(x.name)+'</div>'+stats+'</div><div class="item-actions" style="display:'+(currentUser?"flex":"none")+';"><button class="btn secondary small edit" type="button">編集</button><button class="btn danger small del" type="button">削除</button></div></div>';el.querySelector(".edit").onclick=function(){edit(x.id)};el.querySelector(".del").onclick=function(){remove(x.id)};box.appendChild(el)});}
+ var weaponTypeFilterHtml=manager==="weapons"?'<div class="sort-bar"><select id="managerWeaponType"><option value="">全武器種</option><option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option><option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option><option value="__unset">未設定</option></select></div>':'';
+ box.innerHTML='<div class="card"><div style="font-weight:900">登録データ：'+title+'（'+arr.length+'件）</div>'+weaponTypeFilterHtml+'<div class="sort-bar"><select id="dataSort"><option value="name_asc">名前：昇順</option><option value="name_desc">名前：降順</option><option value="hp_desc">HP：降順</option><option value="sp_desc">SP：降順</option><option value="atk_desc">攻撃力：降順</option><option value="def_desc">防御力：降順</option><option value="spd_desc">素早さ：降順</option><option value="crit_desc">クリティカル：降順</option><option value="id_asc">登録順</option></select></div></div>';
+ var sort=$("dataSort");sort.onchange=function(){
+   var v=this.value;
+   if(v==="name_desc")arr.sort(function(a,b){return String(b.name).localeCompare(String(a.name),"ja")});
+   else if(v==="id_asc")arr.sort(function(a,b){return Number(a.id)-Number(b.id)});
+   else if(/^(hp|sp|atk|def|spd|crit)_desc$/.test(v)){
+     var key=v.replace("_desc","");
+     arr.sort(function(a,b){
+       var diff=Number((b.stats||{})[key]||0)-Number((a.stats||{})[key]||0);
+       return diff!==0?diff:String(a.name).localeCompare(String(b.name),"ja");
+     });
+   }else arr.sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ja")});
+   draw();
+ };
+ var managerWeaponType=$("managerWeaponType");
+ if(managerWeaponType)managerWeaponType.onchange=draw;
+ function draw(){
+   Array.from(box.querySelectorAll(".item")).forEach(function(e){e.remove()});
+   var shown=arr;
+   if(manager==="weapons"&&managerWeaponType&&managerWeaponType.value){var f=managerWeaponType.value;shown=arr.filter(function(x){return f==="__unset"?!(x.weapon_type||""):(x.weapon_type||"")===f;});}
+   shown.forEach(function(x){var el=document.createElement("div");el.className="item";var stats='<div class="stats">';STAT_KEYS.forEach(function(k){stats+='<span><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});stats+='</div>';var typeLabel=manager==="weapons"?'<div style="font-size:11px;color:#9ca8c0;margin-top:3px">武器種：'+esc(x.weapon_type||"未設定")+'</div>':'';el.innerHTML='<div class="item-top"><div><div class="name">'+esc(x.name)+'</div>'+typeLabel+stats+'</div><div class="item-actions" style="display:'+(currentUser?"flex":"none")+';"><button class="btn secondary small edit" type="button">編集</button><button class="btn danger small del" type="button">削除</button></div></div>';el.querySelector(".edit").onclick=function(){edit(x.id)};el.querySelector(".del").onclick=function(){remove(x.id)};box.appendChild(el)});
+ }
  draw();
 }
 function resetModal(){
  $("dataName").value="";
+ if($("dataWeaponType"))$("dataWeaponType").value="";
  ["statHp","statSp","statAtk","statDef","statSpd","statCrit"].forEach(function(id){$(id).value=0})
 }
-function add(){editId=null;$("modalTitle").textContent="データを追加";resetModal();$("modal").classList.add("open")}
+function add(){editId=null;$("modalTitle").textContent="データを追加";resetModal();if($("weaponTypeModalGroup"))$("weaponTypeModalGroup").style.display=manager==="weapons"?"block":"none";$("modal").classList.add("open")}
 function edit(id){
  var x=db[manager].find(function(a){return a.id===id});if(!x)return;
  editId=id;$("modalTitle").textContent="データを編集";$("dataName").value=x.name;
+ if($("weaponTypeModalGroup"))$("weaponTypeModalGroup").style.display=manager==="weapons"?"block":"none";
+ if($("dataWeaponType"))$("dataWeaponType").value=manager==="weapons"?(x.weapon_type||""):"";
  $("statHp").value=x.stats.hp||0;$("statSp").value=x.stats.sp||0;$("statAtk").value=x.stats.atk||0;$("statDef").value=x.stats.def||0;$("statSpd").value=x.stats.spd||0;$("statCrit").value=x.stats.crit||0;
  $("modal").classList.add("open")
 }
@@ -588,6 +707,7 @@ async function saveItem(){
  var name=$("dataName").value.trim();if(!name){alert("名前を入力してください");return}
  var stats={hp:Number($("statHp").value)||0,sp:Number($("statSp").value)||0,atk:Number($("statAtk").value)||0,def:Number($("statDef").value)||0,spd:Number($("statSpd").value)||0,crit:Number($("statCrit").value)||0};
  var row={name:name,hp:stats.hp,sp:stats.sp,atk:stats.atk,def:stats.def,spd:stats.spd,crit:stats.crit};
+ if(manager==="weapons"){var wt=$("dataWeaponType").value;if(!wt){alert("武器種を選択してください");return}row.weapon_type=wt;}
  try{
   var res;if(editId===null){row.id=Date.now();res=await supabaseClient.from(manager).insert(row).select().single();}else{res=await supabaseClient.from(manager).update(row).eq("id",editId).select().single();}
   if(res.error)throw res.error;
@@ -608,7 +728,7 @@ async function seedCloud(){
  try{normalizeDb();
   var types=["characters","weapons","talismans"];
   for(var i=0;i<types.length;i++){
-   var type=types[i],rows=db[type].map(toRow);
+   var type=types[i],rows=db[type].map(function(x){return toRow(x,type)});
    setCloudStatus("☁️ "+type+" を登録中…（"+rows.length+"件）");
    var res=await supabaseClient.from(type).upsert(rows,{onConflict:"id"});
    if(res.error)throw {table:type,error:res.error};
@@ -646,7 +766,10 @@ $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){pa
   $("talisman").value="";
   $("characterSearch").value="";
   $("weaponSearch").value="";
+  if($("weaponTypeFilter"))$("weaponTypeFilter").value="";
   $("talismanSearch").value="";
+  [1,2,3,4,5].forEach(function(n){var sel=$("passive"+n),input=$("passiveSearch"+n);if(sel)sel.value="";if(input)input.value="";});
+  updatePassiveOptionState();
   ["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"].forEach(function(id){$(id).value=""});
   $("runeHp").value=3648;$("runeSp").value=3624;$("runeAtk").value=2328;$("runeDef").value=2160;$("runeSpd").value=2328;$("runeCrit").value=96;
   if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
@@ -662,9 +785,7 @@ $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
 $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$("file").onchange=restore;
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
-["characterSearch","weaponSearch","talismanSearch"].forEach(function(id){var el=$(id);if(!el)return;el.addEventListener("input",function(){var map={characterSearch:["characters","character","characterNames","characterList"],weaponSearch:["weapons","weapon","weaponNames","weaponList"],talismanSearch:["talismans","talisman","talismanNames","talismanList"]}[id],arr=db[map[0]],dl=$(map[2]),visible=$(map[3]),q=el.value.trim().toLowerCase();dl.innerHTML="";visible.innerHTML="";var matches=arr.filter(function(a){return !q||String(a.name).toLowerCase().indexOf(q)>=0});matches.slice(0,50).forEach(function(a){var p=document.createElement("option");p.value=a.name;dl.appendChild(p);var vo=document.createElement("option");vo.value=a.id;vo.textContent=a.name;visible.appendChild(vo)});var x=arr.find(function(a){return a.name===el.value});if(x){$(map[1]).value=x.id;visible.value=x.id;calc()}else if(matches.length===1){$(map[1]).value=matches[0].id;visible.value=matches[0].id;calc()}})});
-[["characterList","characterSearch","character","characters"],["weaponList","weaponSearch","weapon","weapons"],["talismanList","talismanSearch","talisman","talismans"]].forEach(function(d){var list=$(d[0]);if(list)list.addEventListener("change",function(){var x=db[d[3]].find(function(a){return String(a.id)===String(list.value)});if(x){$(d[2]).value=x.id;$(d[1]).value=x.name;calc()}})});
-[1,2,3,4,5].forEach(function(n){var el=$("passive"+n);if(el)el.addEventListener("change",function(){updatePassiveOptionState();calc()})});
+[1,2,3,4,5].forEach(function(n){var el=$("passive"+n);if(el)el.addEventListener("change",function(){updatePassiveOptionState();if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();calc()})});
 ["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit"].forEach(function(id){
  var el=$(id);
  if(el){el.addEventListener("change",calc);el.addEventListener("input",calc);}
