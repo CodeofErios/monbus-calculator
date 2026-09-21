@@ -234,6 +234,18 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 </div>
 <div class="hint">最大値が初期入力されています。必要に応じて各ステータスを手動で変更できます。</div>
 </div>
+<div class="group">
+<label>バフ / デバフ（%・ステータス別手動入力）</label>
+<div class="rune-grid buff-debuff-grid">
+<div><span>HP (%)</span><input id="buffHp" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+<div><span>SP (%)</span><input id="buffSp" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+<div><span>攻撃力 (%)</span><input id="buffAtk" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+<div><span>防御力 (%)</span><input id="buffDef" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+<div><span>素早さ (%)</span><input id="buffSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+<div><span>クリティカル (%)</span><input id="buffCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
+</div>
+<div class="hint">すべての既存計算が終わった後のステータスに割合で反映します。プラス値はバフ、マイナス値はデバフとして計算します。例：20 → +20%、-20 → -20%。</div>
+</div>
 </div>
 <div class="result">
 <div class="selected-summary" aria-label="選択中の装備とパッシブ">
@@ -261,7 +273,7 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="stat-card"><span>素早さ</span><b id="totalSpd">0</b></div>
 <div class="stat-card"><span>クリティカル</span><b id="totalCrit">0</b></div>
 </div>
-<small>モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：初期値から手動入力・数値加算</small>
+<small>モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：数値加算 ／ バフ・デバフ：全計算後に％補正</small>
 </div>
 <button id="resetCalc" class="btn secondary" type="button">入力をリセット</button>
 <div class="awake-quick-buttons">
@@ -553,13 +565,26 @@ function calc(){
   crit:Number($("runeCrit").value)||0
  };
 
+ // バフ / デバフは、キャラ・覚醒・武器・タリスマン・ルーン・パッシブの
+ // すべての計算が終わった後に最後の割合補正として適用する。
+ // 正の値 = バフ、負の値 = デバフ。
+ var buffDebuff={
+  hp:(Number($("buffHp").value)||0)/100,
+  sp:(Number($("buffSp").value)||0)/100,
+  atk:(Number($("buffAtk").value)||0)/100,
+  def:(Number($("buffDef").value)||0)/100,
+  spd:(Number($("buffSpd").value)||0)/100,
+  crit:(Number($("buffCrit").value)||0)/100
+ };
+
  var ids={hp:"totalHp",sp:"totalSp",atk:"totalAtk",def:"totalDef",spd:"totalSpd",crit:"totalCrit"};
  ["hp","sp","atk","def","spd","crit"].forEach(function(k){
    var charBase=Number(c.stats[k]||0)*(1+awake[k]);
    var weaponBase=Number(w.stats[k]||0)*(1+weaponAwake[k]);
    var talismanBase=Number(t.stats[k]||0)*(1+talismanAwake[k]);
    var base=charBase+weaponBase+talismanBase+rune[k];
-   var total=Math.round(base*(1+passive[k]));
+   var afterPassive=base*(1+passive[k]);
+   var total=Math.round(afterPassive*(1+buffDebuff[k]));
    var el=$(ids[k]);
    if(el) el.textContent=total.toLocaleString();
  });
@@ -819,6 +844,7 @@ $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){pa
   updatePassiveOptionState();
   ["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"].forEach(function(id){$(id).value=""});
   $("runeHp").value=3648;$("runeSp").value=3624;$("runeAtk").value=2328;$("runeDef").value=2160;$("runeSpd").value=2328;$("runeCrit").value=96;
+  ["buffHp","buffSp","buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){if($(id))$(id).value="";});
   if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
   calc();
 };
@@ -833,7 +859,7 @@ $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$(
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
 [1,2,3,4,5].forEach(function(n){var el=$("passive"+n);if(el)el.addEventListener("change",function(){updatePassiveOptionState();if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();calc()})});
-["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit"].forEach(function(id){
+["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit","buffHp","buffSp","buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){
  var el=$(id);
  if(el){el.addEventListener("change",calc);el.addEventListener("input",calc);}
 });
