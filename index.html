@@ -82,9 +82,17 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 .selected-summary{
   margin-bottom:12px;padding:12px;border:1px solid #315c88;border-radius:12px;background:#1d2740;text-align:left;
 }
+.selected-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.selected-summary-main,.selected-summary-passives{min-width:0}
+.selected-summary-passives{border-left:1px solid #ffffff18;padding-left:12px}
 .selected-summary-row{display:grid;grid-template-columns:88px 1fr;gap:8px;padding:4px 0;align-items:start}
+.selected-summary-passives .selected-summary-row{grid-template-columns:64px 1fr}
 .selected-summary-label{font-size:12px;color:#aab4cc;font-weight:800}
 .selected-summary-value{font-size:14px;color:#fff;font-weight:800;word-break:break-word}
+@media(max-width:430px){
+  .selected-summary-grid{grid-template-columns:1fr;gap:8px}
+  .selected-summary-passives{border-left:0;border-top:1px solid #ffffff18;padding-left:0;padding-top:8px}
+}
 
 </style>
 
@@ -228,10 +236,21 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 </div>
 </div>
 <div class="result">
-<div class="selected-summary" aria-label="選択中の装備">
+<div class="selected-summary" aria-label="選択中の装備とパッシブ">
+<div class="selected-summary-grid">
+<div class="selected-summary-main">
 <div class="selected-summary-row"><span class="selected-summary-label">キャラクター</span><span class="selected-summary-value" id="selectedCharacterName">未選択</span></div>
 <div class="selected-summary-row"><span class="selected-summary-label">武器</span><span class="selected-summary-value" id="selectedWeaponName">未選択</span></div>
 <div class="selected-summary-row"><span class="selected-summary-label">タリスマン</span><span class="selected-summary-value" id="selectedTalismanName">未選択</span></div>
+</div>
+<div class="selected-summary-passives">
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ1</span><span class="selected-summary-value" id="selectedPassiveName1">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ2</span><span class="selected-summary-value" id="selectedPassiveName2">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ3</span><span class="selected-summary-value" id="selectedPassiveName3">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ4</span><span class="selected-summary-value" id="selectedPassiveName4">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ5</span><span class="selected-summary-value" id="selectedPassiveName5">未選択</span></div>
+</div>
+</div>
 </div>
 <div class="result-title">最終予測ステータス</div>
 <div class="stat-result-grid">
@@ -495,6 +514,14 @@ function calc(){
    selectedTalismanName:(t&&t.name)?t.name:"未選択"
  };
  Object.keys(selectedNames).forEach(function(id){var el=$(id);if(el)el.textContent=selectedNames[id];});
+
+ [1,2,3,4,5].forEach(function(n){
+   var sel=$("passive"+n);
+   var value=sel?sel.value:"";
+   var p=db.passives.find(function(x){return String(x.id)===String(value)});
+   var el=$("selectedPassiveName"+n);
+   if(el)el.textContent=(p&&p.name)?p.name:"未選択";
+ });
 
  var awake={
   hp:(Number($("awakeHp").value)||0)/100,
