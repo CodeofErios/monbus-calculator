@@ -235,16 +235,34 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="hint">最大値が初期入力されています。必要に応じて各ステータスを手動で変更できます。</div>
 </div>
 <div class="group">
+<label>ギルドバトル</label>
+<select id="guildBattleMode">
+<option value="normal">ギルドバトル以外</option>
+<option value="guild">ギルドバトル中</option>
+<option value="attack">ギルドバトル中(攻撃時)</option>
+<option value="oipoka">ギルドバトル中(おいポカ時)</option>
+</select>
+<div id="oipokaPassiveGroup" style="display:none;margin-top:12px">
+  <span style="display:block;font-size:12px;margin-bottom:6px">おいポカ時 追加パッシブキャラクター</span>
+  <div class="unified-select" id="oipokaPassivePicker">
+    <input id="oipokaPassiveSearch" type="text" placeholder="パッシブ名を入力・検索" autocomplete="off">
+    <button class="picker-arrow" type="button" aria-label="おいポカ時の追加パッシブ一覧を開く">▼</button>
+    <div id="oipokaPassiveDropdown" class="picker-dropdown"></div>
+  </div>
+  <select id="oipokaPassive" style="display:none"></select>
+  <div class="hint">既存のパッシブ5体と同じキャラクターも選択できます。</div>
+</div>
+<div class="hint">キャラクター・覚醒・武器・タリスマン・パッシブ・ルーンの計算後に、選択したギルドバトル補正を適用します。</div>
+</div>
+<div class="group">
 <label>バフ / デバフ（%・ステータス別手動入力）</label>
 <div class="rune-grid buff-debuff-grid">
-<div><span>HP (%)</span><input id="buffHp" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
-<div><span>SP (%)</span><input id="buffSp" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 <div><span>攻撃力 (%)</span><input id="buffAtk" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 <div><span>防御力 (%)</span><input id="buffDef" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 <div><span>素早さ (%)</span><input id="buffSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 <div><span>クリティカル (%)</span><input id="buffCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 </div>
-<div class="hint">すべての既存計算が終わった後のステータスに割合で反映します。プラス値はバフ、マイナス値はデバフとして計算します。例：20 → +20%、-20 → -20%。</div>
+<div class="hint">ギルドバトルHP補正まで終わった後に割合で反映します。プラス値はバフ、マイナス値はデバフです。HP・SPにはバフ/デバフを適用しません。</div>
 </div>
 </div>
 <div class="result">
@@ -273,7 +291,7 @@ footer{text-align:center;color:#68728b;font-size:10px;padding:8px}
 <div class="stat-card"><span>素早さ</span><b id="totalSpd">0</b></div>
 <div class="stat-card"><span>クリティカル</span><b id="totalCrit">0</b></div>
 </div>
-<small>モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：数値加算 ／ バフ・デバフ：全計算後に％補正</small>
+<small>モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：数値加算 ／ ギルドバトル：選択内容に応じた補正 ／ バフ・デバフ：最後に攻撃力・防御力・素早さ・クリティカルへ％補正</small>
 </div>
 <button id="resetCalc" class="btn secondary" type="button">入力をリセット</button>
 <div class="awake-quick-buttons">
@@ -509,6 +527,13 @@ function fillPassiveSelectors(){
    db.passives.forEach(function(x){var o=document.createElement("option");o.value=x.id;o.textContent=x.name;sel.appendChild(o)});
    if(db.passives.some(function(x){return String(x.id)===String(old)}))sel.value=old;
  });
+ var extra=$("oipokaPassive");
+ if(extra){
+   var extraOld=extra.value;extra.innerHTML="";
+   var extraBlank=document.createElement("option");extraBlank.value="";extraBlank.textContent="選択なし";extra.appendChild(extraBlank);
+   db.passives.forEach(function(x){var o=document.createElement("option");o.value=x.id;o.textContent=x.name;extra.appendChild(o)});
+   if(db.passives.some(function(x){return String(x.id)===String(extraOld)}))extra.value=extraOld;
+ }
  updatePassiveOptionState();
 }
 function updatePassiveOptionState(){
@@ -555,6 +580,12 @@ function calc(){
    if(!p)return;
    STAT_KEYS.forEach(function(k){passive[k]+=Number(p.stats[k]||0)/100;});
  });
+ var guildMode=$("guildBattleMode")?$("guildBattleMode").value:"normal";
+ if(guildMode==="oipoka"){
+   var extraPassiveId=$("oipokaPassive")?$("oipokaPassive").value:"";
+   var extraPassive=db.passives.find(function(x){return String(x.id)===String(extraPassiveId)});
+   if(extraPassive)STAT_KEYS.forEach(function(k){passive[k]+=Number(extraPassive.stats[k]||0)/100;});
+ }
 
  var rune={
   hp:Number($("runeHp").value)||0,
@@ -565,12 +596,19 @@ function calc(){
   crit:Number($("runeCrit").value)||0
  };
 
- // バフ / デバフは、キャラ・覚醒・武器・タリスマン・ルーン・パッシブの
- // すべての計算が終わった後に最後の割合補正として適用する。
+ // ギルドバトル補正は、キャラ・覚醒・武器・タリスマン・ルーン・パッシブの計算後に適用。
+ // おいポカ時は追加パッシブも合算し、HP×6のうえで全ステータス×1.2を適用する。
+ var guildHpMultiplier=1;
+ var guildAllMultiplier=1;
+ if(guildMode==="guild")guildHpMultiplier=5;
+ else if(guildMode==="attack")guildHpMultiplier=6;
+ else if(guildMode==="oipoka"){guildHpMultiplier=6;guildAllMultiplier=1.2;}
+
+ // バフ / デバフは最後に適用。HP・SPは対象外。
  // 正の値 = バフ、負の値 = デバフ。
  var buffDebuff={
-  hp:(Number($("buffHp").value)||0)/100,
-  sp:(Number($("buffSp").value)||0)/100,
+  hp:0,
+  sp:0,
   atk:(Number($("buffAtk").value)||0)/100,
   def:(Number($("buffDef").value)||0)/100,
   spd:(Number($("buffSpd").value)||0)/100,
@@ -584,7 +622,8 @@ function calc(){
    var talismanBase=Number(t.stats[k]||0)*(1+talismanAwake[k]);
    var base=charBase+weaponBase+talismanBase+rune[k];
    var afterPassive=base*(1+passive[k]);
-   var total=Math.round(afterPassive*(1+buffDebuff[k]));
+   var afterGuild=((k==="hp")?afterPassive*guildHpMultiplier:afterPassive)*guildAllMultiplier;
+   var total=Math.round(afterGuild*(1+buffDebuff[k]));
    var el=$(ids[k]);
    if(el) el.textContent=total.toLocaleString();
  });
@@ -706,7 +745,8 @@ function calc(){
     passive2: setupUnifiedPicker("passiveSearch2","passiveDropdown2","passive2"),
     passive3: setupUnifiedPicker("passiveSearch3","passiveDropdown3","passive3"),
     passive4: setupUnifiedPicker("passiveSearch4","passiveDropdown4","passive4"),
-    passive5: setupUnifiedPicker("passiveSearch5","passiveDropdown5","passive5")
+    passive5: setupUnifiedPicker("passiveSearch5","passiveDropdown5","passive5"),
+    oipokaPassive: setupUnifiedPicker("oipokaPassiveSearch","oipokaPassiveDropdown","oipokaPassive")
   };
 
   window.__refreshUnifiedPickers=function(){
@@ -841,10 +881,14 @@ $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){pa
   if($("weaponTypeFilter"))$("weaponTypeFilter").value="";
   $("talismanSearch").value="";
   [1,2,3,4,5].forEach(function(n){var sel=$("passive"+n),input=$("passiveSearch"+n);if(sel)sel.value="";if(input)input.value="";});
+  if($("oipokaPassive"))$("oipokaPassive").value="";
+  if($("oipokaPassiveSearch"))$("oipokaPassiveSearch").value="";
   updatePassiveOptionState();
   ["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"].forEach(function(id){$(id).value=""});
   $("runeHp").value=3648;$("runeSp").value=3624;$("runeAtk").value=2328;$("runeDef").value=2160;$("runeSpd").value=2328;$("runeCrit").value=96;
-  ["buffHp","buffSp","buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){if($(id))$(id).value="";});
+  if($("guildBattleMode"))$("guildBattleMode").value="normal";
+  if($("oipokaPassiveGroup"))$("oipokaPassiveGroup").style.display="none";
+  ["buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){if($(id))$(id).value="";});
   if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
   calc();
 };
@@ -858,8 +902,20 @@ $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
 $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$("file").onchange=restore;
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
+function updateGuildBattleModeUI(){
+  var mode=$("guildBattleMode")?$("guildBattleMode").value:"normal";
+  var group=$("oipokaPassiveGroup");
+  if(group)group.style.display=mode==="oipoka"?"block":"none";
+  if(mode!=="oipoka"){
+    if($("oipokaPassive"))$("oipokaPassive").value="";
+    if($("oipokaPassiveSearch"))$("oipokaPassiveSearch").value="";
+  }
+  if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
+}
 [1,2,3,4,5].forEach(function(n){var el=$("passive"+n);if(el)el.addEventListener("change",function(){updatePassiveOptionState();if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();calc()})});
-["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit","buffHp","buffSp","buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){
+if($("oipokaPassive"))$("oipokaPassive").addEventListener("change",calc);
+if($("guildBattleMode"))$("guildBattleMode").addEventListener("change",function(){updateGuildBattleModeUI();calc();});
+["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","oipokaPassive","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit","buffAtk","buffDef","buffSpd","buffCrit"].forEach(function(id){
  var el=$(id);
  if(el){el.addEventListener("change",calc);el.addEventListener("input",calc);}
 });
@@ -872,6 +928,7 @@ if(announcementText){
   announcementTimer=setTimeout(saveAnnouncement,700);
  });
 }
+updateGuildBattleModeUI();
 calc();
 })();
 </script>
