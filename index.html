@@ -109,6 +109,24 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 
 
 .result-section-title{margin:14px 0 10px;text-align:center;font-size:1.25rem;font-weight:800;letter-spacing:.03em;}
+
+
+/* データ管理：利用状況・計算履歴 */
+.dashboard-title{font-size:16px;font-weight:900;margin-bottom:10px}
+.usage-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.usage-stat-card{background:#1d2740;border:1px solid #303b59;border-radius:12px;padding:12px;text-align:center}
+.usage-stat-card span{display:block;font-size:12px;color:#aab4cc;font-weight:800;margin-bottom:4px}
+.usage-stat-card b{display:block;font-size:28px;color:#fff;font-weight:900}
+.dashboard-status{font-size:11px;color:#9ca8c0;margin-top:8px;line-height:1.5}
+.history-list{display:grid;gap:8px}
+.history-entry{background:#1d2740;border:1px solid #303b59;border-radius:12px;padding:11px}
+.history-entry-time{font-size:11px;color:#8f9bb5;margin-bottom:7px}
+.history-entry-row{display:grid;grid-template-columns:82px 1fr;gap:8px;padding:2px 0;font-size:12px;line-height:1.45}
+.history-entry-label{color:#aab4cc;font-weight:800}
+.history-entry-value{color:#fff;font-weight:700;word-break:break-word}
+.history-empty{padding:14px;text-align:center;color:#8f9bb5;font-size:12px;background:#1d2740;border:1px solid #303b59;border-radius:12px}
+@media(max-width:430px){.history-entry-row{grid-template-columns:72px 1fr}.usage-stat-card b{font-size:25px}}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -325,26 +343,28 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 </section>
 
 <section id="dataPage" class="page" style="display:none">
-<div>
-<div class="card" id="authBox" style="margin-bottom:12px">
-  <div style="font-weight:900;margin-bottom:8px">管理者ログイン</div>
-  <div id="loggedOutBox">
-    <input id="authEmail" type="email" placeholder="メールアドレス" style="width:100%;margin-bottom:8px">
-    <input id="authPassword" type="password" placeholder="パスワード" style="width:100%;margin-bottom:8px">
-    <button id="loginButton" class="btn" type="button">ログイン</button>
+<div class="card" id="usageStatsCard" style="margin-bottom:12px">
+  <div class="dashboard-title">利用状況</div>
+  <div class="usage-stat-grid">
+    <div class="usage-stat-card"><span>閲覧数</span><b id="pageViewCount">---</b></div>
+    <div class="usage-stat-card"><span>計算機利用回数</span><b id="calculatorUseCount">---</b></div>
   </div>
-  <div id="loggedInBox" style="display:none">
-    <div id="authUser" style="font-size:13px;margin-bottom:8px"></div>
-    <button id="seedButton" class="btn secondary" type="button">現在の初期データをDBへ登録</button>
-    <button id="logoutButton" class="btn secondary" type="button" style="margin-top:8px">ログアウト</button>
-  </div>
-  <div style="font-size:11px;color:#9ca8c0;margin-top:8px">一般ユーザーはログイン不要です。追加・編集・削除は管理者ログイン後に行います。</div>
+  <div id="usageStatsStatus" class="dashboard-status">全端末共通の集計です。</div>
 </div>
+
 <div class="card" id="announcementCard" style="margin-bottom:12px">
   <div style="font-weight:900;margin-bottom:8px">お知らせ</div>
   <textarea id="announcementText" placeholder="お知らせ内容を入力"></textarea>
   <div id="announcementStatus" style="font-size:11px;color:#9ca8c0;margin-top:7px">全端末共通のお知らせです。</div>
 </div>
+
+<div class="card" id="historyCard" style="margin-bottom:12px">
+  <div class="dashboard-title">最近の計算履歴（5件）</div>
+  <div id="calculationHistoryList" class="history-list"><div class="history-empty">履歴を読み込み中…</div></div>
+  <div id="calculationHistoryStatus" class="dashboard-status">全端末共通の最新5件を表示します。</div>
+</div>
+
+<div>
 <div class="card" id="cloudStatus" style="margin-bottom:12px">☁️ 共通データベース：接続確認中…</div>
 <div class="manager-tabs">
 <button class="mtab active" data-type="characters" type="button">キャラ</button>
@@ -361,6 +381,21 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 <div style="height:8px"></div>
 <button id="restore" class="btn secondary" type="button">📥 バックアップから復元</button>
 <input id="file" type="file" accept=".json,application/json" style="display:none">
+</div>
+
+<div class="card" id="authBox" style="margin-bottom:12px">
+  <div style="font-weight:900;margin-bottom:8px">管理者ログイン</div>
+  <div id="loggedOutBox">
+    <input id="authEmail" type="email" placeholder="メールアドレス" style="width:100%;margin-bottom:8px">
+    <input id="authPassword" type="password" placeholder="パスワード" style="width:100%;margin-bottom:8px">
+    <button id="loginButton" class="btn" type="button">ログイン</button>
+  </div>
+  <div id="loggedInBox" style="display:none">
+    <div id="authUser" style="font-size:13px;margin-bottom:8px"></div>
+    <button id="seedButton" class="btn secondary" type="button">現在の初期データをDBへ登録</button>
+    <button id="logoutButton" class="btn secondary" type="button" style="margin-top:8px">ログアウト</button>
+  </div>
+  <div style="font-size:11px;color:#9ca8c0;margin-top:8px">一般ユーザーはログイン不要です。追加・編集・削除は管理者ログイン後に行います。</div>
 </div>
 </section>
 <footer>モンバス計算ツール</footer>
@@ -405,6 +440,21 @@ var SUPABASE_URL="https://qmqciolpfiepzancuvhe.supabase.co";
 var SUPABASE_KEY="sb_publishable_eNPRHLT81mCpqJIpkCrf_w_8-vekwG-";
 var supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var cloudReady=false, currentUser=null;
+var ANALYTICS_SESSION_KEY="monbus_calc_session_id_v1";
+var ANALYTICS_USE_KEY="monbus_calc_use_counted_v1";
+var analyticsHistoryTimer=null;
+function getAnalyticsSessionId(){
+ try{
+  var existing=sessionStorage.getItem(ANALYTICS_SESSION_KEY);
+  if(existing)return existing;
+  var id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now()+"-"+Math.random().toString(36).slice(2));
+  sessionStorage.setItem(ANALYTICS_SESSION_KEY,id);
+  return id;
+ }catch(e){return Date.now()+"-"+Math.random().toString(36).slice(2)}
+}
+var analyticsSessionId=getAnalyticsSessionId();
+var analyticsUseCounted=false;
+try{analyticsUseCounted=sessionStorage.getItem(ANALYTICS_USE_KEY)==="1"}catch(e){}
 function $(id){return document.getElementById(id)}
 function normalizeItem(a){
  if(!a)return item(0,"");
@@ -522,6 +572,124 @@ async function refreshAuth(){
  render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+
+function formatHistoryTime(value){
+ if(!value)return "日時不明";
+ try{return new Intl.DateTimeFormat("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value))}
+ catch(e){return String(value)}
+}
+function selectedDbName(type,selectId){
+ var sel=$(selectId);if(!sel||!sel.value)return "";
+ var found=(db[type]||[]).find(function(x){return String(x.id)===String(sel.value)});
+ return found&&found.name?found.name:"";
+}
+function currentCalculationSnapshot(){
+ var passiveNames=[1,2,3,4,5].map(function(n){return selectedDbName("passives","passive"+n)}).filter(Boolean);
+ var mode=$ ("guildBattleMode") ? $("guildBattleMode").value : "normal";
+ var labels={normal:"ギルドバトル以外",guild:"ギルドバトル中",attack:"ギルドバトル中(攻撃時)",oipoka:"ギルドバトル中(おいポカ時)"};
+ return {
+  character_name:selectedDbName("characters","character"),
+  weapon_name:selectedDbName("weapons","weapon"),
+  talisman_name:selectedDbName("talismans","talisman"),
+  passive_names:passiveNames,
+  guild_mode:labels[mode]||"ギルドバトル以外",
+  oipoka_passive_name:mode==="oipoka"?selectedDbName("passives","oipokaPassive"):"",
+  buff_atk:Number($("buffAtk")&&$("buffAtk").value)||0,
+  buff_def:Number($("buffDef")&&$("buffDef").value)||0,
+  buff_spd:Number($("buffSpd")&&$("buffSpd").value)||0
+ };
+}
+async function recordPageView(){
+ try{
+  var r=await supabaseClient.rpc("increment_monbus_page_view");
+  if(r.error)throw r.error;
+ }catch(e){console.warn("閲覧数カウント未設定",e)}
+}
+async function recordCalculatorUse(){
+ if(analyticsUseCounted)return;
+ analyticsUseCounted=true;
+ try{sessionStorage.setItem(ANALYTICS_USE_KEY,"1")}catch(e){}
+ try{
+  var r=await supabaseClient.rpc("increment_monbus_calculator_use");
+  if(r.error)throw r.error;
+  if(document.body.dataset.page==="data")loadUsageStats();
+ }catch(e){console.warn("利用回数カウント未設定",e)}
+}
+async function saveCalculationHistory(){
+ var s=currentCalculationSnapshot();
+ try{
+  var r=await supabaseClient.rpc("save_monbus_calculation_history",{
+   p_session_id:analyticsSessionId,
+   p_character_name:s.character_name,
+   p_weapon_name:s.weapon_name,
+   p_talisman_name:s.talisman_name,
+   p_passive_names:s.passive_names,
+   p_guild_mode:s.guild_mode,
+   p_oipoka_passive_name:s.oipoka_passive_name,
+   p_buff_atk:s.buff_atk,
+   p_buff_def:s.buff_def,
+   p_buff_spd:s.buff_spd
+  });
+  if(r.error)throw r.error;
+  if(document.body.dataset.page==="data")loadCalculationHistory();
+ }catch(e){console.warn("計算履歴保存未設定",e)}
+}
+function trackCalculationInteraction(){
+ recordCalculatorUse();
+ clearTimeout(analyticsHistoryTimer);
+ analyticsHistoryTimer=setTimeout(saveCalculationHistory,900);
+}
+async function loadUsageStats(){
+ var status=$("usageStatsStatus");
+ try{
+  var r=await supabaseClient.from("app_usage_stats").select("page_views,calculator_uses").eq("id",1).maybeSingle();
+  if(r.error)throw r.error;
+  var row=r.data||{page_views:0,calculator_uses:0};
+  if($("pageViewCount"))$("pageViewCount").textContent=Number(row.page_views||0).toLocaleString();
+  if($("calculatorUseCount"))$("calculatorUseCount").textContent=Number(row.calculator_uses||0).toLocaleString();
+  if(status)status.textContent="全端末共通の集計です。";
+ }catch(e){
+  console.warn("利用状況取得エラー",e);
+  if($("pageViewCount"))$("pageViewCount").textContent="---";
+  if($("calculatorUseCount"))$("calculatorUseCount").textContent="---";
+  if(status)status.textContent="⚠️ 集計用のSupabase設定が必要です。";
+ }
+}
+async function loadCalculationHistory(){
+ var list=$("calculationHistoryList"),status=$("calculationHistoryStatus");
+ if(!list)return;
+ try{
+  var r=await supabaseClient.from("calculation_history")
+   .select("session_id,updated_at,character_name,weapon_name,talisman_name,passive_names,guild_mode,oipoka_passive_name,buff_atk,buff_def,buff_spd")
+   .order("updated_at",{ascending:false}).limit(5);
+  if(r.error)throw r.error;
+  var rows=r.data||[];
+  if(!rows.length){list.innerHTML='<div class="history-empty">まだ計算履歴はありません</div>';}
+  else{
+   list.innerHTML=rows.map(function(row){
+    var passives=Array.isArray(row.passive_names)&&row.passive_names.length?row.passive_names.join(" / "):"未選択";
+    var oipoka=row.oipoka_passive_name?'<div class="history-entry-row"><span class="history-entry-label">おいポカ</span><span class="history-entry-value">'+esc(row.oipoka_passive_name)+'</span></div>':"";
+    var buff='攻撃 '+((Number(row.buff_atk)||0)>0?"+":"")+(Number(row.buff_atk)||0)+'% / 防御 '+((Number(row.buff_def)||0)>0?"+":"")+(Number(row.buff_def)||0)+'% / 素早さ '+((Number(row.buff_spd)||0)>0?"+":"")+(Number(row.buff_spd)||0)+'%';
+    return '<div class="history-entry">'+
+      '<div class="history-entry-time">'+esc(formatHistoryTime(row.updated_at))+'</div>'+
+      '<div class="history-entry-row"><span class="history-entry-label">キャラ</span><span class="history-entry-value">'+esc(row.character_name||"未選択")+'</span></div>'+
+      '<div class="history-entry-row"><span class="history-entry-label">武器</span><span class="history-entry-value">'+esc(row.weapon_name||"未選択")+'</span></div>'+
+      '<div class="history-entry-row"><span class="history-entry-label">タリスマン</span><span class="history-entry-value">'+esc(row.talisman_name||"未選択")+'</span></div>'+
+      '<div class="history-entry-row"><span class="history-entry-label">パッシブ</span><span class="history-entry-value">'+esc(passives)+'</span></div>'+
+      '<div class="history-entry-row"><span class="history-entry-label">ギルド</span><span class="history-entry-value">'+esc(row.guild_mode||"ギルドバトル以外")+'</span></div>'+oipoka+
+      '<div class="history-entry-row"><span class="history-entry-label">バフ/デバフ</span><span class="history-entry-value">'+esc(buff)+'</span></div>'+
+    '</div>';
+   }).join("");
+  }
+  if(status)status.textContent="全端末共通の最新5件を表示しています。";
+ }catch(e){
+  console.warn("計算履歴取得エラー",e);
+  list.innerHTML='<div class="history-empty">⚠️ 履歴用のSupabase設定が必要です</div>';
+  if(status)status.textContent="設定用SQLをSupabaseで実行してください。";
+ }
+}
+function loadAdminDashboard(){loadUsageStats();loadCalculationHistory();}
 function fill(){
   [["characters","character","characterSearch"],["weapons","weapon","weaponSearch"],["talismans","talisman","talismanSearch"]].forEach(function(d){
     var sel=$(d[1]),input=$(d[2]);
@@ -811,7 +979,7 @@ function page(p){
  dataPage.style.display=c?"none":"block";
  $("tabCalc").classList.toggle("active",c);
  $("tabData").classList.toggle("active",!c);
- if(!c)render();
+ if(!c){render();loadAdminDashboard();}
 }
 function setManager(t){manager=t;document.querySelectorAll(".mtab").forEach(function(b){b.classList.toggle("active",b.dataset.type===t)});render()}
 function render(){
@@ -904,7 +1072,7 @@ function restore(e){
  var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();
  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.characters||!x.weapons||!x.talismans)throw 0;db=x;db.characters.concat(db.weapons,db.talismans).forEach(function(a){if(!a.stats)a.stats={};STAT_KEYS.forEach(function(k){a.stats[k]=Number(a.stats[k]||0)})});saveLocal();fill();render();alert("復元しました")}catch(z){alert("正しいバックアップではありません")}e.target.value=""};r.readAsText(f)
 }
-(async function(){await load();fill();await refreshAuth();})();
+(async function(){await recordPageView();await load();fill();await refreshAuth();})();
 $("loginButton").onclick=async function(){
  var email=$("authEmail").value.trim(),password=$("authPassword").value;
  if(!email||!password){alert("メールアドレスとパスワードを入力してください");return}
@@ -939,6 +1107,7 @@ var awakeningInputIds=["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awa
 function setAllAwakeningValues(value){
   awakeningInputIds.forEach(function(id){$(id).value=String(value)});
   calc();
+  trackCalculationInteraction();
 }
 $("setAwakeZero").onclick=function(){setAllAwakeningValues(0)};
 $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
@@ -982,6 +1151,8 @@ if(announcementText){
     // 検索入力・数値入力・select の変更はすべて即時反映。
     if(t.matches("input, select")){
       calc();
+      var trackedIds=["character","weapon","talisman","passive1","passive2","passive3","passive4","passive5","oipokaPassive","guildBattleMode","awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit","runeHp","runeSp","runeAtk","runeDef","runeSpd","runeCrit","buffAtk","buffDef","buffSpd"];
+      if(trackedIds.indexOf(t.id)>=0)trackCalculationInteraction();
     }
   };
   calcPage.addEventListener("input",recalc,true);
