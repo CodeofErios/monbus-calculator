@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#31464c">
 <title>モンバス計算機</title>
 <style>
 *{box-sizing:border-box}
@@ -127,13 +127,79 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 .history-empty{padding:14px;text-align:center;color:#8f9bb5;font-size:12px;background:#1d2740;border:1px solid #303b59;border-radius:12px}
 @media(max-width:430px){.history-entry-row{grid-template-columns:72px 1fr}.usage-stat-card b{font-size:25px}}
 
+
+/* ===== モンバス風テーマ & 管理者テーマ切替 ===== */
+:root{
+  --bg:#31464c;
+  --surface:#41575e;
+  --surface-2:#384d54;
+  --input:#4a6269;
+  --border:#6f8991;
+  --text:#ffffff;
+  --muted:#d1dadd;
+  --accent:#8ee8dd;
+  --accent-strong:#71d7cc;
+  --accent-text:#163036;
+  --danger:#d36c73;
+  --shadow:#213237;
+}
+body[data-theme="monbus"]{
+  --bg:#31464c;--surface:#41575e;--surface-2:#384d54;--input:#4a6269;--border:#6f8991;
+  --text:#ffffff;--muted:#d1dadd;--accent:#8ee8dd;--accent-strong:#71d7cc;--accent-text:#163036;--danger:#d36c73;--shadow:#213237;
+}
+body[data-theme="navy"]{
+  --bg:#0d1728;--surface:#182844;--surface-2:#13213a;--input:#223657;--border:#3f5d88;
+  --text:#ffffff;--muted:#b8c6d9;--accent:#77b9ff;--accent-strong:#4da3ff;--accent-text:#102338;--danger:#df6d7a;--shadow:#08101d;
+}
+body[data-theme="green"]{
+  --bg:#15261f;--surface:#233c31;--surface-2:#1d332a;--input:#2c493c;--border:#527464;
+  --text:#ffffff;--muted:#c3d4cb;--accent:#8edbb3;--accent-strong:#6bc99a;--accent-text:#173126;--danger:#da7474;--shadow:#0d1914;
+}
+body[data-theme="red"]{
+  --bg:#281719;--surface:#42272b;--surface-2:#372125;--input:#503036;--border:#81535a;
+  --text:#ffffff;--muted:#dbc6c9;--accent:#ff9b9b;--accent-strong:#eb7777;--accent-text:#3a1519;--danger:#ff737d;--shadow:#1b0d0f;
+}
+body[data-theme="purple"]{
+  --bg:#21182d;--surface:#352846;--surface-2:#2c223b;--input:#403151;--border:#6f5787;
+  --text:#ffffff;--muted:#d3c8df;--accent:#c6a0ff;--accent-strong:#aa7ff0;--accent-text:#281739;--danger:#e27d91;--shadow:#150e1d;
+}
+html,body{
+  background:var(--bg)!important;color:var(--text)!important;
+  font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif!important;
+  font-weight:700;
+}
+header h1,.dashboard-title,label,.name,.btn,.mtab,.tab,.status-value,.stat-card b,.selected-summary-value,.usage-stat-card b,.modal-title{
+  font-weight:900!important;
+  text-shadow:0 2px 0 rgba(0,0,0,.45),1px 0 0 rgba(0,0,0,.22),-1px 0 0 rgba(0,0,0,.22),0 1px 0 rgba(0,0,0,.22);
+}
+.card,.modal-box{background:var(--surface)!important;border-color:var(--border)!important}
+.result{background:var(--surface-2)!important;border-color:var(--border)!important}
+input,select,textarea,.item,.usage-stat-card,.history-entry,.history-empty,.selected-summary,.stat-card,.rune-grid>div,.mtab,.btn.secondary,.unified-select input{
+  background:var(--input)!important;border-color:var(--border)!important;color:var(--text)!important;
+}
+textarea[readonly]{background:var(--surface-2)!important;color:var(--text)!important;border-color:var(--border)!important}
+.stats span,.picker-dropdown{background:var(--surface-2)!important;border-color:var(--border)!important}
+.tab{background:var(--surface-2)!important;border-color:var(--border)!important;color:var(--muted)!important}
+.tab.active,.btn:not(.secondary):not(.danger){background:var(--accent)!important;border-color:var(--accent-strong)!important;color:var(--accent-text)!important}
+.mtab.active,.unified-select input:focus,input:focus,select:focus,textarea:focus{border-color:var(--accent)!important}
+.status-card.main{background:var(--surface-2)!important;border-color:var(--accent)!important}
+.status-card.main .status-value,.result-value{color:var(--accent)!important}
+.sub,.notice,.hint,.selected-summary-label,.selected-buff-item span,.history-entry-label,.history-entry-time,.dashboard-status,.usage-stat-card span,.rune-grid span,.row,.stat-card span,.result-title{color:var(--muted)!important}
+.btn.danger{border-color:var(--danger)!important;color:#fff!important}
+.picker-option:hover,.picker-option:focus{background:var(--surface)!important}
+.theme-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 12px}
+.theme-preview span{height:26px;border-radius:8px;border:1px solid var(--border)}
+.theme-preview .p1{background:var(--bg)}.theme-preview .p2{background:var(--surface)}.theme-preview .p3{background:var(--input)}.theme-preview .p4{background:var(--accent)}
+#themeSettingsCard .group{margin-bottom:8px}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 </head>
-<body data-page="calc">
+<body data-page="calc" data-theme="monbus">
+<script>(function(){try{var t=localStorage.getItem("monbus_theme_global_cache_v2");if(["monbus","navy","green","red","purple"].indexOf(t)>=0)document.body.setAttribute("data-theme",t)}catch(e){}})();</script>
 
 <div class="app">
 <header><h1>⚔️ モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン データベース</div></header>
@@ -383,6 +449,24 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 <input id="file" type="file" accept=".json,application/json" style="display:none">
 </div>
 
+
+<div class="card" id="themeSettingsCard" style="display:none;margin-bottom:12px">
+  <div class="dashboard-title">テーマカラー設定</div>
+  <div class="group">
+    <label for="themePreset">背景カラー</label>
+    <select id="themePreset">
+      <option value="monbus">モンバス風</option>
+      <option value="navy">ネイビー</option>
+      <option value="green">グリーン</option>
+      <option value="red">レッド</option>
+      <option value="purple">パープル</option>
+    </select>
+  </div>
+  <div class="theme-preview" aria-hidden="true"><span class="p1"></span><span class="p2"></span><span class="p3"></span><span class="p4"></span></div>
+  <button id="saveThemeButton" class="btn" type="button">このカラーを全端末へ反映</button>
+  <div id="themeStatus" class="dashboard-status">管理者は全端末共通、STRATOSメンバーはこの端末のみ変更できます。</div>
+</div>
+
 <div class="card" id="stratosAuthBox" style="margin-bottom:12px">
   <div style="font-weight:900;margin-bottom:8px">STRATOSメンバーログイン</div>
   <div id="stratosLoggedOutBox">
@@ -461,6 +545,78 @@ function isStratosMember(){return !!currentUser&&currentLoginEmail()===STRATOS_A
 function canEditData(){return isMainAdmin()||isStratosMember()}
 function canDeleteData(){return isMainAdmin()}
 function canEditAnnouncement(){return isMainAdmin()||isStratosMember()}
+function canEditTheme(){return isMainAdmin()||isStratosMember()}
+var THEME_KEYS=["monbus","navy","green","red","purple"];
+var THEME_META_COLORS={monbus:"#31464c",navy:"#0d1728",green:"#15261f",red:"#281719",purple:"#21182d"};
+var GLOBAL_THEME_CACHE_KEY="monbus_theme_global_cache_v2";
+var STRATOS_LOCAL_THEME_KEY="monbus_theme_stratos_local_v1";
+var currentGlobalTheme="monbus";
+function normalizeTheme(theme){return THEME_KEYS.indexOf(theme)>=0?theme:"monbus"}
+function setThemeVisual(theme){
+ theme=normalizeTheme(theme);
+ document.body.setAttribute("data-theme",theme);
+ var sel=$("themePreset");if(sel&&sel.value!==theme)sel.value=theme;
+ var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute("content",THEME_META_COLORS[theme]||THEME_META_COLORS.monbus);
+}
+function applyThemeForCurrentUser(){
+ var theme=currentGlobalTheme;
+ if(isStratosMember()){
+  try{
+   var localTheme=localStorage.getItem(STRATOS_LOCAL_THEME_KEY);
+   if(localTheme)theme=normalizeTheme(localTheme);
+  }catch(e){}
+ }
+ setThemeVisual(theme);
+}
+async function loadTheme(){
+ var cached="monbus";
+ try{cached=normalizeTheme(localStorage.getItem(GLOBAL_THEME_CACHE_KEY)||"monbus")}catch(e){}
+ currentGlobalTheme=cached;
+ setThemeVisual(currentGlobalTheme);
+ try{
+  var r=await supabaseClient.from("app_theme_settings").select("theme").eq("id",1).maybeSingle();
+  if(r.error)throw r.error;
+  if(r.data&&r.data.theme){
+   currentGlobalTheme=normalizeTheme(r.data.theme);
+   try{localStorage.setItem(GLOBAL_THEME_CACHE_KEY,currentGlobalTheme)}catch(e){}
+  }
+  applyThemeForCurrentUser();
+  if($("themeStatus"))$("themeStatus").textContent=isStratosMember()
+    ?"STRATOSメンバーのテーマ変更はこの端末だけに保存されます。"
+    :"現在の全端末共通テーマを読み込みました。";
+ }catch(e){
+  console.warn("テーマ取得エラー",e);
+  applyThemeForCurrentUser();
+  if($("themeStatus"))$("themeStatus").textContent="テーマ設定テーブル未設定の場合はモンバス風を使用します。";
+ }
+}
+async function saveTheme(){
+ if(!canEditTheme()){alert("管理者またはSTRATOSメンバーログインが必要です");return}
+ var theme=normalizeTheme($("themePreset")?$("themePreset").value:"monbus");
+
+ if(isStratosMember()){
+  setThemeVisual(theme);
+  try{localStorage.setItem(STRATOS_LOCAL_THEME_KEY,theme)}catch(e){}
+  if($("themeStatus"))$("themeStatus").textContent="この端末だけのテーマとして保存しました。";
+  return;
+ }
+
+ if(!isMainAdmin()){alert("テーマを保存できません");return}
+
+ setThemeVisual(theme);
+ if($("themeStatus"))$("themeStatus").textContent="全端末共通テーマを保存中…";
+ try{
+  var r=await supabaseClient.from("app_theme_settings").upsert({id:1,theme:theme,updated_at:new Date().toISOString()},{onConflict:"id"});
+  if(r.error)throw r.error;
+  currentGlobalTheme=theme;
+  try{localStorage.setItem(GLOBAL_THEME_CACHE_KEY,theme)}catch(e){}
+  if($("themeStatus"))$("themeStatus").textContent="管理者の全端末共通テーマとして保存しました。";
+ }catch(e){
+  console.error("テーマ保存エラー",e);
+  if($("themeStatus"))$("themeStatus").textContent="保存できませんでした。Supabase設定を確認してください。";
+  alert("テーマカラーを保存できませんでした。Supabaseの設定を確認してください。");
+ }
+}
 var ANALYTICS_SESSION_KEY="monbus_calc_session_id_v1";
 var ANALYTICS_USE_KEY="monbus_calc_use_counted_v1";
 var analyticsHistoryTimer=null;
@@ -567,6 +723,7 @@ async function load(){
  normalizeDb();
  await fetchCloud();
  await loadAnnouncement();
+ await loadTheme();
 }
 async function refreshAuth(){
  var r=await supabaseClient.auth.getUser();currentUser=r.data&&r.data.user?r.data.user:null;
@@ -575,6 +732,7 @@ async function refreshAuth(){
  var mainAdmin=isMainAdmin(),stratos=isStratosMember(),canEdit=canEditData(),canAnnounce=canEditAnnouncement();
 
  document.body.classList.toggle("admin-mode",mainAdmin);
+ applyThemeForCurrentUser();
 
  if(currentUser){
   if(out)out.style.display="none";
@@ -596,6 +754,7 @@ async function refreshAuth(){
  if(addBtn)addBtn.style.display=canEdit?"inline-block":"none";
  if($("seedButton"))$("seedButton").style.display=mainAdmin?"block":"none";
  if($("backupCard"))$("backupCard").style.display=mainAdmin?"block":"none";
+ if($("themeSettingsCard"))$("themeSettingsCard").style.display=canEditTheme()?"block":"none";
 
  if(announcementCard)announcementCard.style.display="block";
  if(announcement){
@@ -1183,6 +1342,15 @@ $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
 $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$("file").onchange=restore;
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
+if($("themePreset"))$("themePreset").addEventListener("change",function(){
+ setThemeVisual(this.value);
+ if($("themeStatus")){
+  $("themeStatus").textContent=isStratosMember()
+   ?"プレビュー中です。保存するとこの端末だけに反映されます。"
+   :"プレビュー中です。管理者が保存すると全端末へ反映されます。";
+ }
+});
+if($("saveThemeButton"))$("saveThemeButton").onclick=saveTheme;
 function updateGuildBattleModeUI(){
   var mode=$("guildBattleMode")?$("guildBattleMode").value:"normal";
   var group=$("oipokaPassiveGroup");
