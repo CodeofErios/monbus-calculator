@@ -195,6 +195,28 @@ body.admin-mode #themeSettingsCard,
 body.stratos-mode #themeSettingsCard{display:block!important}
 #themeSettingsCard .group{margin-bottom:8px}
 
+
+/* ===== 登録データ画像 ===== */
+.item-name-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+.item-thumb,.picker-thumb,.image-preview{
+  width:44px;height:44px;flex:0 0 44px;border-radius:10px;
+  object-fit:cover;border:1px solid var(--border,#6f8991);
+  background:var(--surface-2,#384d54);
+}
+.item-thumb.placeholder,.image-preview.placeholder{
+  display:grid;place-items:center;font-size:20px;color:var(--muted,#d1dadd);
+}
+.picker-option.with-image{display:flex;align-items:center;gap:10px}
+.picker-option.with-image .picker-thumb{width:36px;height:36px;flex-basis:36px;border-radius:8px}
+.image-editor{
+  border:1px solid var(--border,#6f8991);border-radius:12px;padding:12px;
+  background:var(--surface-2,#384d54);margin-bottom:13px
+}
+.image-editor-row{display:flex;align-items:center;gap:12px}
+.image-preview{width:72px;height:72px;flex-basis:72px}
+.image-actions{flex:1;display:grid;gap:8px}
+.image-help{font-size:11px;color:var(--muted,#d1dadd);margin-top:8px;line-height:1.5}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -517,6 +539,20 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 <div class="modal-box">
 <div id="modalTitle" class="modal-title">データを追加</div>
 <div class="group"><label>名前</label><input id="dataName" maxlength="80" placeholder="例：新キャラ"></div>
+
+<div class="image-editor" id="dataImageGroup">
+  <label>画像</label>
+  <div class="image-editor-row">
+    <div id="dataImagePreview" class="image-preview placeholder">画像</div>
+    <div class="image-actions">
+      <button id="chooseDataImage" class="btn secondary" type="button">画像を選択 / 変更</button>
+      <button id="removeDataImage" class="btn danger" type="button">画像を削除</button>
+      <input id="dataImageFile" type="file" accept="image/png,image/jpeg,image/webp" style="display:none">
+    </div>
+  </div>
+  <div class="image-help">JPG / PNG / WEBP、8MB以下。管理者・STRATOSメンバーのみ変更できます。</div>
+</div>
+
 <div class="group" id="weaponTypeModalGroup" style="display:none"><label>武器種</label><select id="dataWeaponType">
 <option value="">未設定</option><option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option><option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option>
 </select></div>
@@ -542,14 +578,14 @@ var STRATOS_AUTH_EMAIL="stratos.member@example.com";
 var STRATOS_LOGIN_ID="ストラトス";
 var STAT_KEYS=["hp","sp","atk","def","spd","crit"];
 var STAT_LABELS={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
-function item(id,name,stats,weaponType){return {id:id,name:name,weapon_type:weaponType||"",stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
+function item(id,name,stats,weaponType,imageUrl){return {id:id,name:name,weapon_type:weaponType||"",image_url:imageUrl||"",stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
 var db={
  passives:[],
  characters:[item(1,"アストラルヴィシュヌ",{hp:7656,sp:6223,atk:5423,def:6706,spd:3808,crit:0}),item(2,"深淵同調サタン",{hp:8834,sp:4088,atk:6831,def:4761,spd:4554,crit:0}),item(3,"ヴィシュヌ",{hp:7411,sp:6119,atk:5050,def:6582,spd:3684,crit:0}),item(4,"お日様散々ミネルヴァ",{hp:7411,sp:4895,atk:5464,def:4595,spd:5299,crit:0}),item(5,"安全祈願ヨルズ",{hp:8981,sp:4140,atk:6251,def:6913,spd:1324,crit:0}),item(6,"ラブハリケーンマナナン",{hp:7803,sp:4400,atk:4636,def:6127,spd:4015,crit:0}),item(7,"アテン",{hp:8147,sp:4166,atk:6127,def:5175,spd:3312,crit:0}),item(8,"邪神ちゃん",{hp:14184,sp:1119,atk:6458,def:869,spd:4264,crit:0}),item(9,"ぺこら",{hp:7509,sp:4921,atk:4719,def:6541,spd:3022,crit:0}),item(10,"サンタヘスティアー",{hp:8147,sp:3984,atk:5009,def:7203,spd:2277,crit:0}),item(11,"ウィル・オ・テューポーン",{hp:10208,sp:1041,atk:6499,def:6458,spd:2277,crit:0}),item(12,"シスター・オーディン",{hp:6969,sp:4400,atk:5589,def:3891,spd:5547,crit:0}),item(13,"ナアマ〖ひな祭りver〗",{hp:6969,sp:4530,atk:3550,def:6789,spd:4512,crit:0}),item(14,"メタトロン",{hp:5644,sp:4739,atk:5713,def:3229,spd:6996,crit:0}),item(15,"カオス・エレボス",{hp:7214,sp:4609,atk:4885,def:5589,spd:4015,crit:0}),item(16,"ブライダル・メティス",{hp:7509,sp:4504,atk:4719,def:6541,spd:3022,crit:0}),item(17,"だいろ神",{hp:9128,sp:2968,atk:3726,def:8611,spd:1821,crit:0}),item(18,"サレオスの姉御",{hp:9570,sp:1744,atk:6706,def:4554,spd:3601,crit:0}),item(19,"イルミネーション如来",{hp:8392,sp:2864,atk:5878,def:6582,spd:2401,crit:0}),item(20,"真っ逆サマーエストリエ",{hp:6969,sp:4661,atk:5878,def:4140,spd:4347,crit:0}),item(21,"爆発寸前ヌアザ",{hp:9423,sp:2083,atk:6168,def:6044,spd:2277,crit:0}),item(22,"おめがリオ",{hp:8049,sp:4687,atk:5464,def:5464,spd:2318,crit:0}),item(23,"女媧",{hp:9521,sp:3202,atk:5878,def:5920,spd:1449,crit:0}),item(24,"ツチミカド",{hp:6920,sp:4557,atk:5009,def:5506,spd:3974,crit:0}),item(25,"サタン",{hp:7067,sp:3046,atk:5920,def:4678,spd:5216,crit:0}),item(26,"ヤンデレ・ツクヨミ",{hp:7656,sp:4192,atk:5547,def:5754,spd:2773,crit:0}),item(27,"聖夜のアイドル乙姫",{hp:7509,sp:4296,atk:4015,def:7410,spd:2525,crit:0}),item(28,"暴君花嫁スカジ",{hp:9030,sp:2005,atk:6292,def:5175,spd:3229,crit:0}),item(29,"笑門来福タナトス",{hp:7607,sp:3593,atk:6292,def:4305,spd:3891,crit:0}),item(30,"お月見ティアマト",{hp:7901,sp:4270,atk:2691,def:7990,spd:2773,crit:0}),item(31,"ハツヒノメイデン",{hp:6723,sp:4374,atk:4512,def:8652,spd:1324,crit:0}),item(32,"風神Pwithおに☆むす",{hp:8490,sp:2135,atk:6292,def:4678,spd:3974,crit:0}),item(33,"テューポーン",{hp:8687,sp:2265,atk:6085,def:5506,spd:2980,crit:0}),item(34,"サマースルト",{hp:10159,sp:1510,atk:6706,def:5837,spd:1283,crit:0}),item(35,"天使長ミカエル",{hp:8147,sp:2369,atk:5009,def:5009,spd:4885,crit:0}),item(36,"内気な花嫁ソロネ",{hp:7067,sp:3619,atk:5589,def:3974,spd:5133,crit:0}),item(37,"幻の花嫁クサビラ神",{hp:8490,sp:4478,atk:4968,def:6582,spd:828,crit:0}),item(38,"本気Dオオゲツヒメ",{hp:10110,sp:2786,atk:3974,def:7700,spd:745,crit:0}),item(39,"雪アリス",{hp:6871,sp:3932,atk:3394,def:6541,spd:4554,crit:0}),item(40,"アラハバキ〖ゴールドver〗",{hp:9276,sp:2109,atk:5837,def:6251,spd:1780,crit:0}),item(41,"秋振舞ナアマ",{hp:7116,sp:4478,atk:3312,def:6251,spd:4057,crit:0}),item(42,"ヌアザ",{hp:9325,sp:1953,atk:5671,def:6044,spd:2152,crit:0}),item(43,"新春スマッシュワッカ＆カムイ",{hp:6969,sp:3463,atk:3353,def:6706,spd:4636,crit:0}),item(44,"釈迦如来",{hp:8392,sp:2630,atk:5464,def:6417,spd:2152,crit:0}),item(45,"キョンキョン",{hp:6674,sp:2213,atk:6251,def:4802,spd:5092,crit:0}),item(46,"マナナン",{hp:7509,sp:3775,atk:5382,def:5175,spd:3187,crit:0}),item(47,"エレボス",{hp:7165,sp:3489,atk:4885,def:5506,spd:3974,crit:0}),item(48,"独り占めヘカトンケイル",{hp:9227,sp:2317,atk:5589,def:7038,spd:828,crit:0}),item(49,"黒引振袖女郎蜘蛛",{hp:8196,sp:2682,atk:6085,def:6127,spd:1863,crit:0}),item(50,"雪兎ちゃう",{hp:5987,sp:4661,atk:4968,def:3312,spd:6003,crit:0}),item(51,"バカンスメイデン",{hp:6380,sp:4452,atk:3767,def:8652,spd:1656,crit:0}),item(52,"霜の巨人ユミル〖七五三ver〗",{hp:8981,sp:2031,atk:5961,def:5713,spd:2194,crit:0}),item(53,"スルト",{hp:9914,sp:1458,atk:6582,def:5589,spd:1283,crit:0}),item(54,"サマービーチスター・ラー",{hp:8196,sp:2942,atk:6624,def:4885,spd:2152,crit:0}),item(55,"狼男ヘラクレス",{hp:8932,sp:2161,atk:5754,def:6085,spd:1821,crit:0}),item(56,"アマテラス〖ブルマver〗",{hp:6674,sp:3202,atk:5837,def:5050,spd:3974,crit:0}),item(57,"おめがレイ",{hp:9177,sp:1588,atk:6748,def:4595,spd:2608,crit:0}),item(58,"友チョコアンドロメダ",{hp:6920,sp:2994,atk:3063,def:6375,spd:3353,crit:0}),item(59,"フランケンタロス",{hp:9325,sp:1119,atk:6375,def:4471,spd:1407,crit:0}),item(60,"春暁スサノオ",{hp:7656,sp:1926,atk:6417,def:3808,spd:2815,crit:0}),item(61,"本気グレープ",{hp:7312,sp:1666,atk:5630,def:2566,spd:5423,crit:0}),item(62,"ノトス",{hp:6184,sp:2708,atk:4595,def:3850,spd:5257,crit:0}),item(63,"アムルタート",{hp:6723,sp:3775,atk:2194,def:4885,spd:5009,crit:0}),item(64,"ティアマト",{hp:6625,sp:3541,atk:2525,def:7617,spd:2277,crit:0}),item(65,"ベルゼブブ",{hp:6036,sp:2369,atk:6085,def:2194,spd:5878,crit:0}),item(66,"わくどきファフニール",{hp:7165,sp:1926,atk:5713,def:2318,spd:5423,crit:0}),item(67,"ナアマ",{hp:5006,sp:4036,atk:3560,def:6003,spd:3891,crit:0}),item(68,"ブライダル・アールマティ",{hp:6331,sp:2942,atk:4678,def:4885,spd:3643,crit:0}),item(69,"女郎蜘蛛",{hp:7607,sp:2421,atk:5837,def:5506,spd:1076,crit:0}),item(70,"ナイチンゲール〖シスターver〗",{hp:5840,sp:3359,atk:4347,def:5299,spd:3601,crit:0}),item(71,"獅子舞ヘラクレス",{hp:8098,sp:1926,atk:5754,def:4926,spd:1697,crit:0}),item(72,"マリーアントワネット〖一発芸ver〗",{hp:6233,sp:2916,atk:3933,def:4802,spd:4512,crit:0}),item(73,"ブラフマー",{hp:5398,sp:3333,atk:4802,def:4388,spd:4471,crit:0}),item(74,"風神",{hp:7018,sp:1796,atk:5796,def:2442,spd:5299,crit:0}),item(75,"魔女っ子アリス",{hp:6723,sp:2734,atk:3229,def:5299,spd:4305,crit:0}),item(76,"チビサタン",{hp:6969,sp:2682,atk:3684,def:5589,spd:3353,crit:0}),item(77,"イーリス",{hp:5202,sp:3437,atk:4802,def:2773,spd:6044,crit:0}),item(78,"はっちゃけランダ",{hp:5006,sp:3176,atk:5092,def:3187,spd:5671,crit:0}),item(79,"サンダードラゴン",{hp:7607,sp:833,atk:5050,def:2898,spd:1573,crit:0}),item(80,"夢喰いバク",{hp:8392,sp:833,atk:3353,def:4719,spd:621,crit:0}),item(81,"デカラビア",{hp:6184,sp:2031,atk:4968,def:4057,spd:496,crit:0}),item(82,"金太郎",{hp:7116,sp:1067,atk:4761,def:2856,spd:1904,crit:0}),item(83,"やる気のない金太郎",{hp:7116,sp:1067,atk:4761,def:2856,spd:1904,crit:0}),item(84,"キョンシー",{hp:4662,sp:2057,atk:4512,def:1324,spd:5133,crit:0}),item(85,"ブライダル・サハギン",{hp:5300,sp:2239,atk:3560,def:3312,spd:3270,crit:0}),item(86,"フランケンシュタイン",{hp:6429,sp:1614,atk:4554,def:3353,spd:1614,crit:0}),item(87,"ユバンラダケ",{hp:6233,sp:1432,atk:5009,def:2359,spd:2525,crit:0}),item(88,"ブライダル・雪女",{hp:4908,sp:2291,atk:4429,def:2649,spd:3270,crit:0}),item(89,"ベビモス",{hp:8098,sp:729,atk:3891,def:3933,spd:869,crit:0}),item(90,"ラミエル",{hp:4613,sp:2499,atk:4140,def:2856,spd:3353,crit:0}),item(91,"エンジェル",{hp:3730,sp:2239,atk:2608,def:2152,spd:3519,crit:0}),item(92,"ジャージーデビル",{hp:4417,sp:1536,atk:4595,def:952,spd:2732,crit:0}),item(93,"クシナダヒメ",{hp:2895,sp:2890,atk:1780,def:2856,spd:3643,crit:0}),item(94,"インキュバス",{hp:2748,sp:2630,atk:3229,def:1697,spd:3353,crit:0}),item(95,"ハーピー",{hp:3435,sp:1822,atk:3105,def:538,spd:4636,crit:0}),item(96,"ロビンフッド",{hp:2846,sp:2369,atk:2856,def:1242,spd:4181,crit:0}),item(97,"ホワイトガネーシャ",{hp:1619,sp:859,atk:1366,def:1366,spd:1366,crit:0}),item(98,"ピカユッキー",{hp:5742,sp:1770,atk:3933,def:3229,spd:1738,crit:0}),item(99,"ヤミユッキー",{hp:5791,sp:1692,atk:4347,def:3022,spd:1531,crit:0}),item(100,"ミドユッキー",{hp:5595,sp:1744,atk:3933,def:3022,spd:1738,crit:0}),item(101,"アオユッキー",{hp:5742,sp:1744,atk:3933,def:3299,spd:1531,crit:0}),item(102,"チビ寿",{hp:6429,sp:1432,atk:3394,def:3684,spd:1200,crit:0}),item(103,"アカユッキー",{hp:5742,sp:1614,atk:4554,def:2815,spd:1324,crit:0}),item(104,"ムジユッキー",{hp:5644,sp:1666,atk:4347,def:2815,spd:1531,crit:0}),item(105,"ピカタマちゃん",{hp:5398,sp:1822,atk:3519,def:3022,spd:2194,crit:0}),item(106,"チビ弁財天",{hp:5889,sp:552,atk:2856,def:3312,spd:2318,crit:0}),item(107,"キイユッキー",{hp:5546,sp:1692,atk:4140,def:2815,spd:1738,crit:0}),item(108,"コザクラグモたん",{hp:4554,sp:2135,atk:4140,def:2318,spd:2773,crit:0}),item(109,"ヤミタマちゃん",{hp:5447,sp:1744,atk:3933,def:2815,spd:1987,crit:0}),item(110,"コナスグモたん",{hp:4613,sp:2057,atk:4554,def:2111,spd:2566,crit:0}),item(111,"チビ布袋尊",{hp:6184,sp:1406,atk:3519,def:3270,spd:1490,crit:0}),item(112,"チビ沙門天",{hp:6282,sp:1302,atk:3974,def:3063,spd:1242,crit:0}),item(113,"小黒天",{hp:5938,sp:1406,atk:3684,def:2773,spd:2028,crit:0}),item(114,"オーク",{hp:5889,sp:677,atk:1863,def:2608,spd:910,crit:0}),item(115,"シェルミー",{hp:4171,sp:1666,atk:1821,def:2898,spd:662,crit:0}),item(116,"リトルスイカリアン",{hp:4319,sp:1354,atk:2608,def:2152,spd:621,crit:0}),item(117,"マンドレイク",{hp:3730,sp:1926,atk:2277,def:2856,spd:248,crit:0}),item(118,"コボルト",{hp:4073,sp:1328,atk:1945,def:1780,spd:1656,crit:0}),item(119,"ヌエ",{hp:4662,sp:520,atk:2566,def:455,spd:2359,crit:0}),item(120,"ウォータールーパー",{hp:3484,sp:1692,atk:1738,def:1987,spd:1656,crit:0}),item(121,"キネコ",{hp:2895,sp:2187,atk:2691,def:2277,spd:414,crit:0}),item(122,"ゴブリン",{hp:3386,sp:1692,atk:1780,def:1780,spd:1821,crit:0}),item(123,"ボクサーラビット",{hp:3779,sp:1041,atk:2566,def:496,spd:2318,crit:0}),item(124,"モフモフ",{hp:2257,sp:2243,atk:1738,def:1987,spd:1656,crit:0}),item(125,"ライトバット",{hp:2993,sp:1510,atk:1738,def:869,spd:2773,crit:0}),item(126,"ダークバット",{hp:2993,sp:1510,atk:1738,def:869,spd:2773,crit:0}),item(127,"キラービー",{hp:2944,sp:1484,atk:1904,def:662,spd:2815,crit:0}),item(128,"ゴールドミミック",{hp:4073,sp:1380,atk:1242,def:2691,spd:207,crit:0}),item(129,"イビルアイ",{hp:2061,sp:2057,atk:3312,def:703,spd:1366,crit:0}),item(130,"ライトゴースト",{hp:1619,sp:2447,atk:1242,def:1449,spd:2691,crit:0}),item(131,"ウォーターゴースト",{hp:1521,sp:2499,atk:1035,def:1449,spd:2898,crit:0}),item(132,"ゴースト",{hp:1472,sp:2447,atk:1242,def:1242,spd:2898,crit:0})],
  weapons:[item(1,"なし")],
  talismans:[item(1001,"八咫鏡のタリスマン",{hp:2820,sp:2670,atk:2970,def:2970,spd:1770,crit:8}),item(1002,"生命のタリスマン",{hp:2850,sp:2910,atk:2070,def:3060,spd:1680,crit:13}),item(1003,"極光のタリスマン",{hp:2340,sp:2790,atk:2250,def:2340,spd:2820,crit:14}),item(1004,"伯爵のタリスマン",{hp:2310,sp:2370,atk:3240,def:1830,spd:2640,crit:15}),item(1005,"エッグタリスマン",{hp:2400,sp:2640,atk:1260,def:3090,spd:2670,crit:9}),item(1006,"天魔のタリスマン",{hp:1740,sp:2130,atk:3540,def:1830,spd:2760,crit:17}),item(1007,"蓮華のタリスマン",{hp:1890,sp:2460,atk:3390,def:2160,spd:1830,crit:10}),item(1008,"初心者のタリスマン",{hp:2310,sp:2310,atk:2310,def:2310,spd:2310,crit:7}),item(1009,"煌めきのタリスマン",{hp:1800,sp:1290,atk:3270,def:2460,spd:2100,crit:11}),item(1010,"ペルソナのタリスマン",{hp:1980,sp:1920,atk:2670,def:2160,spd:1950,crit:13}),item(1011,"ノクターン",{hp:1620,sp:1230,atk:3540,def:1830,spd:2340,crit:13}),item(1012,"安息のタリスマン",{hp:2220,sp:2730,atk:870,def:3390,spd:1350,crit:3}),item(1013,"思い出のタリスマン",{hp:2520,sp:2160,atk:1950,def:2910,spd:570,crit:7}),item(1014,"嫉妬のタリスマン",{hp:960,sp:2370,atk:3360,def:1260,spd:2040,crit:16}),item(1015,"荒くれ者のタリスマン",{hp:2160,sp:1170,atk:3330,def:2670,spd:630,crit:17}),item(1016,"邪神のタリスマン",{hp:1040,sp:2070,atk:1590,def:2220,spd:870,crit:8}),item(1017,"覚醒のタリスマン",{hp:1860,sp:1890,atk:1290,def:1620,spd:2040,crit:7}),item(1018,"拳のタリスマン",{hp:1920,sp:1050,atk:2820,def:1950,spd:960,crit:11}),item(1019,"翼のタリスマン",{hp:1440,sp:1770,atk:1170,def:1800,spd:2160,crit:8}),item(1020,"猛毒のタリスマン",{hp:1530,sp:1050,atk:2160,def:1020,spd:2070,crit:12}),item(1021,"慈愛のタリスマン",{hp:2040,sp:1470,atk:1140,def:1650,spd:1200,crit:7}),item(1022,"烈火のタリスマン",{hp:2100,sp:1350,atk:1650,def:1260,spd:960,crit:10}),item(1023,"八卦のタリスマン",{hp:1650,sp:1950,atk:1200,def:1620,spd:870,crit:8}),item(1024,"清浄のタリスマン",{hp:1740,sp:1380,atk:1200,def:1800,spd:960,crit:8}),item(1025,"飛翔のタリスマン",{hp:1740,sp:1050,atk:1230,def:930,spd:2040,crit:9}),item(1026,"双竜のタリスマン",{hp:2070,sp:840,atk:1650,def:1110,spd:1260,crit:9}),item(1027,"魔剣のタリスマン",{hp:1200,sp:1140,atk:2010,def:840,spd:1410,crit:12}),item(1028,"聖剣のタリスマン",{hp:1440,sp:600,atk:1890,def:1140,spd:1350,crit:10})]
 };
-var manager="characters",editId=null;
+var manager="characters",editId=null,pendingImageFile=null,pendingRemoveImage=false,currentEditImageUrl="";
 var SUPABASE_URL="https://qmqciolpfiepzancuvhe.supabase.co";
 var SUPABASE_KEY="sb_publishable_eNPRHLT81mCpqJIpkCrf_w_8-vekwG-";
 var supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -561,6 +597,39 @@ function canEditData(){return isMainAdmin()||isStratosMember()}
 function canDeleteData(){return isMainAdmin()}
 function canEditAnnouncement(){return isMainAdmin()||isStratosMember()}
 function canEditTheme(){return isMainAdmin()||isStratosMember()}
+
+function imagePlaceholderHtml(cls){
+ return '<div class="'+cls+' placeholder" aria-hidden="true">画像</div>';
+}
+function imageHtml(url,cls,alt){
+ if(!url)return imagePlaceholderHtml(cls);
+ return '<img class="'+cls+'" src="'+esc(url)+'" alt="'+esc(alt||"")+'" loading="lazy" onerror="this.style.display=\'none\'">';
+}
+function storageObjectPathFromPublicUrl(url){
+ if(!url)return "";
+ var marker="/storage/v1/object/public/monbus-images/";
+ var i=url.indexOf(marker);
+ return i>=0?decodeURIComponent(url.slice(i+marker.length).split("?")[0]):"";
+}
+async function deleteStoredImageByUrl(url){
+ var path=storageObjectPathFromPublicUrl(url);
+ if(!path)return;
+ try{await supabaseClient.storage.from("monbus-images").remove([path])}catch(e){console.warn("旧画像削除エラー",e)}
+}
+async function uploadItemImage(file,type,id){
+ if(!file)return "";
+ if(!canEditData())throw new Error("画像を変更する権限がありません");
+ if(file.size>8*1024*1024)throw new Error("画像は8MB以下にしてください");
+ var mime=String(file.type||"").toLowerCase();
+ if(["image/jpeg","image/png","image/webp"].indexOf(mime)<0)throw new Error("JPG / PNG / WEBP の画像を選択してください");
+ var ext=mime==="image/png"?"png":mime==="image/webp"?"webp":"jpg";
+ var path=type+"/"+String(id)+"/"+Date.now()+"."+ext;
+ var up=await supabaseClient.storage.from("monbus-images").upload(path,file,{cacheControl:"3600",upsert:false,contentType:mime});
+ if(up.error)throw up.error;
+ var pub=supabaseClient.storage.from("monbus-images").getPublicUrl(path);
+ return pub&&pub.data&&pub.data.publicUrl?pub.data.publicUrl:"";
+}
+
 var THEME_KEYS=["monbus","navy","green","red","purple"];
 var THEME_META_COLORS={monbus:"#31464c",navy:"#0d1728",green:"#15261f",red:"#281719",purple:"#21182d"};
 var GLOBAL_THEME_CACHE_KEY="monbus_theme_global_cache_v2";
@@ -652,20 +721,20 @@ try{analyticsUseCounted=sessionStorage.getItem(ANALYTICS_USE_KEY)==="1"}catch(e)
 function $(id){return document.getElementById(id)}
 function normalizeItem(a){
  if(!a)return item(0,"");
- return item(Number(a.id)||Date.now(),a.name,{hp:Number(a.hp)||0,sp:Number(a.sp)||0,atk:Number(a.atk)||0,def:Number(a.def)||0,spd:Number(a.spd)||0,crit:Number(a.crit)||0},a.weapon_type||"");
+ return item(Number(a.id)||Date.now(),a.name,{hp:Number(a.hp)||0,sp:Number(a.sp)||0,atk:Number(a.atk)||0,def:Number(a.def)||0,spd:Number(a.spd)||0,crit:Number(a.crit)||0},a.weapon_type||"",a.image_url||"");
 }
 function normalizeDb(){
  ["characters","weapons","talismans","passives"].forEach(function(type){
    if(!Array.isArray(db[type])) db[type]=[];
    db[type]=db[type].map(function(a){
-     if(a.stats){return item(Number(a.id)||Date.now(),a.name,a.stats,a.weapon_type||"")}
+     if(a.stats){return item(Number(a.id)||Date.now(),a.name,a.stats,a.weapon_type||"",a.image_url||"")}
      return normalizeItem(a);
    });
  });
 }
 function saveLocal(){localStorage.setItem(KEY,JSON.stringify(db))}
 function setCloudStatus(msg){var el=$("cloudStatus");if(el)el.textContent=msg}
-function toRow(a,type){var row={id:Number(a.id),name:a.name,hp:Number(a.stats.hp)||0,sp:Number(a.stats.sp)||0,atk:Number(a.stats.atk)||0,def:Number(a.stats.def)||0,spd:Number(a.stats.spd)||0,crit:Number(a.stats.crit)||0};if(type==="weapons")row.weapon_type=a.weapon_type||"";return row}
+function toRow(a,type){var row={id:Number(a.id),name:a.name,hp:Number(a.stats.hp)||0,sp:Number(a.stats.sp)||0,atk:Number(a.stats.atk)||0,def:Number(a.stats.def)||0,spd:Number(a.stats.spd)||0,crit:Number(a.stats.crit)||0,image_url:a.image_url||""};if(type==="weapons")row.weapon_type=a.weapon_type||"";return row}
 function formatSupabaseError(e){
  if(!e)return "不明なエラー";
  return [
@@ -708,14 +777,14 @@ async function saveAnnouncement(){
 }
 async function fetchCloud(){
  try{
-  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit").order("id");
-  var weaponReq=supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,weapon_type").order("id");
-  var talismanReq=supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit").order("id");
-  var passiveReq=supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
+  var weaponReq=supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,weapon_type,image_url").order("id");
+  var talismanReq=supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
+  var passiveReq=supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
   var results=await Promise.all([characterReq,weaponReq,talismanReq,passiveReq]);
   var weaponTypeMissing=false;
   if(results[1].error && (results[1].error.code==="42703" || String(results[1].error.message||"").includes("weapon_type"))){
-    results[1]=await supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit").order("id");
+    results[1]=await supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
     if(results[1].data)results[1].data.forEach(function(x){x.weapon_type=""});
     weaponTypeMissing=true;
     setCloudStatus("⚠️ 武器種列が未設定です。SupabaseでSQLを実行してください。");
@@ -1088,8 +1157,10 @@ function calc(){
         list.slice(0,100).forEach(function(o){
           var b=document.createElement("button");
           b.type="button";
-          b.className="picker-option";
-          b.textContent=o.text;
+          b.className="picker-option with-image";
+          var dataType=selectId==="character"?"characters":selectId==="weapon"?"weapons":selectId==="talisman"?"talismans":"passives";
+          var dataItem=(db[dataType]||[]).find(function(x){return String(x.id)===String(o.value)});
+          b.innerHTML=imageHtml(dataItem&&dataItem.image_url,"picker-thumb",o.text)+'<span>'+esc(o.text)+'</span>';
           b.dataset.value=o.value;
           b.addEventListener("click",function(){
             select.value=o.value;
@@ -1158,7 +1229,7 @@ function calc(){
       dropdown.innerHTML="";
       if(!list.length){dropdown.innerHTML='<div class="picker-empty">該当する武器がありません</div>';return;}
       list.slice(0,150).forEach(function(o){
-        var b=document.createElement("button");b.type="button";b.className="picker-option";b.textContent=o.text;
+        var b=document.createElement("button");b.type="button";b.className="picker-option with-image";var wi=weaponForOption(o);b.innerHTML=imageHtml(wi&&wi.image_url,"picker-thumb",o.text)+'<span>'+esc(o.text)+'</span>';
         b.onclick=function(){select.value=o.value;input.value=o.text;dropdown.classList.remove("open");select.dispatchEvent(new Event("change",{bubbles:true}));};
         dropdown.appendChild(b);
       });
@@ -1243,7 +1314,8 @@ function render(){
         +(canDeleteData()?'<button class="btn danger small del" type="button">削除</button>':'')
         +'</div>';
     }
-    el.innerHTML='<div class="item-top"><div><div class="name">'+esc(x.name)+'</div>'+typeLabel+stats+'</div>'+actionHtml+'</div>';
+    var nameBlock='<div class="item-name-wrap">'+imageHtml(x.image_url,"item-thumb",x.name)+'<div><div class="name">'+esc(x.name)+'</div>'+typeLabel+'</div></div>';
+    el.innerHTML='<div class="item-top"><div>'+nameBlock+stats+'</div>'+actionHtml+'</div>';
     var editBtn=el.querySelector(".edit");if(editBtn)editBtn.onclick=function(){edit(x.id)};
     var delBtn=el.querySelector(".del");if(delBtn)delBtn.onclick=function(){remove(x.id)};
     box.appendChild(el)
@@ -1251,10 +1323,26 @@ function render(){
  }
  draw();
 }
+function setDataImagePreview(url,file){
+ var p=$("dataImagePreview");if(!p)return;
+ p.innerHTML="";p.classList.remove("placeholder");
+ if(file){
+  var img=document.createElement("img");img.src=URL.createObjectURL(file);img.className="image-preview";img.alt="画像プレビュー";
+  p.appendChild(img);return;
+ }
+ if(url){
+  var img2=document.createElement("img");img2.src=url;img2.className="image-preview";img2.alt="画像プレビュー";
+  p.appendChild(img2);return;
+ }
+ p.classList.add("placeholder");p.textContent="画像";
+}
 function resetModal(){
  $("dataName").value="";
  if($("dataWeaponType"))$("dataWeaponType").value="";
- ["statHp","statSp","statAtk","statDef","statSpd","statCrit"].forEach(function(id){$(id).value=0})
+ ["statHp","statSp","statAtk","statDef","statSpd","statCrit"].forEach(function(id){$(id).value=0});
+ pendingImageFile=null;pendingRemoveImage=false;currentEditImageUrl="";
+ if($("dataImageFile"))$("dataImageFile").value="";
+ setDataImagePreview("");
 }
 function add(){editId=null;$("modalTitle").textContent="データを追加";resetModal();if($("weaponTypeModalGroup"))$("weaponTypeModalGroup").style.display=manager==="weapons"?"block":"none";$("modal").classList.add("open")}
 function edit(id){
@@ -1263,6 +1351,7 @@ function edit(id){
  if($("weaponTypeModalGroup"))$("weaponTypeModalGroup").style.display=manager==="weapons"?"block":"none";
  if($("dataWeaponType"))$("dataWeaponType").value=manager==="weapons"?(x.weapon_type||""):"";
  $("statHp").value=x.stats.hp||0;$("statSp").value=x.stats.sp||0;$("statAtk").value=x.stats.atk||0;$("statDef").value=x.stats.def||0;$("statSpd").value=x.stats.spd||0;$("statCrit").value=x.stats.crit||0;
+ pendingImageFile=null;pendingRemoveImage=false;currentEditImageUrl=x.image_url||"";if($("dataImageFile"))$("dataImageFile").value="";setDataImagePreview(currentEditImageUrl);
  $("modal").classList.add("open")
 }
 function close(){ $("modal").classList.remove("open") }
@@ -1272,11 +1361,31 @@ async function saveItem(){
  var stats={hp:Number($("statHp").value)||0,sp:Number($("statSp").value)||0,atk:Number($("statAtk").value)||0,def:Number($("statDef").value)||0,spd:Number($("statSpd").value)||0,crit:Number($("statCrit").value)||0};
  var row={name:name,hp:stats.hp,sp:stats.sp,atk:stats.atk,def:stats.def,spd:stats.spd,crit:stats.crit};
  if(manager==="weapons"){var wt=$("dataWeaponType").value;if(!wt){alert("武器種を選択してください");return}row.weapon_type=wt;}
+ var itemId=editId===null?Date.now():editId;
+ var oldUrl=currentEditImageUrl||"";
  try{
-  var res;if(editId===null){row.id=Date.now();res=await supabaseClient.from(manager).insert(row).select().single();}else{res=await supabaseClient.from(manager).update(row).eq("id",editId).select().single();}
+  if(pendingImageFile){
+   row.image_url=await uploadItemImage(pendingImageFile,manager,itemId);
+  }else if(pendingRemoveImage){
+   row.image_url="";
+  }else{
+   row.image_url=oldUrl;
+  }
+  var res;
+  if(editId===null){
+   row.id=itemId;
+   res=await supabaseClient.from(manager).insert(row).select().single();
+  }else{
+   res=await supabaseClient.from(manager).update(row).eq("id",editId).select().single();
+  }
   if(res.error)throw res.error;
+  if((pendingImageFile||pendingRemoveImage)&&oldUrl&&oldUrl!==row.image_url)await deleteStoredImageByUrl(oldUrl);
   await fetchCloud();fill();close();render();alert("共通データベースに保存しました");
- }catch(e){showSupabaseError(editId===null?"追加":"編集",manager,e);}
+ }catch(e){
+  console.error("保存エラー",e);
+  if(e&&e.message&&String(e.message).indexOf("8MB")>=0){alert(e.message);return}
+  showSupabaseError(editId===null?"追加":"編集",manager,e);
+ }
 }
 async function remove(id){
  if(!canDeleteData()){alert("削除は管理者のみ可能です");return}
@@ -1331,6 +1440,15 @@ $("stratosLoginButton").onclick=async function(){
 $("logoutButton").onclick=async function(){await supabaseClient.auth.signOut();currentUser=null;if($("stratosPassword"))$("stratosPassword").value="";if($("authPassword"))$("authPassword").value="";await refreshAuth();};
 $("seedButton").onclick=seedCloud;
 supabaseClient.auth.onAuthStateChange(function(){setTimeout(refreshAuth,0)});
+if($("chooseDataImage"))$("chooseDataImage").onclick=function(){if(!canEditData()){alert("管理者またはSTRATOSメンバーログインが必要です");return}$("dataImageFile").click();};
+if($("dataImageFile"))$("dataImageFile").onchange=function(){
+ var f=this.files&&this.files[0];if(!f)return;
+ if(f.size>8*1024*1024){alert("画像は8MB以下にしてください");this.value="";return}
+ if(["image/jpeg","image/png","image/webp"].indexOf(String(f.type||"").toLowerCase())<0){alert("JPG / PNG / WEBP の画像を選択してください");this.value="";return}
+ pendingImageFile=f;pendingRemoveImage=false;setDataImagePreview("",f);
+};
+if($("removeDataImage"))$("removeDataImage").onclick=function(){pendingImageFile=null;pendingRemoveImage=true;if($("dataImageFile"))$("dataImageFile").value="";setDataImagePreview("");};
+
 $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){page("data")};$("addButton").onclick=add;$("cancelModal").onclick=close;$("saveItem").onclick=saveItem;$("resetCalc").onclick=function(){
   $("character").value="";
   $("weapon").value="";
