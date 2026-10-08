@@ -376,15 +376,28 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 <div class="notice">登録データを管理できます。</div>
 </div>
 <div id="list"></div>
-<div class="card">
+<div class="card" id="backupCard">
 <button id="backup" class="btn secondary" type="button">💾 バックアップ</button>
 <div style="height:8px"></div>
 <button id="restore" class="btn secondary" type="button">📥 バックアップから復元</button>
 <input id="file" type="file" accept=".json,application/json" style="display:none">
 </div>
 
+<div class="card" id="stratosAuthBox" style="margin-bottom:12px">
+  <div style="font-weight:900;margin-bottom:8px">STRATOSメンバーログイン</div>
+  <div id="stratosLoggedOutBox">
+    <input id="stratosId" type="text" placeholder="ID" autocomplete="username" style="width:100%;margin-bottom:8px">
+    <input id="stratosPassword" type="text" placeholder="パスワード" autocomplete="off" autocapitalize="none" spellcheck="false" style="width:100%;margin-bottom:8px">
+    <button id="stratosLoginButton" class="btn" type="button">ログイン</button>
+  </div>
+  <div id="stratosLoggedInBox" style="display:none">
+    <div style="font-size:13px;margin-bottom:8px">STRATOSメンバーでログイン中</div>
+  </div>
+  <div style="font-size:11px;color:#9ca8c0;margin-top:8px">キャラクター・武器・タリスマン・パッシブの追加/編集と、お知らせの変更ができます。</div>
+</div>
+
 <div class="card" id="authBox" style="margin-bottom:12px">
-  <div style="font-weight:900;margin-bottom:8px">管理者ログイン</div>
+  <div id="authBoxTitle" style="font-weight:900;margin-bottom:8px">管理者ログイン</div>
   <div id="loggedOutBox">
     <input id="authEmail" type="email" placeholder="メールアドレス" style="width:100%;margin-bottom:8px">
     <input id="authPassword" type="password" placeholder="パスワード" style="width:100%;margin-bottom:8px">
@@ -395,7 +408,7 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
     <button id="seedButton" class="btn secondary" type="button">現在の初期データをDBへ登録</button>
     <button id="logoutButton" class="btn secondary" type="button" style="margin-top:8px">ログアウト</button>
   </div>
-  <div style="font-size:11px;color:#9ca8c0;margin-top:8px">一般ユーザーはログイン不要です。追加・編集・削除は管理者ログイン後に行います。</div>
+  <div style="font-size:11px;color:#9ca8c0;margin-top:8px">一般ユーザーはログイン不要です。管理者は全権限、STRATOSメンバーは追加・編集とお知らせ変更のみ可能です。</div>
 </div>
 </section>
 <footer>モンバス計算ツール</footer>
@@ -426,6 +439,8 @@ body.admin-mode #calcPage .hint, body.admin-mode #calcPage small, body.admin-mod
 "use strict";
 var KEY="monbus_stats_db_v1";
 var ADMIN_EMAIL="koki.ayaka1016@gmail.com";
+var STRATOS_AUTH_EMAIL="stratos.member@example.com";
+var STRATOS_LOGIN_ID="ストラトス";
 var STAT_KEYS=["hp","sp","atk","def","spd","crit"];
 var STAT_LABELS={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
 function item(id,name,stats,weaponType){return {id:id,name:name,weapon_type:weaponType||"",stats:Object.assign({hp:0,sp:0,atk:0,def:0,spd:0,crit:0},stats||{})}}
@@ -440,6 +455,12 @@ var SUPABASE_URL="https://qmqciolpfiepzancuvhe.supabase.co";
 var SUPABASE_KEY="sb_publishable_eNPRHLT81mCpqJIpkCrf_w_8-vekwG-";
 var supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var cloudReady=false, currentUser=null;
+function currentLoginEmail(){return (currentUser&&currentUser.email||"").toLowerCase()}
+function isMainAdmin(){return !!currentUser&&currentLoginEmail()===ADMIN_EMAIL.toLowerCase()}
+function isStratosMember(){return !!currentUser&&currentLoginEmail()===STRATOS_AUTH_EMAIL.toLowerCase()}
+function canEditData(){return isMainAdmin()||isStratosMember()}
+function canDeleteData(){return isMainAdmin()}
+function canEditAnnouncement(){return isMainAdmin()||isStratosMember()}
 var ANALYTICS_SESSION_KEY="monbus_calc_session_id_v1";
 var ANALYTICS_USE_KEY="monbus_calc_use_counted_v1";
 var analyticsHistoryTimer=null;
@@ -498,9 +519,8 @@ async function loadAnnouncement(){
  }
 }
 async function saveAnnouncement(){
- var isAdmin=!!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase());
- document.body.classList.toggle("admin-mode",isAdmin);
- if(!isAdmin)return;
+ var canEdit=canEditAnnouncement();
+ if(!canEdit)return;
  var el=$("announcementText"),st=$("announcementStatus");
  if(!el)return;
  if(st)st.textContent="保存中…";
@@ -551,24 +571,50 @@ async function load(){
 async function refreshAuth(){
  var r=await supabaseClient.auth.getUser();currentUser=r.data&&r.data.user?r.data.user:null;
  var out=$("loggedOutBox"),inn=$("loggedInBox"),addBtn=$("addButton"),announcementCard=$("announcementCard"),announcement=$("announcementText");
- var isAdmin=!!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase());
+ var stratosOut=$("stratosLoggedOutBox"),stratosIn=$("stratosLoggedInBox"),stratosBox=$("stratosAuthBox");
+ var mainAdmin=isMainAdmin(),stratos=isStratosMember(),canEdit=canEditData(),canAnnounce=canEditAnnouncement();
+
+ document.body.classList.toggle("admin-mode",mainAdmin);
+
  if(currentUser){
-  if(out)out.style.display="none";if(inn)inn.style.display="block";
-  if($("authUser"))$("authUser").textContent="ログイン中："+(currentUser.email||currentUser.id);
-  if(addBtn)addBtn.style.display="inline-block";
+  if(out)out.style.display="none";
+  if(inn)inn.style.display="block";
+  if($("authBoxTitle"))$("authBoxTitle").textContent="ログイン状態";
+  if($("authUser")){
+    $("authUser").textContent=mainAdmin?"管理者でログイン中":stratos?"STRATOSメンバーでログイン中":"ログイン中："+(currentUser.email||currentUser.id);
+  }
  }else{
-  if(out)out.style.display="block";if(inn)inn.style.display="none";
-  if(addBtn)addBtn.style.display="none";
+  if(out)out.style.display="block";
+  if(inn)inn.style.display="none";
+  if($("authBoxTitle"))$("authBoxTitle").textContent="管理者ログイン";
  }
+
+ if(stratosBox)stratosBox.style.display=mainAdmin?"none":"block";
+ if(stratosOut)stratosOut.style.display=currentUser?"none":"block";
+ if(stratosIn)stratosIn.style.display=stratos?"block":"none";
+
+ if(addBtn)addBtn.style.display=canEdit?"inline-block":"none";
+ if($("seedButton"))$("seedButton").style.display=mainAdmin?"block":"none";
+ if($("backupCard"))$("backupCard").style.display=mainAdmin?"block":"none";
+
  if(announcementCard)announcementCard.style.display="block";
  if(announcement){
-  announcement.readOnly=!isAdmin;
-  announcement.setAttribute("aria-readonly",isAdmin?"false":"true");
-  announcement.placeholder=isAdmin?"お知らせ内容を入力":"現在お知らせはありません";
+  announcement.readOnly=!canAnnounce;
+  announcement.setAttribute("aria-readonly",canAnnounce?"false":"true");
+  announcement.placeholder=canAnnounce?"お知らせ内容を入力":"現在お知らせはありません";
  }
- if($("announcementStatus"))$("announcementStatus").textContent=isAdmin?"管理者のみ編集できます。入力内容は全端末共通で自動保存されます。":"閲覧専用です。お知らせの編集は管理者のみ可能です。";
+ if($("announcementStatus")){
+  $("announcementStatus").textContent=canAnnounce
+    ?"管理者・STRATOSメンバーが編集できます。入力内容は全端末共通で自動保存されます。"
+    :"閲覧専用です。お知らせの編集は管理者・STRATOSメンバーのみ可能です。";
+ }
+
  await loadAnnouncement();
- if($("announcementStatus"))$("announcementStatus").textContent=isAdmin?"管理者のみ編集できます。入力内容は全端末共通で自動保存されます。":"閲覧専用です。お知らせの編集は管理者のみ可能です。";
+ if($("announcementStatus")){
+  $("announcementStatus").textContent=canAnnounce
+    ?"管理者・STRATOSメンバーが編集できます。入力内容は全端末共通で自動保存されます。"
+    :"閲覧専用です。お知らせの編集は管理者・STRATOSメンバーのみ可能です。";
+ }
  render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -1006,7 +1052,23 @@ function render(){
    Array.from(box.querySelectorAll(".item")).forEach(function(e){e.remove()});
    var shown=arr;
    if(manager==="weapons"&&managerWeaponType&&managerWeaponType.value){var f=managerWeaponType.value;shown=arr.filter(function(x){return f==="__unset"?!(x.weapon_type||""):(x.weapon_type||"")===f;});}
-   shown.forEach(function(x){var el=document.createElement("div");el.className="item";var stats='<div class="stats">';STAT_KEYS.forEach(function(k){stats+='<span><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});stats+='</div>';var typeLabel=manager==="weapons"?'<div style="font-size:11px;color:#9ca8c0;margin-top:3px">武器種：'+esc(x.weapon_type||"未設定")+'</div>':'';el.innerHTML='<div class="item-top"><div><div class="name">'+esc(x.name)+'</div>'+typeLabel+stats+'</div><div class="item-actions" style="display:'+(currentUser?"flex":"none")+';"><button class="btn secondary small edit" type="button">編集</button><button class="btn danger small del" type="button">削除</button></div></div>';el.querySelector(".edit").onclick=function(){edit(x.id)};el.querySelector(".del").onclick=function(){remove(x.id)};box.appendChild(el)});
+   shown.forEach(function(x){
+    var el=document.createElement("div");el.className="item";
+    var stats='<div class="stats">';
+    STAT_KEYS.forEach(function(k){stats+='<span><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});
+    stats+='</div>';
+    var typeLabel=manager==="weapons"?'<div style="font-size:11px;color:#9ca8c0;margin-top:3px">武器種：'+esc(x.weapon_type||"未設定")+'</div>':'';
+    var actionHtml='';
+    if(canEditData()){
+      actionHtml='<div class="item-actions" style="display:flex;"><button class="btn secondary small edit" type="button">編集</button>'
+        +(canDeleteData()?'<button class="btn danger small del" type="button">削除</button>':'')
+        +'</div>';
+    }
+    el.innerHTML='<div class="item-top"><div><div class="name">'+esc(x.name)+'</div>'+typeLabel+stats+'</div>'+actionHtml+'</div>';
+    var editBtn=el.querySelector(".edit");if(editBtn)editBtn.onclick=function(){edit(x.id)};
+    var delBtn=el.querySelector(".del");if(delBtn)delBtn.onclick=function(){remove(x.id)};
+    box.appendChild(el)
+   });
  }
  draw();
 }
@@ -1026,7 +1088,7 @@ function edit(id){
 }
 function close(){ $("modal").classList.remove("open") }
 async function saveItem(){
- if(!currentUser){alert("管理者ログインが必要です");return}
+ if(!canEditData()){alert("管理者またはSTRATOSメンバーログインが必要です");return}
  var name=$("dataName").value.trim();if(!name){alert("名前を入力してください");return}
  var stats={hp:Number($("statHp").value)||0,sp:Number($("statSp").value)||0,atk:Number($("statAtk").value)||0,def:Number($("statDef").value)||0,spd:Number($("statSpd").value)||0,crit:Number($("statCrit").value)||0};
  var row={name:name,hp:stats.hp,sp:stats.sp,atk:stats.atk,def:stats.def,spd:stats.spd,crit:stats.crit};
@@ -1038,15 +1100,14 @@ async function saveItem(){
  }catch(e){showSupabaseError(editId===null?"追加":"編集",manager,e);}
 }
 async function remove(id){
- if(!currentUser){alert("管理者ログインが必要です");return}
+ if(!canDeleteData()){alert("削除は管理者のみ可能です");return}
  var x=db[manager].find(function(a){return a.id===id});if(!x)return;
  if(!confirm("「"+x.name+"」を削除しますか？"))return;
  try{var res=await supabaseClient.from(manager).delete().eq("id",id);if(res.error)throw res.error;await fetchCloud();fill();render();alert("共通データベースから削除しました");}
  catch(e){showSupabaseError("削除",manager,e);}
 }
 async function seedCloud(){
- if(!currentUser){alert("管理者ログインが必要です");return}
- if((currentUser.email||"").toLowerCase()!==ADMIN_EMAIL.toLowerCase()){alert("この操作は管理者アカウントのみ実行できます。\n現在のログイン："+(currentUser.email||"不明"));return}
+ if(!isMainAdmin()){alert("この操作は管理者アカウントのみ実行できます。");return}
  if(!confirm("現在の計算機に入っているキャラ・武器・タリスマンを共通データベースへ登録します。既存データは更新されます。続行しますか？"))return;
  try{normalizeDb();
   var types=["characters","weapons","talismans"];
@@ -1080,7 +1141,15 @@ $("loginButton").onclick=async function(){
  if(r.error){alert("ログインできませんでした："+r.error.message);return}
  await refreshAuth();
 };
-$("logoutButton").onclick=async function(){await supabaseClient.auth.signOut();currentUser=null;await refreshAuth();};
+$("stratosLoginButton").onclick=async function(){
+ var id=$("stratosId").value.trim(),password=$("stratosPassword").value;
+ if(id!==STRATOS_LOGIN_ID){alert("IDまたはパスワードが違います");return}
+ if(!password){alert("パスワードを入力してください");return}
+ var r=await supabaseClient.auth.signInWithPassword({email:STRATOS_AUTH_EMAIL,password:password});
+ if(r.error){alert("IDまたはパスワードが違います");return}
+ await refreshAuth();
+};
+$("logoutButton").onclick=async function(){await supabaseClient.auth.signOut();currentUser=null;if($("stratosPassword"))$("stratosPassword").value="";if($("authPassword"))$("authPassword").value="";await refreshAuth();};
 $("seedButton").onclick=seedCloud;
 supabaseClient.auth.onAuthStateChange(function(){setTimeout(refreshAuth,0)});
 $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){page("data")};$("addButton").onclick=add;$("cancelModal").onclick=close;$("saveItem").onclick=saveItem;$("resetCalc").onclick=function(){
@@ -1134,7 +1203,7 @@ if($("guildBattleMode"))$("guildBattleMode").addEventListener("change",function(
 var announcementText=$("announcementText"),announcementTimer=null;
 if(announcementText){
  announcementText.addEventListener("input",function(){
-  if(!(currentUser&&(currentUser.email||"").toLowerCase()===ADMIN_EMAIL.toLowerCase()))return;
+  if(!canEditAnnouncement())return;
   if($("announcementStatus"))$("announcementStatus").textContent="入力中…";
   clearTimeout(announcementTimer);
   announcementTimer=setTimeout(saveAnnouncement,700);
