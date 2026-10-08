@@ -190,6 +190,9 @@ textarea[readonly]{background:var(--surface-2)!important;color:var(--text)!impor
 .theme-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 12px}
 .theme-preview span{height:26px;border-radius:8px;border:1px solid var(--border)}
 .theme-preview .p1{background:var(--bg)}.theme-preview .p2{background:var(--surface)}.theme-preview .p3{background:var(--input)}.theme-preview .p4{background:var(--accent)}
+#themeSettingsCard{display:none!important}
+body.admin-mode #themeSettingsCard,
+body.stratos-mode #themeSettingsCard{display:block!important}
 #themeSettingsCard .group{margin-bottom:8px}
 
 </style>
@@ -199,7 +202,19 @@ textarea[readonly]{background:var(--surface-2)!important;color:var(--text)!impor
 
 </head>
 <body data-page="calc" data-theme="monbus">
-<script>(function(){try{var t=localStorage.getItem("monbus_theme_global_cache_v2");if(["monbus","navy","green","red","purple"].indexOf(t)>=0)document.body.setAttribute("data-theme",t)}catch(e){}})();</script>
+<script>(function(){
+ try{
+  localStorage.removeItem("monbus_theme_cache_v1");
+  var t=localStorage.getItem("monbus_theme_global_cache_v2");
+  if(["monbus","navy","green","red","purple"].indexOf(t)>=0){
+   document.body.setAttribute("data-theme",t);
+  }else{
+   document.body.setAttribute("data-theme","monbus");
+  }
+ }catch(e){
+  document.body.setAttribute("data-theme","monbus");
+ }
+})();</script>
 
 <div class="app">
 <header><h1>⚔️ モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン データベース</div></header>
@@ -450,7 +465,7 @@ textarea[readonly]{background:var(--surface-2)!important;color:var(--text)!impor
 </div>
 
 
-<div class="card" id="themeSettingsCard" style="display:none;margin-bottom:12px">
+<div class="card" id="themeSettingsCard" style="margin-bottom:12px">
   <div class="dashboard-title">テーマカラー設定</div>
   <div class="group">
     <label for="themePreset">背景カラー</label>
@@ -464,7 +479,7 @@ textarea[readonly]{background:var(--surface-2)!important;color:var(--text)!impor
   </div>
   <div class="theme-preview" aria-hidden="true"><span class="p1"></span><span class="p2"></span><span class="p3"></span><span class="p4"></span></div>
   <button id="saveThemeButton" class="btn" type="button">このカラーを全端末へ反映</button>
-  <div id="themeStatus" class="dashboard-status">管理者は全端末共通、STRATOSメンバーはこの端末のみ変更できます。</div>
+  <div id="themeStatus" class="dashboard-status">管理者は全端末共通、STRATOSメンバーはこの端末のみ変更できます。<br><span style="opacity:.65">Theme UI v2</span></div>
 </div>
 
 <div class="card" id="stratosAuthBox" style="margin-bottom:12px">
@@ -578,8 +593,10 @@ async function loadTheme(){
   if(r.error)throw r.error;
   if(r.data&&r.data.theme){
    currentGlobalTheme=normalizeTheme(r.data.theme);
-   try{localStorage.setItem(GLOBAL_THEME_CACHE_KEY,currentGlobalTheme)}catch(e){}
+  }else{
+   currentGlobalTheme="monbus";
   }
+  try{localStorage.setItem(GLOBAL_THEME_CACHE_KEY,currentGlobalTheme)}catch(e){}
   applyThemeForCurrentUser();
   if($("themeStatus"))$("themeStatus").textContent=isStratosMember()
     ?"STRATOSメンバーのテーマ変更はこの端末だけに保存されます。"
@@ -732,6 +749,7 @@ async function refreshAuth(){
  var mainAdmin=isMainAdmin(),stratos=isStratosMember(),canEdit=canEditData(),canAnnounce=canEditAnnouncement();
 
  document.body.classList.toggle("admin-mode",mainAdmin);
+ document.body.classList.toggle("stratos-mode",stratos);
  applyThemeForCurrentUser();
 
  if(currentUser){
@@ -753,8 +771,10 @@ async function refreshAuth(){
 
  if(addBtn)addBtn.style.display=canEdit?"inline-block":"none";
  if($("seedButton"))$("seedButton").style.display=mainAdmin?"block":"none";
+ if($("saveThemeButton"))$("saveThemeButton").textContent=mainAdmin
+   ?"このカラーを全端末へ反映"
+   :"この端末だけに保存";
  if($("backupCard"))$("backupCard").style.display=mainAdmin?"block":"none";
- if($("themeSettingsCard"))$("themeSettingsCard").style.display=canEditTheme()?"block":"none";
 
  if(announcementCard)announcementCard.style.display="block";
  if(announcement){
