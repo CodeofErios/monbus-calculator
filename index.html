@@ -217,13 +217,51 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 .image-actions{flex:1;display:grid;gap:8px}
 .image-help{font-size:11px;color:var(--muted,#d1dadd);margin-top:8px;line-height:1.5}
 
+
+/* ===== 最終予測ステータス：選択画像 ===== */
+.result-name-with-image{
+  display:flex;align-items:center;gap:8px;min-width:0;
+}
+.result-name-with-image .result-thumb{
+  width:36px;height:36px;flex:0 0 36px;border-radius:8px;
+  object-fit:cover;border:1px solid var(--border,#6f8991);
+  background:var(--surface-2,#384d54);
+}
+.result-name-with-image .result-thumb.placeholder{
+  display:grid;place-items:center;font-size:10px;color:var(--muted,#d1dadd);
+}
+.result-name-text{min-width:0;word-break:break-word}
+
+
+/* 画像の公開状態：管理者は全端末、共同管理者はこの端末、一般は管理者の設定に従う */
+/* 未取得時は body.hide-linked-images が付いているため、画像を初期非表示にする。 */
+body.hide-linked-images #calcPage .picker-thumb,
+body.hide-linked-images .result .result-thumb{
+  display:none !important;
+}
+body.hide-linked-images .result .result-name-with-image{gap:0 !important;}
+body.hide-linked-images #calcPage .picker-option.with-image{gap:0 !important;}
+#imageToggleWrap{display:none!important}
+body.admin-mode[data-page="calc"] #imageToggleWrap,
+body.stratos-mode[data-page="calc"] #imageToggleWrap{display:block!important}
+
+/* データ管理の登録画像も一般ユーザーは管理者の全端末設定に従う。
+   管理者・共同管理者のデータ管理画像は、従来どおり表示する。 */
+body:not(.admin-mode):not(.stratos-mode).hide-linked-images #dataPage .item-thumb,
+body:not(.admin-mode):not(.stratos-mode).hide-linked-images #dataPage .image-preview{
+  display:none !important;
+}
+body:not(.admin-mode):not(.stratos-mode).hide-linked-images #dataPage .item-name-wrap{
+  gap:0 !important;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 </head>
-<body data-page="calc" data-theme="monbus">
+<body data-page="calc" data-theme="monbus" class="hide-linked-images">
 <script>(function(){
  try{
   localStorage.removeItem("monbus_theme_cache_v1");
@@ -239,11 +277,11 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 })();</script>
 
 <div class="app">
-<header><h1>⚔️ モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン データベース</div></header>
+<header><h1>モンバス計算機【version 2.01】</h1><div class="sub">キャラ・武器・タリスマン データベース</div></header>
 
 <div class="tabs">
-<button id="tabCalc" class="tab active" type="button">🧮 計算</button>
-<button id="tabData" class="tab" type="button">⚙️ データ管理</button>
+<button id="tabCalc" class="tab active" type="button">計算ツール</button>
+<button id="tabData" class="tab" type="button">⚙️データ管理&お知らせ</button>
 </div>
 
 <section id="calcPage" class="page active" style="display:block">
@@ -256,7 +294,7 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 </div>
 <select id="character" style="display:none"></select></div>
 <div class="group">
-<label>覚醒補正（%・ステータス別手動入力）</label>
+<label>覚醒値（%補正）</label>
 <div class="rune-grid awakening-grid">
 <div><span>HP (%)</span><input id="awakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div><span>SP (%)</span><input id="awakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -283,7 +321,7 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 </div>
 <select id="weapon" style="display:none"></select></div>
 <div class="group">
-<label>装備用覚醒補正（%・ステータス別手動入力）</label>
+<label>装備用覚醒値（%補正）</label>
 <div class="rune-grid awakening-grid">
 <div><span>HP (%)</span><input id="weaponAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div><span>SP (%)</span><input id="weaponAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -301,7 +339,7 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 </div>
 <select id="talisman" style="display:none"></select></div>
 <div class="group">
-<label>タリスマン用覚醒補正（%・ステータス別手動入力）</label>
+<label>タリスマン用覚醒値（%補正）</label>
 <div class="rune-grid awakening-grid">
 <div><span>HP (%)</span><input id="talismanAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div><span>SP (%)</span><input id="talismanAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -359,7 +397,7 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 </div>
 </div>
 <div class="group">
-<label>ルーン初期値（手動入力）</label>
+<label>ルーン値（最大値で初期入力済み）</label>
 <div class="rune-grid">
 <div><span>HP</span><input id="runeHp" type="number" min="0" step="1" inputmode="numeric" value="3648"></div>
 <div><span>SP</span><input id="runeSp" type="number" min="0" step="1" inputmode="numeric" value="3624"></div>
@@ -398,36 +436,35 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 <div><span>素早さ (%)</span><input id="buffSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：20 / -20"></div>
 </div>
 <div class="hint">ギルドバトルHP補正まで終わった後に割合で反映します。プラス値はバフ、マイナス値はデバフです。HP・SP・クリティカルにはバフ/デバフを適用しません。</div>
-</div>
+</div></div>
 </div>
 <div class="result-heading"><label>【最終予測ステータス】</label></div>
 <div class="result">
 <div class="selected-summary" aria-label="選択中の装備とパッシブ">
 <div class="selected-summary-grid">
 <div class="selected-summary-main">
-<div class="selected-summary-row"><span class="selected-summary-label">キャラクター</span><span class="selected-summary-value" id="selectedCharacterName">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">武器</span><span class="selected-summary-value" id="selectedWeaponName">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">タリスマン</span><span class="selected-summary-value" id="selectedTalismanName">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">キャラクター</span><span class="selected-summary-value result-name-with-image"><span id="selectedCharacterImage" class="result-thumb placeholder">画像</span><span id="selectedCharacterName" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">武器</span><span class="selected-summary-value result-name-with-image"><span id="selectedWeaponImage" class="result-thumb placeholder">画像</span><span id="selectedWeaponName" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">タリスマン</span><span class="selected-summary-value result-name-with-image"><span id="selectedTalismanImage" class="result-thumb placeholder">画像</span><span id="selectedTalismanName" class="result-name-text">未選択</span></span></div>
 </div>
 <div class="selected-summary-passives">
-<div class="selected-summary-row"><span class="selected-summary-label">パッシブ1</span><span class="selected-summary-value" id="selectedPassiveName1">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">パッシブ2</span><span class="selected-summary-value" id="selectedPassiveName2">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">パッシブ3</span><span class="selected-summary-value" id="selectedPassiveName3">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">パッシブ4</span><span class="selected-summary-value" id="selectedPassiveName4">未選択</span></div>
-<div class="selected-summary-row"><span class="selected-summary-label">パッシブ5</span><span class="selected-summary-value" id="selectedPassiveName5">未選択</span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ1</span><span class="selected-summary-value result-name-with-image"><span id="selectedPassiveImage1" class="result-thumb placeholder">画像</span><span id="selectedPassiveName1" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ2</span><span class="selected-summary-value result-name-with-image"><span id="selectedPassiveImage2" class="result-thumb placeholder">画像</span><span id="selectedPassiveName2" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ3</span><span class="selected-summary-value result-name-with-image"><span id="selectedPassiveImage3" class="result-thumb placeholder">画像</span><span id="selectedPassiveName3" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ4</span><span class="selected-summary-value result-name-with-image"><span id="selectedPassiveImage4" class="result-thumb placeholder">画像</span><span id="selectedPassiveName4" class="result-name-text">未選択</span></span></div>
+<div class="selected-summary-row"><span class="selected-summary-label">パッシブ5</span><span class="selected-summary-value result-name-with-image"><span id="selectedPassiveImage5" class="result-thumb placeholder">画像</span><span id="selectedPassiveName5" class="result-name-text">未選択</span></span></div>
 </div>
 </div>
 <div class="selected-summary-extra">
 <div class="selected-summary-row"><span class="selected-summary-label">ギルドバトル</span><span class="selected-summary-value" id="selectedGuildBattleMode">ギルドバトル以外</span></div>
-<div class="selected-summary-row" id="selectedOipokaPassiveRow" style="display:none"><span class="selected-summary-label">おいポカ時パッシブ</span><span class="selected-summary-value" id="selectedOipokaPassiveName">未選択</span></div>
+<div class="selected-summary-row" id="selectedOipokaPassiveRow" style="display:none"><span class="selected-summary-label">おいポカ時パッシブ</span><span class="selected-summary-value result-name-with-image"><span id="selectedOipokaPassiveImage" class="result-thumb placeholder">画像</span><span id="selectedOipokaPassiveName" class="result-name-text">未選択</span></span></div>
 <div class="selected-summary-row"><span class="selected-summary-label">バフ / デバフ</span><div class="selected-buff-grid">
 <div class="selected-buff-item"><span>攻撃力</span><b id="selectedBuffAtk">0%</b></div>
 <div class="selected-buff-item"><span>防御力</span><b id="selectedBuffDef">0%</b></div>
 <div class="selected-buff-item"><span>素早さ</span><b id="selectedBuffSpd">0%</b></div>
-</div></div>
 </div>
 </div>
-<div class="result-title">最終予測ステータス</div>
+</div>
 <div class="stat-result-grid">
 <div class="stat-card"><span>HP</span><b id="totalHp">0</b></div>
 <div class="stat-card"><span>SP</span><b id="totalSp">0</b></div>
@@ -435,13 +472,17 @@ body.stratos-mode #themeSettingsCard{display:block!important}
 <div class="stat-card"><span>防御力</span><b id="totalDef">0</b></div>
 <div class="stat-card"><span>素早さ</span><b id="totalSpd">0</b></div>
 <div class="stat-card"><span>クリティカル</span><b id="totalCrit">0</b></div>
-</div>
-<small class="admin-help">モンスター・装備・タリスマン覚醒：各ステータス別％補正 ／ パッシブ：％補正 ／ ルーン：数値加算 ／ ギルドバトル：選択内容に応じた補正 ／ バフ・デバフ：最後に攻撃力・防御力・素早さへ％補正</small>
+</div></div>
 </div>
 <button id="resetCalc" class="btn secondary" type="button">入力をリセット</button>
 <div class="awake-quick-buttons">
 <button id="setAwakeZero" class="btn secondary" type="button">覚醒値をすべて0</button>
 <button id="setAwakeHundred" class="btn secondary" type="button">覚醒値をすべて100</button>
+</div>
+<div id="imageToggleWrap" class="group" style="margin-top:12px">
+<button id="toggleLinkedImages" class="btn secondary" type="button">画像表示：OFF</button>
+<div id="imageToggleHelp" class="hint">管理者は全端末に反映、共同管理者はこの端末だけに保存されます。一般ユーザーは管理者の全端末設定に従います。</div>
+<div id="imageToggleStatus" class="dashboard-status" role="status" aria-live="polite"></div>
 </div>
 </section>
 
@@ -634,6 +675,103 @@ var THEME_KEYS=["monbus","navy","green","red","purple"];
 var THEME_META_COLORS={monbus:"#31464c",navy:"#0d1728",green:"#15261f",red:"#281719",purple:"#21182d"};
 var GLOBAL_THEME_CACHE_KEY="monbus_theme_global_cache_v2";
 var STRATOS_LOCAL_THEME_KEY="monbus_theme_stratos_local_v1";
+
+// 管理者は Supabase の全端末共通設定を切替え、一般ユーザーはその設定に従う。
+// STRATOS共同管理者は従来のローカル保存キーを維持し、全端末設定を変更しない。
+var LINKED_IMAGE_VISIBILITY_KEY="monbus_linked_image_visibility_v1";
+var GLOBAL_IMAGE_TABLE="monbus_image_settings";
+var globalImagesEnabled=false;        // 読み込み前・接続エラー時は必ず画像非表示
+var globalImageSettingReady=false;
+var globalImageSavePending=false;
+var globalImageFetchVersion=0;
+function getLinkedImageVisible(){
+ try{return localStorage.getItem(LINKED_IMAGE_VISIBILITY_KEY)!=="off"}catch(e){return true}
+}
+function applyLinkedImageVisibilityForCurrentUser(){
+ var visible=isStratosMember()?getLinkedImageVisible():globalImagesEnabled;
+ document.body.classList.toggle("hide-linked-images",!visible);
+ var btn=$("toggleLinkedImages");
+ if(btn){
+  var scope=isMainAdmin()?"全端末":isStratosMember()?"この端末":"全端末";
+  btn.textContent="画像表示（"+scope+"）："+(visible?"ON":"OFF");
+  btn.disabled=globalImageSavePending || (isMainAdmin()&&!globalImageSettingReady);
+ }
+ var help=$("imageToggleHelp");
+ if(help)help.textContent=isMainAdmin()
+  ?"管理者：ON/OFFを全端末へ反映します。一般ユーザーにも反映されます。"
+  :"共同管理者：ON/OFFはこの端末だけに保存されます。一般ユーザーの表示設定には影響しません。";
+}
+function saveStratosImageVisibility(flag){
+ if(!isStratosMember())return;
+ try{localStorage.setItem(LINKED_IMAGE_VISIBILITY_KEY,flag?"on":"off")}catch(e){}
+ applyLinkedImageVisibilityForCurrentUser();
+ if($("imageToggleStatus"))$("imageToggleStatus").textContent="この端末の表示設定を保存しました。";
+}
+async function fetchGlobalImageVisibility(){
+ if(globalImageSavePending)return;
+ var version=++globalImageFetchVersion;
+ try{
+  var r=await supabaseClient.from(GLOBAL_IMAGE_TABLE).select("enabled").eq("id",1).maybeSingle();
+  if(r.error)throw r.error;
+  if(!r.data)throw new Error("画像表示設定のレコードがありません。SQLを実行してください。");
+  if(version!==globalImageFetchVersion || globalImageSavePending)return;
+  globalImagesEnabled=r.data.enabled===true;
+  globalImageSettingReady=true;
+  applyLinkedImageVisibilityForCurrentUser();
+  if(isMainAdmin() && $("imageToggleStatus"))$("imageToggleStatus").textContent="全端末共通の設定を取得しました。";
+ }catch(e){
+  if(version!==globalImageFetchVersion || globalImageSavePending)return;
+  console.warn("画像表示設定の取得エラー",e);
+  globalImagesEnabled=false; // 障害時に一般ユーザーへ誤って公開しない
+  globalImageSettingReady=false;
+  applyLinkedImageVisibilityForCurrentUser();
+  if(isMainAdmin() && $("imageToggleStatus"))$("imageToggleStatus").textContent="⚠️ 全端末設定を読み込めません。画像表示設定用SQLを確認してください。";
+ }
+}
+async function toggleGlobalImageVisibility(){
+ if(!isMainAdmin()||globalImageSavePending)return;
+ if(!globalImageSettingReady){alert("画像表示設定を取得できません。先に設定用SQLを実行してください。");return;}
+ var next=!globalImagesEnabled;
+ globalImageSavePending=true;
+ ++globalImageFetchVersion; // 進行中の古い取得結果は破棄
+ applyLinkedImageVisibilityForCurrentUser();
+ if($("imageToggleStatus"))$("imageToggleStatus").textContent="全端末へ保存中…";
+ try{
+  var r=await supabaseClient.from(GLOBAL_IMAGE_TABLE)
+   .update({enabled:next,updated_at:new Date().toISOString()}).eq("id",1).select("enabled").single();
+  if(r.error)throw r.error;
+  globalImagesEnabled=r.data.enabled===true;
+  globalImageSettingReady=true;
+  if($("imageToggleStatus"))$("imageToggleStatus").textContent="全端末に保存しました。他の端末も自動更新されます。";
+ }catch(e){
+  console.error("全端末画像表示設定の保存エラー",e);
+  if($("imageToggleStatus"))$("imageToggleStatus").textContent="⚠️ 保存できませんでした。SQLと管理者権限を確認してください。";
+  alert("画像表示設定を全端末に保存できませんでした。Supabase設定を確認してください。\n"+(e.message||""));
+ }finally{
+  globalImageSavePending=false;
+  applyLinkedImageVisibilityForCurrentUser();
+  if(!globalImageSettingReady)fetchGlobalImageVisibility();
+ }
+}
+function startGlobalImageVisibilitySync(){
+ // 開いている端末には Realtime で即時通知。通信が途切れても定期取得で復旧。
+ try{
+  supabaseClient.channel("monbus-global-image-visibility")
+   .on("postgres_changes",{event:"UPDATE",schema:"public",table:GLOBAL_IMAGE_TABLE,filter:"id=eq.1"},function(payload){
+    if(globalImageSavePending)return;
+    if(payload.new && typeof payload.new.enabled==="boolean"){
+     ++globalImageFetchVersion;
+     globalImagesEnabled=payload.new.enabled;
+     globalImageSettingReady=true;
+     applyLinkedImageVisibilityForCurrentUser();
+    }
+   }).subscribe();
+ }catch(e){console.warn("画像表示Realtime接続エラー",e)}
+ setInterval(fetchGlobalImageVisibility,20000);
+ document.addEventListener("visibilitychange",function(){if(!document.hidden)fetchGlobalImageVisibility();});
+ window.addEventListener("focus",fetchGlobalImageVisibility);
+}
+
 var currentGlobalTheme="monbus";
 function normalizeTheme(theme){return THEME_KEYS.indexOf(theme)>=0?theme:"monbus"}
 function setThemeVisual(theme){
@@ -810,6 +948,7 @@ async function load(){
  await fetchCloud();
  await loadAnnouncement();
  await loadTheme();
+ await fetchGlobalImageVisibility();
 }
 async function refreshAuth(){
  var r=await supabaseClient.auth.getUser();currentUser=r.data&&r.data.user?r.data.user:null;
@@ -819,6 +958,10 @@ async function refreshAuth(){
 
  document.body.classList.toggle("admin-mode",mainAdmin);
  document.body.classList.toggle("stratos-mode",stratos);
+ // 権限確定後に表示設定を反映（管理者と一般は全端末設定、共同管理者だけ端末設定）。
+ applyLinkedImageVisibilityForCurrentUser();
+ if(mainAdmin && !globalImageSettingReady && $("imageToggleStatus"))
+  $("imageToggleStatus").textContent="⚠️ 全端末設定を取得できません。先に画像表示設定用SQLを実行してください。";
  applyThemeForCurrentUser();
 
  if(currentUser){
@@ -1027,6 +1170,29 @@ function updatePassiveOptionState(){
  var selected=[1,2,3,4,5].map(function(n){return $("passive"+n).value}).filter(Boolean);
  [1,2,3,4,5].forEach(function(n){var sel=$("passive"+n);if(!sel)return;Array.prototype.forEach.call(sel.options,function(o){o.disabled=!!o.value&&selected.indexOf(o.value)>=0&&o.value!==sel.value;});});
 }
+
+function setResultThumb(id,itemData){
+ var el=$(id);if(!el)return;
+ el.innerHTML="";
+ el.classList.remove("placeholder");
+ if(itemData&&itemData.image_url){
+   var img=document.createElement("img");
+   img.src=itemData.image_url;
+   img.alt=itemData.name||"";
+   img.className="result-thumb";
+   img.loading="lazy";
+   img.onerror=function(){
+     el.innerHTML="";
+     el.classList.add("placeholder");
+     el.textContent="画像";
+   };
+   el.appendChild(img);
+ }else{
+   el.classList.add("placeholder");
+   el.textContent="画像";
+ }
+}
+
 function calc(){
  var c=db.characters.find(function(x){return String(x.id)===$( "character").value})||item(0,"");
  var w=db.weapons.find(function(x){return String(x.id)===$( "weapon").value})||item(0,"");
@@ -1038,6 +1204,9 @@ function calc(){
    selectedTalismanName:(t&&t.name)?t.name:"未選択"
  };
  Object.keys(selectedNames).forEach(function(id){var el=$(id);if(el)el.textContent=selectedNames[id];});
+ setResultThumb("selectedCharacterImage",c&&c.id?c:null);
+ setResultThumb("selectedWeaponImage",w&&w.id?w:null);
+ setResultThumb("selectedTalismanImage",t&&t.id?t:null);
 
  [1,2,3,4,5].forEach(function(n){
    var sel=$("passive"+n);
@@ -1045,6 +1214,7 @@ function calc(){
    var p=db.passives.find(function(x){return String(x.id)===String(value)});
    var el=$("selectedPassiveName"+n);
    if(el)el.textContent=(p&&p.name)?p.name:"未選択";
+   setResultThumb("selectedPassiveImage"+n,p||null);
  });
 
  var awake={
@@ -1077,6 +1247,7 @@ function calc(){
  var extraPassive=db.passives.find(function(x){return String(x.id)===String(extraPassiveId)});
  var extraPassiveNameEl=$("selectedOipokaPassiveName");
  if(extraPassiveNameEl)extraPassiveNameEl.textContent=(extraPassive&&extraPassive.name)?extraPassive.name:"未選択";
+ setResultThumb("selectedOipokaPassiveImage",extraPassive||null);
  if(guildMode==="oipoka"){
    if(extraPassive)STAT_KEYS.forEach(function(k){passive[k]+=Number(extraPassive.stats[k]||0)/100;});
  }
@@ -1421,7 +1592,7 @@ function restore(e){
  var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();
  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.characters||!x.weapons||!x.talismans)throw 0;db=x;db.characters.concat(db.weapons,db.talismans).forEach(function(a){if(!a.stats)a.stats={};STAT_KEYS.forEach(function(k){a.stats[k]=Number(a.stats[k]||0)})});saveLocal();fill();render();alert("復元しました")}catch(z){alert("正しいバックアップではありません")}e.target.value=""};r.readAsText(f)
 }
-(async function(){await recordPageView();await load();fill();await refreshAuth();})();
+(async function(){await recordPageView();await load();fill();await refreshAuth();startGlobalImageVisibilitySync();})();
 $("loginButton").onclick=async function(){
  var email=$("authEmail").value.trim(),password=$("authPassword").value;
  if(!email||!password){alert("メールアドレスとパスワードを入力してください");return}
@@ -1477,6 +1648,11 @@ function setAllAwakeningValues(value){
 }
 $("setAwakeZero").onclick=function(){setAllAwakeningValues(0)};
 $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
+if($("toggleLinkedImages"))$("toggleLinkedImages").onclick=function(){
+ if(isMainAdmin()){toggleGlobalImageVisibility();return;}
+ if(isStratosMember()){saveStratosImageVisibility(!getLinkedImageVisible());return;}
+ alert("画像表示の切替は管理者・共同管理者のみ可能です。");
+};
 $("backup").onclick=backup;$("restore").onclick=function(){$("file").click()};$("file").onchange=restore;
 $("modal").onclick=function(e){if(e.target===$("modal"))close()};
 document.querySelectorAll(".mtab").forEach(function(b){b.onclick=function(){setManager(b.dataset.type)}});
