@@ -269,7 +269,7 @@ html,body{background-color:#eff1ef!important;background-image:radial-gradient(#b
 body{padding-bottom:110px!important}
 .app{max-width:860px!important;padding:0 12px!important}
 .app>header{position:relative;padding:15px 8px 16px!important;text-align:left!important;color:#203440}
-.app>header:after{content:'✦ 💎 ✦';position:absolute;right:10px;top:15px;font-size:28px;color:#78daca;filter:drop-shadow(2px 3px 0 #263e48)}
+.app>header:after{content:'';display:none;position:absolute;right:10px;top:15px;font-size:28px;color:#78daca;filter:drop-shadow(2px 3px 0 #263e48)}
 .app>header h1{margin:0!important;color:#a3fff1!important;font-size:clamp(27px,6.6vw,47px)!important;letter-spacing:-.055em;line-height:1.22;-webkit-text-stroke:1.5px #20333f;text-shadow:2px 3px 0 #20333f,4px 5px 0 #7d9296!important}
 .app>header h1 .v2-logo-first{color:#ffe779}
 .app>header .sub{font-size:clamp(10px,2.2vw,15px)!important;color:#233a44!important;font-weight:900;margin:6px 0 0 8px}
@@ -464,83 +464,615 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 #versionSwitchLink.version-switch-disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
 #versionSwitchLink:focus-visible{outline:3px solid #19a69a;outline-offset:3px}
 #versionSwitchLink:active{transform:translateY(2px);box-shadow:0 1px 0 #28404b}
+
+
+
+/* ===== モンバスRPG風 新テーマ ===== */
+body[data-theme="rpg"]{
+  background:
+    radial-gradient(circle at 1px 1px, rgba(31,51,64,.12) 1.15px, transparent 1.25px) 0 0/18px 18px,
+    linear-gradient(180deg,#f8fafc 0%,#eef2f4 100%)!important;
+  color:#173447!important;
+}
+body[data-theme="rpg"] .app{max-width:620px;padding:0 14px}
+body[data-theme="rpg"] header{padding:12px 0 16px;position:relative}
+body[data-theme="rpg"] h1{
+  margin:0; font-size:32px; line-height:1.04; letter-spacing:.02em;
+  color:#173447!important;
+  text-shadow:0 4px 0 rgba(255,230,132,.92),0 0 0 transparent!important;
+}
+body[data-theme="rpg"] .sub{
+  margin-top:8px;display:inline-block;padding:7px 14px;border-radius:999px;
+  background:#1f3340;color:#f8fafc!important;border:2px solid #32556a;
+  box-shadow:0 3px 0 rgba(15,36,48,.28);font-size:12px;font-weight:900;
+}
+body[data-theme="rpg"] .tabs{gap:10px;margin-bottom:14px}
+body[data-theme="rpg"] .tab{
+  height:56px;border:3px solid #173447!important;border-radius:18px;
+  color:#173447!important;font-size:18px;
+  box-shadow:0 4px 0 rgba(23,52,71,.22);
+}
+body[data-theme="rpg"] #tabCalc{background:linear-gradient(180deg,#9af3e6 0%,#7eead6 100%)!important}
+body[data-theme="rpg"] #tabData{background:linear-gradient(180deg,#fff3b2 0%,#ffe684 100%)!important}
+body[data-theme="rpg"] .tab.active{transform:translateY(1px);filter:saturate(1.05)}
+body[data-theme="rpg"] .card,body[data-theme="rpg"] .modal-box{
+  background:linear-gradient(180deg,#315467 0%,#244253 100%)!important;
+  border:3px solid #173447!important;border-radius:20px;
+  box-shadow:0 5px 0 rgba(15,36,48,.9), inset 0 1px 0 rgba(255,255,255,.08);
+}
+body[data-theme="rpg"] label,
+body[data-theme="rpg"] .dashboard-title,
+body[data-theme="rpg"] .modal-title,
+body[data-theme="rpg"] .name,
+body[data-theme="rpg"] .result-section-title,
+body[data-theme="rpg"] #calcPage .result-heading label{
+  color:#ffffff!important;
+  text-shadow:0 2px 0 rgba(11,27,35,.75), 0 0 0 transparent!important;
+}
+body[data-theme="rpg"] .group>small,
+body[data-theme="rpg"] .hint,
+body[data-theme="rpg"] .notice,
+body[data-theme="rpg"] .selected-summary-label,
+body[data-theme="rpg"] .selected-buff-item span,
+body[data-theme="rpg"] .history-entry-label,
+body[data-theme="rpg"] .history-entry-time,
+body[data-theme="rpg"] .dashboard-status,
+body[data-theme="rpg"] .usage-stat-card span,
+body[data-theme="rpg"] .rune-grid span,
+body[data-theme="rpg"] .row,
+body[data-theme="rpg"] .stat-card span,
+body[data-theme="rpg"] .result-title,
+body[data-theme="rpg"] .status-label{color:#d7e5ed!important;text-shadow:none!important}
+body[data-theme="rpg"] input,
+body[data-theme="rpg"] select,
+body[data-theme="rpg"] textarea,
+body[data-theme="rpg"] .unified-select input{
+  background:linear-gradient(180deg,#ffffff 0%,#eef4f7 100%)!important;
+  border:2px solid #173447!important;border-radius:13px;color:#173447!important;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.9), 0 2px 0 rgba(17,31,42,.12);
+  font-weight:800;
+}
+body[data-theme="rpg"] input::placeholder,body[data-theme="rpg"] textarea::placeholder{color:#7b92a1!important}
+body[data-theme="rpg"] .picker-arrow{
+  right:7px;top:7px;width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(180deg,#9af3e6 0%,#7eead6 100%);
+  border:2px solid #173447;color:#173447;font-weight:900;
+}
+body[data-theme="rpg"] .picker-dropdown{
+  background:#f8fafc!important;border:2px solid #173447!important;border-radius:14px;
+  box-shadow:0 12px 24px rgba(23,52,71,.22);
+}
+body[data-theme="rpg"] .picker-option{color:#173447!important;font-weight:800}
+body[data-theme="rpg"] .picker-option:hover,body[data-theme="rpg"] .picker-option:focus{background:#dff7f1!important}
+body[data-theme="rpg"] .item,body[data-theme="rpg"] .usage-stat-card,body[data-theme="rpg"] .history-entry,body[data-theme="rpg"] .history-empty,body[data-theme="rpg"] .selected-summary,body[data-theme="rpg"] .rune-grid>div{
+  background:linear-gradient(180deg,#355a6d 0%,#29495b 100%)!important;
+  border:2px solid #40687d!important;border-radius:16px;
+}
+body[data-theme="rpg"] .btn{
+  border:3px solid #173447!important;border-radius:15px;height:48px;
+  background:linear-gradient(180deg,#9af3e6 0%,#7eead6 100%)!important;
+  color:#173447!important;box-shadow:0 4px 0 rgba(15,36,48,.9);
+  text-shadow:none!important;font-weight:900;font-size:16px;
+}
+body[data-theme="rpg"] .btn:active,body[data-theme="rpg"] .tab:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(15,36,48,.9)}
+body[data-theme="rpg"] .btn.secondary{background:linear-gradient(180deg,#fff4bc 0%,#ffe684 100%)!important}
+body[data-theme="rpg"] .btn.danger{background:linear-gradient(180deg,#ffb1c8 0%,#ff7ea3 100%)!important;color:#ffffff!important}
+body[data-theme="rpg"] .mtab{
+  background:linear-gradient(180deg,#3a6175 0%,#2a4b5d 100%)!important;
+  border:2px solid #40687d!important;color:#eef8fb!important;border-radius:12px;
+}
+body[data-theme="rpg"] .mtab.active{background:linear-gradient(180deg,#9af3e6 0%,#7eead6 100%)!important;color:#173447!important;border-color:#173447!important}
+body[data-theme="rpg"] .result{
+  background:linear-gradient(180deg,#315467 0%,#244253 100%)!important;
+  border:3px solid #173447!important;border-radius:20px;box-shadow:0 5px 0 rgba(15,36,48,.9);
+}
+body[data-theme="rpg"] .status-grid,body[data-theme="rpg"] .stat-result-grid{gap:10px}
+body[data-theme="rpg"] .status-card,body[data-theme="rpg"] .stat-card{
+  background:linear-gradient(180deg,#ffffff 0%,#edf4f7 100%)!important;
+  border:2px solid #173447!important;border-radius:16px;
+  box-shadow:0 3px 0 rgba(17,31,42,.16);
+}
+body[data-theme="rpg"] .status-value,body[data-theme="rpg"] .stat-card b{color:#173447!important;text-shadow:none!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(1) .status-value{color:#ff5b8c!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(2) .status-value{color:#2ea7ff!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(3) .status-value{color:#ff8650!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(4) .status-value{color:#2e8de0!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(5) .status-value{color:#31b85e!important}
+body[data-theme="rpg"] .status-grid .status-card:nth-child(6) .status-value{color:#e1a900!important}
+body[data-theme="rpg"] .selected-summary{
+  background:linear-gradient(180deg,#ffffff 0%,#f2f7fa 100%)!important;
+  border:2px solid #173447!important;color:#173447!important;
+}
+body[data-theme="rpg"] .selected-summary-value,
+body[data-theme="rpg"] .selected-buff-item,
+body[data-theme="rpg"] .row b,
+body[data-theme="rpg"] .stats b,
+body[data-theme="rpg"] .history-entry-value{color:#173447!important;text-shadow:none!important}
+body[data-theme="rpg"] .selected-summary-passives{border-left:1px dashed #89a4b4}
+body[data-theme="rpg"] .stats span{background:#eef4f7!important;border:1px solid #bed0da;color:#173447!important}
+body[data-theme="rpg"] .usage-stat-card b{color:#ffffff!important}
+body[data-theme="rpg"] footer{color:#38576c!important;font-weight:800}
+body[data-theme="rpg"] .item-thumb,body[data-theme="rpg"] .picker-thumb,body[data-theme="rpg"] .image-preview{border:2px solid #173447!important;background:#f0f6f9!important}
+@media (max-width:430px){
+  body[data-theme="rpg"] h1{font-size:28px}
+  body[data-theme="rpg"] .tab{font-size:16px;height:54px}
+}
+
+
+
+/* ===== モンバスUI寄せ 強化調整 ===== */
+body[data-theme="rpg"] header{margin-bottom:6px}
+body[data-theme="rpg"] header::before{
+  content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px;pointer-events:none;opacity:.18;
+  background:repeating-linear-gradient(90deg,transparent 0 68px, rgba(23,52,71,.08) 68px 78px, transparent 78px 156px);
+}
+body[data-theme="rpg"] header::after{
+  content:"NEW";position:absolute;right:0;top:6px;
+  min-width:60px;height:34px;padding:0 12px;display:flex;align-items:center;justify-content:center;
+  border-radius:999px;border:2px solid #173447;background:linear-gradient(180deg,#fff3b2 0%,#ffe684 100%);
+  color:#173447;font-size:13px;font-weight:900;letter-spacing:.08em;box-shadow:0 3px 0 rgba(23,52,71,.18);
+}
+body[data-theme="rpg"] h1{
+  font-size:38px;line-height:1;letter-spacing:.01em;display:inline-block;
+  background:linear-gradient(180deg,#ffd86a 0%,#ffbf4f 34%,#9af3e6 35%,#80e7db 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent!important;
+  -webkit-text-stroke:5px #173447;text-shadow:none!important; paint-order:stroke fill;
+}
+body[data-theme="rpg"] .sub{margin-top:10px;font-size:13px;padding:7px 16px}
+body[data-theme="rpg"] .tabs{margin-bottom:16px}
+body[data-theme="rpg"] .tab{position:relative;font-size:20px;padding-top:2px}
+body[data-theme="rpg"] #tabCalc::before{content:none;display:inline-block;margin-right:8px;font-size:18px;vertical-align:1px}
+body[data-theme="rpg"] #tabData::before{content:none;display:inline-block;margin-right:8px;font-size:17px;vertical-align:1px}
+body[data-theme="rpg"] #calcPage>.card{padding:12px;background:linear-gradient(180deg,#29495b 0%,#223f4e 100%)!important}
+body[data-theme="rpg"] #calcPage>.card>.group{
+  background:linear-gradient(180deg,#355a6d 0%,#29495b 100%)!important;
+  border:2px solid #40687d!important;border-radius:18px;padding:12px;
+  box-shadow:0 3px 0 rgba(15,36,48,.32);margin-bottom:12px;
+}
+body[data-theme="rpg"] #calcPage>.card>.group>.label,
+body[data-theme="rpg"] #calcPage>.card>.group>label:first-child{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:21px;font-weight:900;
+}
+body[data-theme="rpg"] #calcPage>.card>.group>label:first-child::before{
+  content:none;display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:999px;background:linear-gradient(180deg,#fff3b2 0%,#ffe684 100%);
+  color:#173447;border:2px solid #173447;font-size:16px;box-shadow:0 2px 0 rgba(23,52,71,.16);
+}
+body[data-theme="rpg"] #calcPage>.card>.group .group{margin-bottom:10px}
+body[data-theme="rpg"] #calcPage>.card>.group .group:last-child{margin-bottom:0}
+body[data-theme="rpg"] #calcPage>.card>.group .group>label{font-size:13px;color:#d7e5ed!important;margin-bottom:6px;text-shadow:none!important}
+body[data-theme="rpg"] .rune-grid{gap:10px}
+body[data-theme="rpg"] .rune-grid>div{padding:10px;border-radius:14px}
+body[data-theme="rpg"] .search-wrap input,body[data-theme="rpg"] .unified-select input{padding-left:14px}
+body[data-theme="rpg"] .picker-arrow{top:8px;right:8px}
+body[data-theme="rpg"] .btn{font-size:18px}
+body[data-theme="rpg"] .awake-quick-buttons .btn{font-size:14px}
+body[data-theme="rpg"] .result-section-title,
+body[data-theme="rpg"] #calcPage .result-heading label{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:999px;background:#1f3340;color:#fff!important;
+  border:2px solid #7eead6;box-shadow:0 3px 0 rgba(23,52,71,.18);text-shadow:none!important;
+}
+body[data-theme="rpg"] .result-section-title::before,
+body[data-theme="rpg"] #calcPage .result-heading label::before{content:none;color:#ffe684}
+body[data-theme="rpg"] .result{padding:16px}
+body[data-theme="rpg"] .status-card{padding:14px 10px}
+body[data-theme="rpg"] .status-label{font-size:14px;color:#173447!important;font-weight:900}
+body[data-theme="rpg"] .status-value{font-size:25px}
+body[data-theme="rpg"] .selected-summary{border-radius:18px;padding:14px}
+body[data-theme="rpg"] .selected-summary-extra{border-top:1px dashed #89a4b4}
+body[data-theme="rpg"] .selected-summary-passives{border-left:1px dashed #89a4b4}
+body[data-theme="rpg"] .row{font-size:13px}
+body[data-theme="rpg"] .stats{gap:6px 10px}
+body[data-theme="rpg"] .stats span{border-radius:10px;padding:6px 8px}
+body[data-theme="rpg"] .manager-tabs{gap:8px}
+body[data-theme="rpg"] .dashboard-title{font-size:18px}
+@media (max-width:430px){
+  body[data-theme="rpg"] h1{font-size:31px;-webkit-text-stroke:4px #173447}
+  body[data-theme="rpg"] header::after{top:2px;height:30px;min-width:52px;font-size:11px}
+  body[data-theme="rpg"] .tab{font-size:17px}
+  body[data-theme="rpg"] #calcPage>.card>.group>label:first-child{font-size:18px}
+  body[data-theme="rpg"] #calcPage>.card>.group>label:first-child::before{width:26px;height:26px;font-size:14px}
+  body[data-theme="rpg"] .status-value{font-size:22px}
+}
+
+
+/* ===== モンバスRPG風：文字のコントラストと可読性改善 ===== */
+body[data-theme="rpg"] header::after{display:none!important}
+body[data-theme="rpg"] header h1{
+  display:block;max-width:100%;width:100%;margin:0 auto 8px;
+  font-size:clamp(25px,8.2vw,38px);line-height:1.32;
+  letter-spacing:0;white-space:nowrap;
+  font-weight:900!important;
+  background:linear-gradient(90deg,#ffd56c 0%,#ffca67 42%,#91eadd 48%,#7ae7db 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1.35px #142f42;
+  paint-order:stroke fill;
+  text-shadow:none!important;
+}
+body[data-theme="rpg"] header .app-version{
+  margin-top:6px;color:#3b5d70;font-size:11px;line-height:1.35;
+  font-weight:900;letter-spacing:.06em;text-shadow:none;
+}
+body[data-theme="rpg"] .tab{
+  font-size:clamp(14px,4.3vw,19px);line-height:1.2;
+  text-shadow:none!important;white-space:nowrap;
+}
+/* ダークパネル上の文字は白系で統一。未指定の見出しが濃紺のままになる不具合を解消 */
+body[data-theme="rpg"] .card,
+body[data-theme="rpg"] .modal-box,
+body[data-theme="rpg"] .result,
+body[data-theme="rpg"] .item,
+body[data-theme="rpg"] .history-entry,
+body[data-theme="rpg"] .history-empty,
+body[data-theme="rpg"] .usage-stat-card,
+body[data-theme="rpg"] .rune-grid>div{
+  color:#f8fafc!important;
+}
+/* ルーン/ギルド戦/バフ入力ブロックも濃色のパネルに揃え、白文字が背景に消えないようにする */
+body[data-theme="rpg"] #calcPage>.group{
+  background:linear-gradient(180deg,#355a6d 0%,#29495b 100%)!important;
+  border:2px solid #173447!important;border-radius:18px;
+  padding:14px;margin:0 0 14px;
+  color:#f8fafc!important;
+  box-shadow:0 4px 0 rgba(15,36,48,.25);
+}
+body[data-theme="rpg"] #calcPage>.group>label{
+  color:#ffffff!important;
+  display:block;font-size:18px;line-height:1.45;
+  margin-bottom:10px;text-shadow:0 1px 0 #142c38!important;
+}
+body[data-theme="rpg"] #calcPage>.group .hint{color:#e3edf2!important}
+/* ラベルの不必要な光彩を減らしてくっきり読めるようにする */
+body[data-theme="rpg"] label,
+body[data-theme="rpg"] .dashboard-title,
+body[data-theme="rpg"] .modal-title,
+body[data-theme="rpg"] .name{
+  line-height:1.45;
+  text-shadow:0 1px 0 #142c38!important;
+}
+body[data-theme="rpg"] .notice,
+body[data-theme="rpg"] .hint,
+body[data-theme="rpg"] .image-help,
+body[data-theme="rpg"] .dashboard-status,
+body[data-theme="rpg"] .history-entry-time,
+body[data-theme="rpg"] .selected-summary-extra .hint{
+  color:#e2eef4!important;line-height:1.65;
+}
+body[data-theme="rpg"] input::placeholder,
+body[data-theme="rpg"] textarea::placeholder{
+  color:#597383!important;opacity:1;
+}
+body[data-theme="rpg"] input:focus-visible,
+body[data-theme="rpg"] select:focus-visible,
+body[data-theme="rpg"] textarea:focus-visible,
+body[data-theme="rpg"] .btn:focus-visible,
+body[data-theme="rpg"] .tab:focus-visible{
+  outline:3px solid #ffe684;outline-offset:2px;
+}
+/* 結果の見出しは calcPage の外にも配置されているため、直接対象にする */
+body[data-theme="rpg"] .result-heading{
+  margin:26px auto 12px!important;text-align:center;
+}
+body[data-theme="rpg"] .result-heading label{
+  display:inline-flex!important;align-items:center;justify-content:center;gap:7px;
+  padding:10px 14px;max-width:100%;
+  color:#ffffff!important;background:#1f3340!important;
+  border:2px solid #7eead6;border-radius:999px;
+  font-size:clamp(16px,4.8vw,21px)!important;line-height:1.3;
+  text-shadow:none!important;box-shadow:0 3px 0 rgba(23,52,71,.24);
+}
+body[data-theme="rpg"] .result-heading label::before{content:none;color:#ffe684}
+/* オフホワイトの結果内訳に白っぽい文字が乗っていた問題 */
+body[data-theme="rpg"] .result .selected-summary,
+body[data-theme="rpg"] .result .selected-summary *{
+  text-shadow:none!important;
+}
+body[data-theme="rpg"] .result .selected-summary-label,
+body[data-theme="rpg"] .result .selected-buff-item span{
+  color:#385a6b!important;font-weight:900!important;
+}
+body[data-theme="rpg"] .result .selected-summary-value,
+body[data-theme="rpg"] .result .selected-buff-item{
+  color:#173447!important;
+}
+body[data-theme="rpg"] .result .selected-summary-row{
+  grid-template-columns:92px minmax(0,1fr);gap:6px;
+}
+body[data-theme="rpg"] .result .selected-summary-passives .selected-summary-row{
+  grid-template-columns:75px minmax(0,1fr);
+}
+body[data-theme="rpg"] .result .selected-summary-extra .selected-summary-row{
+  grid-template-columns:118px minmax(0,1fr);
+}
+body[data-theme="rpg"] .result .selected-summary-label{font-size:12px;line-height:1.5}
+body[data-theme="rpg"] .result .selected-summary-value{font-size:14px;line-height:1.5}
+body[data-theme="rpg"] .result .selected-buff-item{font-size:12px;line-height:1.55}
+/* 最終予測ステータス：白いカードは濃い文字。色の違いは保ちつつ十分なコントラストを確保 */
+body[data-theme="rpg"] .result .stat-card span{
+  color:#31546b!important;opacity:1;font-size:14px;font-weight:900;
+}
+body[data-theme="rpg"] .result .stat-card b{
+  color:#173447!important;font-weight:900;font-size:clamp(22px,5.8vw,28px);
+  line-height:1.2;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;
+}
+body[data-theme="rpg"] .result .stat-card:nth-child(1) b{color:#b02358!important}
+body[data-theme="rpg"] .result .stat-card:nth-child(2) b{color:#075c91!important}
+body[data-theme="rpg"] .result .stat-card:nth-child(3) b{color:#b34f2e!important}
+body[data-theme="rpg"] .result .stat-card:nth-child(4) b{color:#075d96!important}
+body[data-theme="rpg"] .result .stat-card:nth-child(5) b{color:#087246!important}
+body[data-theme="rpg"] .result .stat-card:nth-child(6) b{color:#8c5a00!important}
+/* 一覧の値など、濃紺の文字がダークパネル上で読みにくかった問題 */
+body[data-theme="rpg"] .history-entry-value,
+body[data-theme="rpg"] .history-entry-row,
+body[data-theme="rpg"] .history-entry-time{color:#f8fafc!important}
+body[data-theme="rpg"] .history-entry-label{color:#d7e8ef!important}
+body[data-theme="rpg"] .history-empty{color:#f8fafc!important}
+body[data-theme="rpg"] .item .name,
+body[data-theme="rpg"] .item-top,
+body[data-theme="rpg"] .selected-summary-row .result-thumb.placeholder{color:#f8fafc}
+body[data-theme="rpg"] .picker-empty{
+  color:#31546b!important;font-size:14px;font-weight:800;
+}
+body[data-theme="rpg"] .selected-summary .result-thumb.placeholder{
+  color:#173447!important;background:#e3edf3!important;
+}
+@media(max-width:430px){
+  body[data-theme="rpg"] .result .selected-summary-row{grid-template-columns:86px minmax(0,1fr)}
+  body[data-theme="rpg"] .result .selected-summary-extra .selected-summary-row{grid-template-columns:111px minmax(0,1fr)}
+  body[data-theme="rpg"] .result .selected-summary-passives .selected-summary-row{grid-template-columns:76px minmax(0,1fr)}
+  body[data-theme="rpg"] .result .stat-card{padding:10px 8px}
+}
+
+
+/* ===== Version 2.04: 同一ステータスの文字色統一 + 丸ゴシック ===== */
+body[data-theme="rpg"]{
+  /* ゲーム風ステータス6色。枠・カード背景は変更しない。 */
+  --stat-hp:#a366d6;  --stat-hp-outline:#522273;
+  --stat-sp:#449bee;  --stat-sp-outline:#134f96;
+  --stat-atk:#e65b6e; --stat-atk-outline:#8d2436;
+  --stat-def:#ffe2ee; --stat-def-outline:#9a536e;
+  --stat-spd:#47bf7d; --stat-spd-outline:#12653c;
+  --stat-crit:#ffe47a;--stat-crit-outline:#93651b;
+}
+/* 日本語丸ゴシック：入力や小さな文字にも同じフォントを適用。 */
+body[data-theme="rpg"],
+body[data-theme="rpg"] input,
+body[data-theme="rpg"] select,
+body[data-theme="rpg"] textarea,
+body[data-theme="rpg"] button,
+body[data-theme="rpg"] .picker-option,
+body[data-theme="rpg"] header h1{
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN W4","Arial Rounded MT Bold","Noto Sans JP",Meiryo,sans-serif!important;
+}
+body[data-theme="rpg"] .tab,
+body[data-theme="rpg"] .btn,
+body[data-theme="rpg"] label,
+body[data-theme="rpg"] .stat-card,
+body[data-theme="rpg"] .selected-summary,
+body[data-theme="rpg"] .name{
+  font-weight:900;
+}
+/* 彩色はラベルと数値に限定し、最終予測ステータスの背景と枠を厳密に維持する。 */
+body[data-theme="rpg"] [data-stat="hp"]{--stat-color:var(--stat-hp);--stat-outline:var(--stat-hp-outline)}
+body[data-theme="rpg"] [data-stat="sp"]{--stat-color:var(--stat-sp);--stat-outline:var(--stat-sp-outline)}
+body[data-theme="rpg"] [data-stat="atk"]{--stat-color:var(--stat-atk);--stat-outline:var(--stat-atk-outline)}
+body[data-theme="rpg"] [data-stat="def"]{--stat-color:var(--stat-def);--stat-outline:var(--stat-def-outline)}
+body[data-theme="rpg"] [data-stat="spd"]{--stat-color:var(--stat-spd);--stat-outline:var(--stat-spd-outline)}
+body[data-theme="rpg"] [data-stat="crit"]{--stat-color:var(--stat-crit);--stat-outline:var(--stat-crit-outline)}
+/* 最終予測ステータス：背景と枠線は前版のまま、項目名・数値だけ変更 */
+body[data-theme="rpg"] .result .stat-result-grid .stat-card[data-stat] >span,
+body[data-theme="rpg"] .result .stat-result-grid .stat-card[data-stat] >b{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.65px var(--stat-outline);
+  text-shadow:0 1px 0 var(--stat-outline), 0 0 1px var(--stat-outline)!important;
+  opacity:1!important;
+  font-weight:900!important;
+}
+/* 淡いピンク・黄色は白背景でも読めるよう輪郭を少し強くする */
+body[data-theme="rpg"] .result .stat-result-grid .stat-card[data-stat="def"] > :is(span,b),
+body[data-theme="rpg"] .result .stat-result-grid .stat-card[data-stat="crit"] > :is(span,b){
+  -webkit-text-stroke:1.05px var(--stat-outline);
+  text-shadow:0 1px 1px var(--stat-outline)!important;
+}
+/* 覚醒・ルーン・バフの項目名：濃色パネルにステータス色を使用 */
+body[data-theme="rpg"] #calcPage .rune-grid >div[data-stat] >span{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.45px var(--stat-outline);
+  text-shadow:0 1px 1px var(--stat-outline)!important;
+  font-weight:900!important;
+  opacity:1;
+}
+/* ステータス入力値も同色に統一。背景や枠はそのまま。 */
+body[data-theme="rpg"] #calcPage .rune-grid >div[data-stat] >input,
+body[data-theme="rpg"] .stat-editor-field[data-stat] >input{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.35px var(--stat-outline);
+  text-shadow:0 0 1px var(--stat-outline)!important;
+  font-weight:900;
+}
+body[data-theme="rpg"] #calcPage .rune-grid >div[data-stat="def"] >input,
+body[data-theme="rpg"] #calcPage .rune-grid >div[data-stat="crit"] >input,
+body[data-theme="rpg"] .stat-editor-field[data-stat="def"] >input,
+body[data-theme="rpg"] .stat-editor-field[data-stat="crit"] >input{
+  -webkit-text-stroke:.8px var(--stat-outline);
+}
+/* 入力例の文字は読みやすいグレーを維持（彩色の輪郭を付けない） */
+body[data-theme="rpg"] #calcPage .rune-grid >div[data-stat] >input::placeholder,
+body[data-theme="rpg"] .stat-editor-field[data-stat] >input::placeholder{
+  color:#597383!important;-webkit-text-stroke:0!important;text-shadow:none!important;
+}
+/* データ管理：登録一覧と編集画面の各ステータスの見出し・数値 */
+body[data-theme="rpg"] #dataPage .stats span[data-stat] >b{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.25px var(--stat-outline);
+  text-shadow:0 0 1px var(--stat-outline)!important;
+}
+body[data-theme="rpg"] .stat-editor-field[data-stat] >label{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.3px var(--stat-outline);
+  text-shadow:0 1px 1px var(--stat-outline)!important;
+}
+/* 選択中の構成：バフ / デバフの攻撃・防御・素早さを同色で表示 */
+body[data-theme="rpg"] .result .selected-buff-item[data-stat] >span,
+body[data-theme="rpg"] .result .selected-buff-item[data-stat] >b{
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.5px var(--stat-outline);
+  text-shadow:0 0 1px var(--stat-outline)!important;
+}
+
+
+
+
+/* ===== Version3: モンバスRPGテーマ（5体編成画面への適用） ===== */
+body[data-theme="rpg"]{background-color:#f1f5f6!important;background-image:radial-gradient(circle at 1px 1px,#cbd5d9 1.05px,transparent 1.2px),linear-gradient(180deg,#f8fafc,#eaf1f4)!important;background-size:18px 18px,auto!important}
+body[data-theme="rpg"] .app{max-width:860px!important;padding:0 12px!important}
+body[data-theme="rpg"] .app>header{padding:12px 0 14px!important;text-align:center!important}
+body[data-theme="rpg"] .app>header::after{display:none!important}
+body[data-theme="rpg"] .app>header h1{display:block!important;max-width:100%;font-size:clamp(26px,7.7vw,42px)!important;-webkit-text-stroke:1.35px #142f42!important;background:linear-gradient(90deg,#ffd56c 0%,#ffca67 42%,#91eadd 48%,#7ae7db 100%)!important;background-clip:text!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important;letter-spacing:0!important;line-height:1.32!important;white-space:nowrap}
+body[data-theme="rpg"] .app>header h1 .v3-rpg-title-warm{color:#ffd56c!important;-webkit-text-fill-color:#ffd56c!important;-webkit-text-stroke:1.45px #173447!important;text-shadow:2px 2px 0 #213e4f33!important;paint-order:stroke fill}
+body[data-theme="rpg"] .app>header h1 .v3-rpg-title-cool{color:#8ceadd!important;-webkit-text-fill-color:#8ceadd!important;-webkit-text-stroke:1.45px #173447!important;text-shadow:2px 2px 0 #213e4f33!important;paint-order:stroke fill}
+body[data-theme="rpg"] .app>header .sub{display:inline-block!important;margin:7px auto 2px!important;padding:7px 14px!important;color:#fff!important;font-size:clamp(10px,2.3vw,13px)!important}
+body[data-theme="rpg"] .app-version{font-size:11px;letter-spacing:.09em;color:#3b5d70;font-weight:900;text-align:center;margin-top:6px}
+body[data-theme="rpg"] .tabs .tab{height:56px!important;border:3px solid #173447!important;border-radius:18px!important;box-shadow:0 4px 0 #17344755!important;font-size:clamp(14px,4vw,19px)!important}
+body[data-theme="rpg"] .tabs #tabCalc{background:linear-gradient(180deg,#a5fff1,#72dfd0)!important}
+body[data-theme="rpg"] .tabs #tabData{background:linear-gradient(180deg,#fff6bb,#ffe68b)!important}
+body[data-theme="rpg"] .tabs .tab.active{outline:2px solid #fff9d1;outline-offset:-6px}
+/* パーティ関連の枠・背景をVersion2のRPGテーマと統一 */
+body[data-theme="rpg"] .v2-frame{border:3px solid #173447!important;border-radius:20px!important;background:linear-gradient(180deg,#315467,#244253)!important;box-shadow:0 5px 0 #173447aa,inset 0 1px 0 #ffffff16!important}
+body[data-theme="rpg"] .v2-panel-heading{background:linear-gradient(120deg,#203d4e,#30566a)!important;border-bottom:2px solid #6c94a0;padding:10px 12px!important;min-height:50px;font-size:clamp(14px,3.35vw,20px)!important;color:#fff!important;text-shadow:0 2px 0 #122e3e!important}
+body[data-theme="rpg"] .v2-panel-heading small,body[data-theme="rpg"] .v2-panel-hint{color:#d4e7ed!important;font-size:clamp(9px,1.75vw,12px);text-shadow:none!important}
+body[data-theme="rpg"] .v2-party-card{background:linear-gradient(180deg,#355a6d,#29495b)!important;border:2px solid #82a6b5!important;border-radius:13px!important;box-shadow:0 3px 0 #16384680!important}
+body[data-theme="rpg"] .v2-party-card.active{border:2px solid #ffdf6c!important;box-shadow:0 0 0 2px #ffdf6c,0 3px 0 #193545,0 0 9px #ffe27b99!important;background:linear-gradient(180deg,#466c78,#355b66)!important}
+body[data-theme="rpg"] .v2-party-card .v2-slot-num{background:linear-gradient(#fff9bd,#ffd977)!important;color:#173447!important;border:1px solid #173447}
+body[data-theme="rpg"] .v2-party-card .v2-portrait{border:2px solid #c9e8df!important;border-radius:9px!important}
+body[data-theme="rpg"] .v2-party-card .v2-card-name{color:#fff!important}
+body[data-theme="rpg"] .v2-party-card .v2-card-status{color:#d8eced!important}
+body[data-theme="rpg"] .v2-party-caption{padding:7px 12px 3px!important;color:#f8fcff!important}
+body[data-theme="rpg"] .v2-party-change{background:linear-gradient(#a6fff1,#72e3d4)!important;border:2px solid #173447!important;border-radius:11px;color:#173447!important;box-shadow:0 2px 0 #122b39!important;min-height:32px}
+body[data-theme="rpg"] .v2-item-image{background:#1e3948!important;border:3px solid #ffe38b!important;border-radius:12px!important}
+body[data-theme="rpg"] .v2-item-name{color:#fff!important}
+body[data-theme="rpg"] .v2-item-stats,body[data-theme="rpg"] .v2-awake-preview,body[data-theme="rpg"] .v2-panel-info{color:#dfecf3!important}
+body[data-theme="rpg"] .v2-button{border:3px solid #173447!important;border-radius:15px!important;box-shadow:0 4px 0 #102d3b!important;font-size:clamp(12px,2.6vw,16px)!important;min-height:46px}
+body[data-theme="rpg"] .v2-button-mint{background:linear-gradient(#a6fff2,#72dfd0)!important;color:#173447!important}
+body[data-theme="rpg"] .v2-button-yellow{background:linear-gradient(#fff7bb,#ffe58a)!important;color:#173447!important}
+body[data-theme="rpg"] .v2-button-white{background:linear-gradient(#fff,#e9f0f4)!important;color:#173447!important}
+body[data-theme="rpg"] .v2-passive-mini,body[data-theme="rpg"] .v2-rune-chip{background:linear-gradient(#355a6d,#29495b)!important;border:2px solid #6c95a4!important;border-radius:11px!important;color:#fff!important}
+body[data-theme="rpg"] .v2-rune-chip strong{color:#ffe88c!important}
+body[data-theme="rpg"] .v2-current-index{background:linear-gradient(#a7fff2,#74e4d5)!important;border:2px solid #173447!important;border-radius:10px!important;color:#173447!important}
+/* 6つの結果カードはVersion2のRPG仕様の白いカード＋ステータス色 */
+body[data-theme="rpg"] .v2-result-grid{gap:9px!important;padding:11px!important}
+body[data-theme="rpg"] .v2-stat-tile{background:linear-gradient(#fff,#edf4f7)!important;border:2px solid #173447!important;border-radius:16px!important;box-shadow:0 3px 0 #102f3b35!important;min-width:0;padding:11px 5px!important}
+body[data-theme="rpg"] .v2-stat-tile span{color:#31546b!important;font-size:clamp(11px,2.45vw,16px);font-weight:900;text-shadow:none!important;-webkit-text-stroke:0!important}
+body[data-theme="rpg"] .v2-stat-tile strong{font-size:clamp(16px,3.95vw,29px);line-height:1.25;overflow-wrap:anywhere;white-space:normal;-webkit-text-stroke:.42px var(--stat-outline,#173447)!important;text-shadow:0 1px 0 var(--stat-outline,#173447)!important;font-weight:900!important}
+body[data-theme="rpg"] .v2-hp{--stat-outline:#522273}body[data-theme="rpg"] .v2-hp strong{color:#a366d6!important}
+body[data-theme="rpg"] .v2-sp{--stat-outline:#134f96}body[data-theme="rpg"] .v2-sp strong{color:#449bee!important}
+body[data-theme="rpg"] .v2-atk{--stat-outline:#8d2436}body[data-theme="rpg"] .v2-atk strong{color:#e65b6e!important}
+body[data-theme="rpg"] .v2-def{--stat-outline:#9a536e}body[data-theme="rpg"] .v2-def strong{color:#ffe2ee!important;-webkit-text-stroke:1px #9a536e!important}
+body[data-theme="rpg"] .v2-spd{--stat-outline:#12653c}body[data-theme="rpg"] .v2-spd strong{color:#47bf7d!important}
+body[data-theme="rpg"] .v2-crit{--stat-outline:#93651b}body[data-theme="rpg"] .v2-crit strong{color:#ffe47a!important;-webkit-text-stroke:1px #93651b!important}
+body[data-theme="rpg"] .v2-summary{background:linear-gradient(#fff,#f1f6f9)!important;border:2px solid #173447!important;color:#173447!important}
+body[data-theme="rpg"] .v2-summary h2,body[data-theme="rpg"] .v2-summary-unit,body[data-theme="rpg"] .v2-summary-unit b{color:#173447!important;text-shadow:none!important}
+body[data-theme="rpg"] .v2-all-results{background:linear-gradient(#315467,#244253)!important}
+body[data-theme="rpg"] .v2-all-results summary{color:#fff!important}
+body[data-theme="rpg"] .v2-bottom-nav{background:#203a4a!important;border-top:4px solid #7de7d8!important}
+body[data-theme="rpg"] .v2-bottom-nav button{background:linear-gradient(#355868,#264552)!important;border:2px solid #71919b!important;border-radius:12px!important;color:#fff!important}
+body[data-theme="rpg"] .v2-bottom-nav button.current{background:linear-gradient(#adfff1,#7ce6d9)!important;border:2px solid #173447!important;color:#173447!important}
+body[data-theme="rpg"] .v2-dialog{border:4px solid #173447!important;border-radius:20px 20px 0 0!important;background:#edf4f6!important}
+body[data-theme="rpg"] .v2-choice{border:2px solid #89aeba!important;border-radius:13px!important;color:#173447!important}
+body[data-theme="rpg"] .v2-editor-section,body[data-theme="rpg"] .v2-editor-passive{border-radius:13px!important}
+body[data-theme="rpg"] .v2-select{border:2px solid #173447!important;border-radius:13px!important;background:linear-gradient(#fff,#edf4f7)!important;color:#173447!important}
+body[data-theme="rpg"] .v2-small-input{border-radius:11px!important}
+body[data-theme="rpg"] .v2-image-control{background:#ecf9f5!important}
+/* V2と同じ描画テーマが適用されるよう、共有テーマの色切替は維持。 */
+@media(max-width:430px){
+ body[data-theme="rpg"] .v2-panel-heading{font-size:clamp(12px,3.5vw,17px)!important;min-height:43px;padding:8px 8px!important}
+ body[data-theme="rpg"] .v2-result-grid{gap:5px!important;padding:7px!important}
+ body[data-theme="rpg"] .v2-stat-tile{border-radius:12px!important;padding:8px 2px!important}
+ body[data-theme="rpg"] .app>header h1{font-size:clamp(25px,7.5vw,34px)!important}
+}
+
+/* 絵文字なし：画像が未登録の場合は小さな文字のみ */
+.v2-linked-placeholder{font-size:10px!important;line-height:1.3!important;text-align:center!important;font-weight:900!important;letter-spacing:0!important;color:#c6dbdf!important;}
+.v2-bottom-nav button{flex-direction:row!important;}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 </head>
-<body data-page="calc" data-theme="monbus" class="hide-linked-images">
+<body data-page="calc" data-theme="rpg" class="hide-linked-images">
 <script>(function(){
  try{
   localStorage.removeItem("monbus_theme_cache_v1");
   var t=localStorage.getItem("monbus_theme_global_cache_v2");
-  if(["monbus","navy","green","red","purple"].indexOf(t)>=0){
+  if(["rpg","monbus","navy","green","red","purple"].indexOf(t)>=0){
    document.body.setAttribute("data-theme",t);
   }else{
-   document.body.setAttribute("data-theme","monbus");
+   document.body.setAttribute("data-theme","rpg");
   }
  }catch(e){
-  document.body.setAttribute("data-theme","monbus");
+  document.body.setAttribute("data-theme","rpg");
  }
 })();</script>
 
 <div class="app">
-<header><h1><span class="v2-logo-first">モンバス</span>計算機 <span style="font-size:.38em;vertical-align:middle;color:#ecfffb;-webkit-text-stroke:0;text-shadow:1px 1px #233b47">Version3</span></h1><div class="sub">キャラ・武器・タリスマン ／ パーティ5体同時計算</div></header>
+<header><h1><span class="v3-rpg-title-warm">モンバス</span><span class="v3-rpg-title-cool">計算機</span></h1><div class="sub">キャラ・武器・タリスマン ／ パーティ5体同時計算</div><div class="app-version">Version 3（開発版）</div></header>
 
 <div id="versionSwitchWrap" hidden>
-  <button id="versionSwitchLink" type="button" disabled aria-label="管理者・共同管理者向け：Version2へ切り替える">🔁 Version2へ切り替える</button>
+  <button id="versionSwitchLink" type="button" disabled aria-label="管理者・共同管理者向け：Version2へ切り替える">Version2へ切り替える</button>
   <div id="versionSwitchStatus" role="status" aria-live="polite"></div>
 </div>
 
 <div class="tabs">
-<button id="tabCalc" class="tab active" type="button">▣ 計算ツール</button>
-<button id="tabData" class="tab" type="button">▤ データ管理</button>
+<button id="tabCalc" class="tab active" type="button">計算ツール</button>
+<button id="tabData" class="tab" type="button">データ管理</button>
 </div>
 
 <section id="calcPage" class="page active" style="display:block">
 <div id="v2App">
   <div class="v2-party-panel v2-frame" id="v2PartyArea">
-    <div class="v2-panel-heading"><span>♟️ キャラクター選択</span><span class="v2-panel-hint">５体編成・選択した枠を編集</span></div>
+    <div class="v2-panel-heading"><span>キャラクター選択</span><span class="v2-panel-hint">５体編成・選択した枠を編集</span></div>
     <div class="v2-party-row" id="v2PartyCards"></div>
     <div class="v2-party-caption"><span id="v2PartyCaption" aria-live="polite">1体目を編集中</span><button class="v2-party-change" type="button" data-v2="pick-character">＋ キャラ変更</button></div>
   </div>
 
   <div class="v2-row">
     <section class="v2-frame v2-editor-panel" aria-labelledby="v2WeaponTitle">
-      <h2 class="v2-panel-heading" id="v2WeaponTitle">⚔️ メイン武器</h2>
+      <h2 class="v2-panel-heading" id="v2WeaponTitle">メイン武器</h2>
       <div id="v2WeaponCurrent" class="v2-item-content"></div>
-      <button class="v2-button v2-button-mint" data-v2="pick-weapon" type="button">🔁 武器変更</button>
+      <button class="v2-button v2-button-mint" data-v2="pick-weapon" type="button">武器変更</button>
     </section>
     <section class="v2-frame v2-editor-panel" aria-labelledby="v2TalismanTitle">
-      <h2 class="v2-panel-heading" id="v2TalismanTitle">💎 タリスマン</h2>
+      <h2 class="v2-panel-heading" id="v2TalismanTitle">タリスマン</h2>
       <div id="v2TalismanCurrent" class="v2-item-content"></div>
-      <button class="v2-button v2-button-mint" data-v2="pick-talisman" type="button">🔁 タリスマン変更</button>
+      <button class="v2-button v2-button-mint" data-v2="pick-talisman" type="button">タリスマン変更</button>
     </section>
   </div>
 
   <section class="v2-frame v2-awake-panel">
-    <div class="v2-panel-heading"><span>🌸 覚醒値</span><small>選択中のキャラ／武器／タリスマン専用</small></div>
+    <div class="v2-panel-heading"><span>覚醒値</span><small>選択中のキャラ／武器／タリスマン専用</small></div>
     <div id="v2AwakePreview" class="v2-awake-preview"></div>
-    <button type="button" data-v2="open-awakening" class="v2-button v2-button-mint">⚙️ 覚醒値を編集</button>
+    <button type="button" data-v2="open-awakening" class="v2-button v2-button-mint">覚醒値を編集</button>
   </section>
 
   <div class="v2-row">
     <section class="v2-frame v2-editor-panel">
-      <h2 class="v2-panel-heading">👥 パッシブキャラクター</h2>
+      <h2 class="v2-panel-heading">パッシブキャラクター</h2>
       <div class="v2-passive-strip" id="v2PassiveStrip"></div>
-      <button class="v2-button v2-button-yellow" type="button" data-v2="open-passives">👥 メンバー編集</button>
+      <button class="v2-button v2-button-yellow" type="button" data-v2="open-passives">メンバー編集</button>
     </section>
     <section class="v2-frame v2-editor-panel">
-      <h2 class="v2-panel-heading">💠 ルーン値</h2>
+      <h2 class="v2-panel-heading">ルーン値</h2>
       <div class="v2-runes" id="v2RunesPreview"></div>
-      <button class="v2-button v2-button-yellow" type="button" data-v2="open-runes">⚙️ ルーン編集</button>
+      <button class="v2-button v2-button-yellow" type="button" data-v2="open-runes">ルーン編集</button>
     </section>
   </div>
 
   <div class="v2-row">
     <section class="v2-frame v2-editor-panel">
-      <h2 class="v2-panel-heading">🏰 ギルドバトル</h2>
+      <h2 class="v2-panel-heading">ギルドバトル</h2>
       <div class="v2-panel-info">共通モード</div>
       <select class="v2-select" id="v2GuildMode" aria-label="ギルドバトルモード">
         <option value="normal">ギルドバトル以外</option>
@@ -553,41 +1085,41 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
       </div>
     </section>
     <section class="v2-frame v2-editor-panel">
-      <h2 class="v2-panel-heading">🧪 バフ / デバフ</h2>
+      <h2 class="v2-panel-heading">バフ / デバフ</h2>
       <div class="v2-buff-grid">
-        <label>⚔️ 攻撃 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="atk" aria-label="攻撃力 バフ デバフ パーセント" placeholder="0"></label>
-        <label>🛡️ 防御 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="def" aria-label="防御力 バフ デバフ パーセント" placeholder="0"></label>
-        <label>🪽 素早さ <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="spd" aria-label="素早さ バフ デバフ パーセント" placeholder="0"></label>
+        <label>攻撃 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="atk" aria-label="攻撃力 バフ デバフ パーセント" placeholder="0"></label>
+        <label>防御 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="def" aria-label="防御力 バフ デバフ パーセント" placeholder="0"></label>
+        <label>素早さ <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="spd" aria-label="素早さ バフ デバフ パーセント" placeholder="0"></label>
       </div>
       <div class="v2-panel-info">単位：%（マイナス入力対応）</div>
     </section>
   </div>
 
   <section id="v2ResultArea" class="v2-result-panel v2-frame">
-    <div class="v2-panel-heading v2-result-title"><span>✨ 最終予測ステータス</span><span class="v2-current-index" id="v2ResultIndex">キャラ 1 / 5</span></div>
+    <div class="v2-panel-heading v2-result-title"><span>最終予測ステータス</span><span class="v2-current-index" id="v2ResultIndex">キャラ 1 / 5</span></div>
     <div class="v2-result-grid" id="v2ResultGrid" aria-live="polite">
-      <div class="v2-stat-tile v2-hp"><span>💗 HP</span><strong>—</strong></div>
-      <div class="v2-stat-tile v2-sp"><span>💧 SP</span><strong>—</strong></div>
-      <div class="v2-stat-tile v2-atk"><span>⚔️ 攻撃力</span><strong>—</strong></div>
-      <div class="v2-stat-tile v2-def"><span>🛡️ 防御力</span><strong>—</strong></div>
-      <div class="v2-stat-tile v2-spd"><span>🪽 素早さ</span><strong>—</strong></div>
-      <div class="v2-stat-tile v2-crit"><span>🌟 クリティカル</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-hp"><span>HP</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-sp"><span>SP</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-atk"><span>攻撃力</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-def"><span>防御力</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-spd"><span>素早さ</span><strong>—</strong></div>
+      <div class="v2-stat-tile v2-crit"><span>クリティカル</span><strong>—</strong></div>
     </div>
   </section>
 
   <section class="v2-summary v2-frame">
-    <h2>▤ 選択中の構成</h2>
+    <h2>選択中の構成</h2>
     <div id="v2SummaryContent" class="v2-summary-content"></div>
   </section>
 
   <details class="v2-all-results v2-frame" id="v2AllResults">
-    <summary>📊 5体の最終予測ステータス一覧（タップで表示）</summary>
+    <summary> 5体の最終予測ステータス一覧（タップで表示）</summary>
     <div class="v2-results-overflow" id="v2OverviewTable"></div>
   </details>
 
   <div class="v2-actions">
-    <button type="button" data-v2="reset-slot" class="v2-button v2-button-white">↶ 選択枠をリセット</button>
-    <button type="button" data-v2="open-awakening" class="v2-button v2-button-yellow">⚙️ 覚醒値をすべて0 / 100</button>
+    <button type="button" data-v2="reset-slot" class="v2-button v2-button-white">選択枠をリセット</button>
+    <button type="button" data-v2="open-awakening" class="v2-button v2-button-yellow">覚醒値をすべて0 / 100</button>
   </div>
   <div class="v2-actions v2-secondary-actions">
     <button type="button" data-v2="reset-party" class="v2-button v2-button-outline">5体編成を全リセット</button>
@@ -617,7 +1149,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
   <div class="v2-dialog" role="dialog" aria-modal="true" aria-labelledby="v2EditorTitle">
     <div class="v2-dialog-head"><h2 id="v2EditorTitle">編集</h2><button id="v2EditorClose" type="button" aria-label="閉じる">×</button></div>
     <div id="v2EditorContent"></div>
-    <button id="v2EditorDone" type="button" class="v2-button v2-button-mint">✓ 編集を完了</button>
+    <button id="v2EditorDone" type="button" class="v2-button v2-button-mint">編集を完了</button>
   </div>
 </div>
 
@@ -647,7 +1179,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 </div>
 
 <div>
-<div class="card" id="cloudStatus" style="margin-bottom:12px">☁️ 共通データベース：接続確認中…</div>
+<div class="card" id="cloudStatus" style="margin-bottom:12px">共通データベース：接続確認中…</div>
 <div class="manager-tabs">
 <button class="mtab active" data-type="characters" type="button">キャラ</button>
 <button class="mtab" data-type="weapons" type="button">武器</button>
@@ -659,9 +1191,9 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 </div>
 <div id="list"></div>
 <div class="card" id="backupCard">
-<button id="backup" class="btn secondary" type="button">💾 バックアップ</button>
+<button id="backup" class="btn secondary" type="button">バックアップ</button>
 <div style="height:8px"></div>
-<button id="restore" class="btn secondary" type="button">📥 バックアップから復元</button>
+<button id="restore" class="btn secondary" type="button">バックアップから復元</button>
 <input id="file" type="file" accept=".json,application/json" style="display:none">
 </div>
 
@@ -671,7 +1203,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
   <div class="group">
     <label for="themePreset">背景カラー</label>
     <select id="themePreset">
-      <option value="monbus">モンバス風</option>
+      <option value="rpg">モンバスRPG風（新）</option>
       <option value="navy">ネイビー</option>
       <option value="green">グリーン</option>
       <option value="red">レッド</option>
@@ -680,7 +1212,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
   </div>
   <div class="theme-preview" aria-hidden="true"><span class="p1"></span><span class="p2"></span><span class="p3"></span><span class="p4"></span></div>
   <button id="saveThemeButton" class="btn" type="button">このカラーを全端末へ反映</button>
-  <div id="themeStatus" class="dashboard-status">管理者は全端末共通、STRATOSメンバーはこの端末のみ変更できます。<br><span style="opacity:.65">Theme UI v2</span></div>
+  <div id="themeStatus" class="dashboard-status">管理者は全端末共通、STRATOSメンバーはこの端末のみ変更できます。<br><span style="opacity:.65">Theme UI v3 / RPG</span></div>
 </div>
 
 <div class="card" id="stratosAuthBox" style="margin-bottom:12px">
@@ -713,9 +1245,9 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 </section>
 <footer>モンバス計算ツール Version3（開発版）</footer>
 <div class="v2-bottom-nav" id="v2BottomNav">
-  <button type="button" data-v2-nav="party" class="current"><span>👥</span>パーティ編成</button>
-  <button type="button" data-v2-nav="result"><span>📊</span>計算結果</button>
-  <button type="button" data-v2-nav="data"><span>📚</span>データ管理</button>
+  <button type="button" data-v2-nav="party" class="current">パーティ編成</button>
+  <button type="button" data-v2-nav="result">計算結果</button>
+  <button type="button" data-v2-nav="data">データ管理</button>
 </div>
 </div>
 
@@ -815,8 +1347,8 @@ async function uploadItemImage(file,type,id){
  return pub&&pub.data&&pub.data.publicUrl?pub.data.publicUrl:"";
 }
 
-var THEME_KEYS=["monbus","navy","green","red","purple"];
-var THEME_META_COLORS={monbus:"#31464c",navy:"#0d1728",green:"#15261f",red:"#281719",purple:"#21182d"};
+var THEME_KEYS=["rpg","monbus","navy","green","red","purple"];
+var THEME_META_COLORS={rpg:"#1f3340",monbus:"#31464c",navy:"#0d1728",green:"#15261f",red:"#281719",purple:"#21182d"};
 var GLOBAL_THEME_CACHE_KEY="monbus_theme_global_cache_v2";
 var STRATOS_LOCAL_THEME_KEY="monbus_theme_stratos_local_v1";
 
@@ -853,7 +1385,7 @@ function applyVersionSwitchState(){
  if(wrap)wrap.hidden=!(admin||stratos);
  if(btn){
   var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:(stratos&&versionAuthResolved);
-  btn.textContent='🔁 Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
+  btn.textContent=' Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
   btn.dataset.targetVersion=next;
   btn.disabled=!enabled || versionSavePending || !versionAuthResolved;
   btn.setAttribute('aria-disabled',(!enabled||versionSavePending)?'true':'false');
@@ -861,7 +1393,7 @@ function applyVersionSwitchState(){
  }
  if(status){
   status.textContent=admin
-   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':'⚠️ 全端末設定を読み込めません。設定SQLを確認してください。')
+   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':' 全端末設定を読み込めません。設定SQLを確認してください。')
    :stratos?'共同管理者の切替はこの端末のみです。全端末の設定には影響しません。':'';
  }
  if(versionAuthResolved&&!versionSavePending&&!versionNavigating){
@@ -953,13 +1485,13 @@ function startVersionSync(){
  window.addEventListener('focus',fetchGlobalVersion);
 }
 
-var currentGlobalTheme="monbus";
-function normalizeTheme(theme){return THEME_KEYS.indexOf(theme)>=0?theme:"monbus"}
+var currentGlobalTheme="rpg";
+function normalizeTheme(theme){return theme==="monbus"?"rpg":(THEME_KEYS.indexOf(theme)>=0?theme:"rpg")}
 function setThemeVisual(theme){
  theme=normalizeTheme(theme);
  document.body.setAttribute("data-theme",theme);
  var sel=$("themePreset");if(sel&&sel.value!==theme)sel.value=theme;
- var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute("content",THEME_META_COLORS[theme]||THEME_META_COLORS.monbus);
+ var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute("content",THEME_META_COLORS[theme]||THEME_META_COLORS.rpg);
 }
 function applyThemeForCurrentUser(){
  var theme=currentGlobalTheme;
@@ -972,8 +1504,8 @@ function applyThemeForCurrentUser(){
  setThemeVisual(theme);
 }
 async function loadTheme(){
- var cached="monbus";
- try{cached=normalizeTheme(localStorage.getItem(GLOBAL_THEME_CACHE_KEY)||"monbus")}catch(e){}
+ var cached="rpg";
+ try{cached=normalizeTheme(localStorage.getItem(GLOBAL_THEME_CACHE_KEY)||"rpg")}catch(e){}
  currentGlobalTheme=cached;
  setThemeVisual(currentGlobalTheme);
  try{
@@ -982,7 +1514,7 @@ async function loadTheme(){
   if(r.data&&r.data.theme){
    currentGlobalTheme=normalizeTheme(r.data.theme);
   }else{
-   currentGlobalTheme="monbus";
+   currentGlobalTheme="rpg";
   }
   try{localStorage.setItem(GLOBAL_THEME_CACHE_KEY,currentGlobalTheme)}catch(e){}
   applyThemeForCurrentUser();
@@ -992,12 +1524,12 @@ async function loadTheme(){
  }catch(e){
   console.warn("テーマ取得エラー",e);
   applyThemeForCurrentUser();
-  if($("themeStatus"))$("themeStatus").textContent="テーマ設定テーブル未設定の場合はモンバス風を使用します。";
+  if($("themeStatus"))$("themeStatus").textContent="テーマ設定テーブル未設定の場合はモンバスRPG風を使用します。";
  }
 }
 async function saveTheme(){
  if(!canEditTheme()){alert("管理者またはSTRATOSメンバーログインが必要です");return}
- var theme=normalizeTheme($("themePreset")?$("themePreset").value:"monbus");
+ var theme=normalizeTheme($("themePreset")?$("themePreset").value:"rpg");
 
  if(isStratosMember()){
   setThemeVisual(theme);
@@ -1076,7 +1608,7 @@ async function loadAnnouncement(){
   if(st)st.textContent="全端末共通のお知らせです。";
  }catch(e){
   console.error("お知らせ取得エラー",e);
-  if($("announcementStatus"))$("announcementStatus").textContent="⚠️ お知らせを取得できません。Supabase設定を確認してください。";
+  if($("announcementStatus"))$("announcementStatus").textContent=" お知らせを取得できません。Supabase設定を確認してください。";
  }
 }
 async function saveAnnouncement(){
@@ -1091,7 +1623,7 @@ async function saveAnnouncement(){
   if(st)st.textContent="保存済み（全端末共通）";
  }catch(e){
   console.error("お知らせ保存エラー",e);
-  if(st)st.textContent="⚠️ 保存に失敗しました。Supabase設定を確認してください。";
+  if(st)st.textContent=" 保存に失敗しました。Supabase設定を確認してください。";
  }
 }
 async function fetchCloud(){
@@ -1106,19 +1638,19 @@ async function fetchCloud(){
     results[1]=await supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
     if(results[1].data)results[1].data.forEach(function(x){x.weapon_type=""});
     weaponTypeMissing=true;
-    setCloudStatus("⚠️ 武器種列が未設定です。SupabaseでSQLを実行してください。");
+    setCloudStatus(" 武器種列が未設定です。SupabaseでSQLを実行してください。");
   }
   for(var i=0;i<results.length;i++){if(results[i].error){showSupabaseError("データ取得",["characters","weapons","talismans","passives"][i],results[i].error);throw results[i].error}}
   var empty=results.slice(0,3).every(function(r){return !r.data||r.data.length===0});
-  if(empty){setCloudStatus("☁️ 共通データベース：接続済み（まだデータがありません）");return false}
+  if(empty){setCloudStatus(" 共通データベース：接続済み（まだデータがありません）");return false}
   db.characters=(results[0].data||[]).map(normalizeItem);
   db.weapons=(results[1].data||[]).map(normalizeItem);
   db.talismans=(results[2].data||[]).map(normalizeItem);
   db.passives=(results[3].data||[]).map(normalizeItem);
   normalizeDb();saveLocal();
-  if(!weaponTypeMissing)setCloudStatus("☁️ 共通データベース：接続済み（全員共通データ）");
+  if(!weaponTypeMissing)setCloudStatus(" 共通データベース：接続済み（全員共通データ）");
   return true;
- }catch(e){console.error(e);setCloudStatus("⚠️ 共通データベース：接続エラー");return false}
+ }catch(e){console.error(e);setCloudStatus(" 共通データベース：接続エラー");return false}
 }
 async function load(){
  try{
@@ -1271,7 +1803,7 @@ async function loadUsageStats(){
   console.warn("利用状況取得エラー",e);
   if($("pageViewCount"))$("pageViewCount").textContent="---";
   if($("calculatorUseCount"))$("calculatorUseCount").textContent="---";
-  if(status)status.textContent="⚠️ 集計用のSupabase設定が必要です。";
+  if(status)status.textContent=" 集計用のSupabase設定が必要です。";
  }
 }
 async function loadCalculationHistory(){
@@ -1303,7 +1835,7 @@ async function loadCalculationHistory(){
   if(status)status.textContent="全端末共通の最新5件を表示しています。";
  }catch(e){
   console.warn("計算履歴取得エラー",e);
-  list.innerHTML='<div class="history-empty">⚠️ 履歴用のSupabase設定が必要です</div>';
+  list.innerHTML='<div class="history-empty">履歴用のSupabase設定が必要です</div>';
   if(status)status.textContent="設定用SQLをSupabaseで実行してください。";
  }
 }
@@ -1472,7 +2004,6 @@ var V2_KEY="monbus_calculator_v2_party_state_v1";
 var v2Ready=false,v2Busy=false;
 var v2Stats=["hp","sp","atk","def","spd","crit"];
 var v2Labels={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
-var v2Icons={hp:"💗",sp:"💧",atk:"⚔️",def:"🛡️",spd:"🪽",crit:"🌟"};
 var v2StatTiles=["v2-hp","v2-sp","v2-atk","v2-def","v2-spd","v2-crit"];
 var v2BlankStats=function(){return {hp:"",sp:"",atk:"",def:"",spd:"",crit:""}};
 function v2NewSlot(){return {character:"",weapon:"",talisman:"",awake:v2BlankStats(),weaponAwake:v2BlankStats(),talismanAwake:v2BlankStats()};}
@@ -1504,10 +2035,10 @@ function v2Find(type,id){return (db[type]||[]).find(function(x){return String(x.
 function v2Name(type,id){var x=v2Find(type,id);return x?x.name:"未選択";}
 function v2ItemIcon(data,classname,placeholder){
  var cls=classname+" v2-linked-img";
- // 画像OFFでは src を作らないので、非表示画像の読み込みも起こらない。
- if(document.body.classList.contains('hide-linked-images'))return '<span class="'+cls+' v2-linked-placeholder" aria-hidden="true">'+(placeholder||'🖼️')+'</span>';
+ // 画像OFFでは src を作らず、絵文字の代わりに画像なしの文字を使う。
+ if(document.body.classList.contains('hide-linked-images'))return '';
  if(data&&data.image_url)return '<img class="'+cls+'" src="'+esc(data.image_url)+'" alt="'+esc(data.name||"")+'" loading="lazy" onerror="this.style.display=\'none\'">';
- return '<span class="'+cls+' v2-linked-placeholder" aria-hidden="true">'+(placeholder||"🖼️")+'</span>';
+ return '<span class="'+cls+' v2-linked-placeholder" aria-hidden="true">画像なし</span>';
 }
 function v2SetLegacyInputs(){
  var sh=v2State.shared;
@@ -1548,30 +2079,30 @@ function v2Render(){
  var active=v2State.active,slot=v2State.slots[active],sh=v2State.shared;
  $("v2PartyCards").innerHTML=v2State.slots.map(function(s,i){
   var c=v2Find("characters",s.character),name=c?c.name:"＋ 未選択";
-  var portrait=v2ItemIcon(c,"v2-party-photo","♟️");
+  var portrait=v2ItemIcon(c,"v2-party-photo");
   return '<button type="button" class="v2-party-card'+(i===active?' active':'')+'" data-v2-slot="'+i+'" aria-pressed="'+(i===active?'true':'false')+'" title="'+esc(name)+'"><span class="v2-slot-num">'+(i+1)+'</span><span class="v2-portrait">'+portrait+'</span><span class="v2-card-name">'+esc(name)+'</span><span class="v2-card-status">'+(c?'選択済み':'タップして選択')+'</span></button>';
  }).join("");
  $("v2PartyCaption").textContent=(active+1)+"体目を編集中："+v2Name("characters",slot.character);
- function itemPanel(type,id,holder,emoji){
+ function itemPanel(type,id,holder){
   var d=v2Find(type,id),name=d?d.name:"未選択";
   var first=(d&&d.stats)?["hp","atk","def"].map(function(k){return v2Labels[k]+" "+Number(d.stats[k]||0).toLocaleString();}).join(' / '):"変更ボタンで選択できます";
-  $(holder).innerHTML='<span class="v2-item-image">'+v2ItemIcon(d,"v2-item-picture",emoji)+'</span><span class="v2-item-meta"><span class="v2-item-name">'+esc(name)+'</span><span class="v2-item-stats">'+esc(first)+'</span></span>';
+  $(holder).innerHTML='<span class="v2-item-image">'+v2ItemIcon(d,"v2-item-picture")+'</span><span class="v2-item-meta"><span class="v2-item-name">'+esc(name)+'</span><span class="v2-item-stats">'+esc(first)+'</span></span>';
  }
- itemPanel("weapons",slot.weapon,"v2WeaponCurrent","⚔️");
- itemPanel("talismans",slot.talisman,"v2TalismanCurrent","💎");
+ itemPanel("weapons",slot.weapon,"v2WeaponCurrent");
+ itemPanel("talismans",slot.talisman,"v2TalismanCurrent");
  function nonzeros(obj){var vals=v2Stats.filter(function(k){return obj[k]!==0&&obj[k]!=="";});if(vals.length)return vals.map(function(k){return v2Labels[k]+" "+obj[k]+"%";}).join(" / ");return v2Stats.some(function(k){return obj[k]!=="";})?"全項目 0%":"未入力";}
  $("v2AwakePreview").innerHTML="キャラ："+esc(nonzeros(slot.awake))+"<br>武器："+esc(nonzeros(slot.weaponAwake))+"<br>タリスマン："+esc(nonzeros(slot.talismanAwake));
  $("v2PassiveStrip").innerHTML=sh.passives.map(function(id,j){var p=v2Find("passives",id);return '<button class="v2-passive-mini" type="button" data-v2-passive="'+j+'" title="'+esc(p?p.name:'パッシブを選択')+'">'+v2ItemIcon(p,"v2-passive-image","＋")+'<b>'+(p?esc(p.name):'枠'+(j+1))+'</b></button>';}).join("");
- $("v2RunesPreview").innerHTML=v2Stats.map(function(k){return '<span class="v2-rune-chip"><span>'+v2Icons[k]+' '+v2Labels[k]+'</span><strong>'+Number(sh.rune[k]).toLocaleString()+'</strong></span>';}).join("");
+ $("v2RunesPreview").innerHTML=v2Stats.map(function(k){return '<span class="v2-rune-chip"><span>'+v2Labels[k]+'</span><strong>'+Number(sh.rune[k]).toLocaleString()+'</strong></span>';}).join("");
  $("v2GuildMode").value=sh.guild;
  $("v2OipokaEditor").hidden=sh.guild!=="oipoka";
  $("v2OipokaButton").textContent=sh.oipoka?"変更："+v2Name("passives",sh.oipoka):"＋ 追加パッシブ選択";
  document.querySelectorAll('#v2App [data-buff]').forEach(function(el){var k=el.dataset.buff;if(document.activeElement!==el)el.value=String(sh.buff[k]);});
  $("v2ResultIndex").textContent="キャラ "+(active+1)+" / 5";
  var current=v2Computed[active];
- $("v2ResultGrid").innerHTML=v2Stats.map(function(k,j){var n=current?Number(current[k]).toLocaleString():"—";return '<div class="v2-stat-tile '+v2StatTiles[j]+'"><span>'+v2Icons[k]+' '+v2Labels[k]+'</span><strong>'+n+'</strong></div>';}).join("");
- var summary=[['キャラ','characters',slot.character,'♟️'],['武器','weapons',slot.weapon,'⚔️'],['タリスマン','talismans',slot.talisman,'💎']];
- $("v2SummaryContent").innerHTML=summary.map(function(x){var data=v2Find(x[1],x[2]);return '<div class="v2-summary-unit">'+(data&&data.image_url?v2ItemIcon(data,'v2-summary-image',x[3]):'<span class="v2-summary-placeholder v2-linked-img">'+x[3]+'</span>')+'<span><b>'+x[0]+'</b>'+esc(data?data.name:'未選択')+'</span></div>';}).join("")+'<div class="v2-summary-unit"><span class="v2-summary-placeholder">👥</span><span><b>共通パッシブ</b>'+sh.passives.filter(Boolean).length+' / 5体</span></div>';
+ $("v2ResultGrid").innerHTML=v2Stats.map(function(k,j){var n=current?Number(current[k]).toLocaleString():"—";return '<div class="v2-stat-tile '+v2StatTiles[j]+'"><span>'+v2Labels[k]+'</span><strong>'+n+'</strong></div>';}).join("");
+ var summary=[['キャラ','characters',slot.character],['武器','weapons',slot.weapon],['タリスマン','talismans',slot.talisman]];
+ $("v2SummaryContent").innerHTML=summary.map(function(x){var data=v2Find(x[1],x[2]);return '<div class="v2-summary-unit">'+(data&&data.image_url?v2ItemIcon(data,'v2-summary-image'):'')+'<span><b>'+x[0]+'</b>'+esc(data?data.name:'未選択')+'</span></div>';}).join("")+'<div class="v2-summary-unit"><span><b>共通パッシブ</b>'+sh.passives.filter(Boolean).length+' / 5体</span></div>';
  $("v2OverviewTable").innerHTML='<table><thead><tr><th>キャラ</th>'+v2Stats.map(function(k){return '<th>'+v2Labels[k]+'</th>';}).join("")+'</tr></thead><tbody>'+v2State.slots.map(function(s,i){var r=v2Computed[i];return '<tr data-slot="'+i+'" class="'+(i===active?'active':'')+'"><td>'+(i+1)+'. '+esc(v2Name("characters",s.character))+'</td>'+v2Stats.map(function(k){return '<td>'+(r?Number(r[k]).toLocaleString():'—')+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table>';
  v2ApplyImageVisibility();
 }
@@ -1594,10 +2125,10 @@ function v2RenderChoices(){
  if(type==="weapons"&&!search&&!weaponType){$("v2ChoiceList").innerHTML='<div class="v2-choice-empty">先に武器種を選択するか、武器名を入力してください。</div>';return;}
  var options=(db[type]||[]).filter(function(x){return (!search||String(x.name).toLocaleLowerCase().includes(search))&&(type!=="weapons"||!weaponType||x.weapon_type===weaponType);});
  options.sort(function(a,b){return String(a.name).localeCompare(String(b.name),'ja');});
- var blank='<button type="button" class="v2-choice" data-v2-choice=""><span class="v2-choice-image v2-linked-img">✖</span><span class="v2-choice-name">選択なし（解除）</span></button>';
+ var blank='<button type="button" class="v2-choice" data-v2-choice=""><span class="v2-choice-name">選択なし（解除）</span></button>';
  $("v2ChoiceList").innerHTML=blank+options.slice(0,250).map(function(x){
   var caption=x.weapon_type?'<small>武器種：'+esc(x.weapon_type)+'</small>':'';
-  return '<button type="button" class="v2-choice" data-v2-choice="'+esc(String(x.id))+'"><span class="v2-choice-image v2-linked-img">'+v2ItemIcon(x,'v2-choice-picture','🖼️')+'</span><span class="v2-choice-name">'+esc(x.name)+caption+'</span></button>';
+  return '<button type="button" class="v2-choice" data-v2-choice="'+esc(String(x.id))+'"><span class="v2-choice-image v2-linked-img">'+v2ItemIcon(x,'v2-choice-picture')+'</span><span class="v2-choice-name">'+esc(x.name)+caption+'</span></button>';
  }).join("")+(options.length>250?'<div class="v2-choice-empty">最初の250件を表示しています。名前検索で絞り込んでください。</div>':(options.length?"":'<div class="v2-choice-empty">該当するデータがありません</div>'));
 }
 function v2SelectChoice(id){
@@ -1621,7 +2152,7 @@ function v2OpenEditor(mode){
   });
   markup+='<div class="v2-editor-actions"><button class="v2-button v2-button-white" data-v2-editor="awake-zero" type="button">覚醒値を全て0</button><button class="v2-button v2-button-yellow" data-v2-editor="awake-hundred" type="button">覚醒値を全て100</button></div>';
  }else if(mode==="runes"){
-  markup='<p class="v2-editor-note">数値は5体全員に共通です。ルーンは割合ではなく加算です。</p><section class="v2-editor-section"><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label>'+v2Icons[k]+' '+v2Labels[k]+'<input data-v2-rune="'+k+'" type="number" min="0" step="1" inputmode="numeric" value="'+v2State.shared.rune[k]+'"></label>';}).join("")+'</div></section>';
+  markup='<p class="v2-editor-note">数値は5体全員に共通です。ルーンは割合ではなく加算です。</p><section class="v2-editor-section"><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label>'+v2Labels[k]+'<input data-v2-rune="'+k+'" type="number" min="0" step="1" inputmode="numeric" value="'+v2State.shared.rune[k]+'"></label>';}).join("")+'</div></section>';
   markup+='<button type="button" class="v2-button v2-button-yellow" data-v2-editor="runes-max">初期値（最大値）に戻す</button>';
  }else if(mode==="passives"){
   markup='<p class="v2-editor-note">最大5体、全員に共通で適用します。おいポカ時の追加パッシブはギルドバトル欄で選べます。</p>';
@@ -1718,7 +2249,7 @@ async function v2FetchGlobalImages(){
  }catch(e){
   if(v2GlobalPending||myVersion!==v2GlobalVersion)return;
   v2GlobalImagesEnabled=false;v2GlobalReady=false;
-  if($('v2ImageStatus'))$('v2ImageStatus').textContent='⚠️ 共有設定を取得できません。Supabaseの画像表示SQLをご確認ください。';
+  if($('v2ImageStatus'))$('v2ImageStatus').textContent=' 共有設定を取得できません。Supabaseの画像表示SQLをご確認ください。';
   console.warn('画像共通設定の取得に失敗:',e);
  }
  v2ApplyImageVisibility();
@@ -1735,7 +2266,7 @@ async function v2ToggleGlobalImages(){
   if($('v2ImageStatus'))$('v2ImageStatus').textContent='全端末へ保存しました。';
  }catch(e){
   alert('全端末設定の保存に失敗しました：'+(e.message||''));
-  if($('v2ImageStatus'))$('v2ImageStatus').textContent='⚠️ 保存できませんでした。';
+  if($('v2ImageStatus'))$('v2ImageStatus').textContent=' 保存できませんでした。';
  }finally{v2GlobalPending=false;v2ApplyImageVisibility();}
 }
 function v2ToggleImages(){
@@ -2027,15 +2558,15 @@ async function seedCloud(){
   var types=["characters","weapons","talismans"];
   for(var i=0;i<types.length;i++){
    var type=types[i],rows=db[type].map(function(x){return toRow(x,type)});
-   setCloudStatus("☁️ "+type+" を登録中…（"+rows.length+"件）");
+   setCloudStatus(" "+type+" を登録中…（"+rows.length+"件）");
    var res=await supabaseClient.from(type).upsert(rows,{onConflict:"id"});
    if(res.error)throw {table:type,error:res.error};
   }
-  await fetchCloud();fill();render();setCloudStatus("☁️ 共通データベース：登録完了");alert("初期データを共通データベースへ登録しました。");
+  await fetchCloud();fill();render();setCloudStatus(" 共通データベース：登録完了");alert("初期データを共通データベースへ登録しました。");
  }catch(x){
   var e=x&&x.error?x.error:x,table=x&&x.table?x.table:"不明";
   console.error("seedCloud failed",table,e);
-  setCloudStatus("⚠️ 初期データ登録に失敗（"+table+"）");
+  setCloudStatus(" 初期データ登録に失敗（"+table+"）");
   alert("初期データの登録に失敗しました。\n\n失敗したテーブル："+table+"\nログイン："+(currentUser.email||"なし")+"\n\n"+formatSupabaseError(e));
  }
 }
