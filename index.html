@@ -636,7 +636,7 @@ body[data-theme="rpg"] .selected-summary .result-thumb.placeholder{
 }
 
 
-/* ===== Version 2.02: 同一ステータスの文字色統一 + 丸ゴシック ===== */
+/* ===== Version 2.04: 同一ステータスの文字色統一 + 丸ゴシック ===== */
 body[data-theme="rpg"]{
   /* ゲーム風ステータス6色。枠・カード背景は変更しない。 */
   --stat-hp:#a366d6;  --stat-hp-outline:#522273;
@@ -732,6 +732,41 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
   text-shadow:0 0 1px var(--stat-outline)!important;
 }
 
+
+/* 覚醒値入力：キャラ／武器／タリスマンを個別に折りたたみ表示 */
+#calcPage .awakening-fold-content[hidden]{display:none!important}
+#calcPage .awakening-fold-content{margin-top:12px}
+#calcPage .awakening-fold-toggle{
+  display:block;width:100%;max-width:none;height:44px!important;
+  font-size:14px!important;line-height:1.4!important;
+  padding:0 12px;letter-spacing:.01em;
+}
+#calcPage .awakening-fold-toggle[aria-expanded="true"]{margin-bottom:0}
+
+
+/* Version切替：管理者と共同管理者のログイン中だけ表示 */
+#versionSwitchWrap{
+  display:none;
+  margin:0 0 12px;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+}
+#versionSwitchWrap[hidden]{display:none!important}
+body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:flex}
+#versionSwitchLink{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;min-height:44px;padding:9px 14px;
+  border:2px solid #28404b;border-radius:12px;
+  background:linear-gradient(180deg,#fff8bb,#ffe884);
+  color:#203745!important;font-weight:900;font-size:14px;
+  text-decoration:none;text-shadow:none!important;
+  box-shadow:0 3px 0 #28404b,0 5px 10px #0002;
+}
+#versionSwitchStatus{font-size:11px;color:#203a47;text-align:center;margin:7px 0 0;line-height:1.45}
+#versionSwitchLink.version-switch-disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+#versionSwitchLink:focus-visible{outline:3px solid #19a69a;outline-offset:3px}
+#versionSwitchLink:active{transform:translateY(2px);box-shadow:0 1px 0 #28404b}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -754,7 +789,12 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 })();</script>
 
 <div class="app">
-<header><h1>モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン 計算ツール</div><div class="app-version">Version 2.02</div></header>
+<header><h1>モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン 計算ツール</div><div class="app-version">Version 2.04</div></header>
+
+<div id="versionSwitchWrap" hidden>
+  <a id="versionSwitchLink" href="monbus_calculator_v3.html" aria-label="管理者・共同管理者向け：Version3へ切り替える">🔁 Version3へ切り替える</a>
+  <div id="versionSwitchStatus" role="status" aria-live="polite"></div>
+</div>
 
 <div class="tabs">
 <button id="tabCalc" class="tab active" type="button">計算ツール</button>
@@ -772,6 +812,8 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <select id="character" style="display:none"></select></div>
 <div class="group">
 <label>覚醒値（%補正）</label>
+<button id="charAwakeFoldButton" class="btn secondary awakening-fold-toggle" type="button" data-awakening-toggle aria-expanded="false" aria-controls="characterAwakeningPanel">覚醒値入力を表示する ▼</button>
+<div id="characterAwakeningPanel" class="awakening-fold-content" hidden>
 <div class="rune-grid awakening-grid">
 <div data-stat="hp"><span>HP (%)</span><input id="awakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div data-stat="sp"><span>SP (%)</span><input id="awakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -781,6 +823,7 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <div data-stat="crit"><span>クリティカル (%)</span><input id="awakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div>
 <small>各ステータスの覚醒率を個別に入力できます。例：攻撃力10 → +10%。</small>
+</div>
 </div>
 <div class="group"><label>メイン武器</label>
 <div class="group" style="margin-bottom:8px">
@@ -799,6 +842,8 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <select id="weapon" style="display:none"></select></div>
 <div class="group">
 <label>装備用覚醒値（%補正）</label>
+<button id="weaponAwakeFoldButton" class="btn secondary awakening-fold-toggle" type="button" data-awakening-toggle aria-expanded="false" aria-controls="weaponAwakeningPanel">覚醒値入力を表示する ▼</button>
+<div id="weaponAwakeningPanel" class="awakening-fold-content" hidden>
 <div class="rune-grid awakening-grid">
 <div data-stat="hp"><span>HP (%)</span><input id="weaponAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div data-stat="sp"><span>SP (%)</span><input id="weaponAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -807,6 +852,7 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <div data-stat="spd"><span>素早さ (%)</span><input id="weaponAwakeSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div data-stat="crit"><span>クリティカル (%)</span><input id="weaponAwakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div><small>装備の各ステータスに個別で％補正をかけます。</small>
+</div>
 </div>
 <div class="group"><label>タリスマン</label>
 <div class="unified-select" id="talismanPicker">
@@ -817,6 +863,8 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <select id="talisman" style="display:none"></select></div>
 <div class="group">
 <label>タリスマン用覚醒値（%補正）</label>
+<button id="talismanAwakeFoldButton" class="btn secondary awakening-fold-toggle" type="button" data-awakening-toggle aria-expanded="false" aria-controls="talismanAwakeningPanel">覚醒値入力を表示する ▼</button>
+<div id="talismanAwakeningPanel" class="awakening-fold-content" hidden>
 <div class="rune-grid awakening-grid">
 <div data-stat="hp"><span>HP (%)</span><input id="talismanAwakeHp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div data-stat="sp"><span>SP (%)</span><input id="talismanAwakeSp" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
@@ -825,6 +873,7 @@ body[data-theme="rpg"] .result .selected-buff-item[data-stat] > b{
 <div data-stat="spd"><span>素早さ (%)</span><input id="talismanAwakeSpd" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 <div data-stat="crit"><span>クリティカル (%)</span><input id="talismanAwakeCrit" type="number" step="0.1" inputmode="decimal" placeholder="例：5"></div>
 </div><small>タリスマンの各ステータスに個別で％補正をかけます。</small>
+</div>
 </div>
 <div class="group">
 <label>パッシブキャラクター（最大5体）</label>
@@ -1250,6 +1299,134 @@ function startGlobalImageVisibilitySync(){
  window.addEventListener("focus",fetchGlobalImageVisibility);
 }
 
+
+/* ============================================================
+   Version2 / Version3 shared switch
+   主管理者は全端末、STRATOSは端末個別、一般は全端末設定に従う。
+   DB接続・認証が未確定なら自動移動せず、誤切替を防ぐ。
+   ============================================================ */
+var VERSION_CURRENT='v2';
+var VERSION_TABLE='monbus_version_settings';
+var VERSION_STRATOS_KEY='monbus_version_stratos_local_v1';
+var globalSelectedVersion='v2';
+var globalVersionLoaded=false, versionAuthResolved=false, versionSavePending=false;
+var globalVersionFetchId=0, versionNavigating=false, versionSyncStarted=false;
+function versionOther(v){return v==='v3'?'v2':'v3';}
+function versionValid(v){return v==='v2'||v==='v3';}
+function versionLocalChoice(){
+ try{var v=localStorage.getItem(VERSION_STRATOS_KEY);return versionValid(v)?v:null;}
+ catch(e){return null;}
+}
+function versionEffectiveChoice(){
+ if(isStratosMember())return versionLocalChoice()||(globalVersionLoaded?globalSelectedVersion:null);
+ return globalVersionLoaded?globalSelectedVersion:null;
+}
+function versionUrl(v){return new URL(v==='v3'?'monbus_calculator_v3.html':'index.html',window.location.href).href;}
+function applyVersionSwitchState(){
+ var admin=isMainAdmin(),stratos=isStratosMember();
+ var wrap=$('versionSwitchWrap'),btn=$('versionSwitchLink'),status=$('versionSwitchStatus');
+ if(wrap)wrap.hidden=!(admin||stratos);
+ if(btn){
+  var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:true;
+  btn.textContent='🔁 Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
+  btn.setAttribute('href',versionUrl(next));
+  btn.setAttribute('aria-disabled',(!enabled||versionSavePending)?'true':'false');
+  btn.classList.toggle('version-switch-disabled',!enabled||versionSavePending);
+ }
+ if(status){
+  status.textContent=admin
+   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':'⚠️ 全端末設定を読み込めません。設定SQLを確認してください。')
+   :stratos?'共同管理者の切替はこの端末のみです。全端末の設定には影響しません。':'';
+ }
+ if(versionAuthResolved&&!versionSavePending&&!versionNavigating){
+  var desired=versionEffectiveChoice();
+  if(desired&&desired!==VERSION_CURRENT){
+   versionNavigating=true;
+   window.location.replace(versionUrl(desired));
+  }
+ }
+}
+async function fetchGlobalVersion(){
+ if(versionSavePending||versionNavigating)return;
+ var fetchId=++globalVersionFetchId;
+ try{
+  var res=await supabaseClient.from(VERSION_TABLE).select('selected_version').eq('id',1).maybeSingle();
+  if(res.error)throw res.error;
+  if(!res.data||!versionValid(res.data.selected_version))throw Error('Version設定のSQLが未設定です。');
+  if(fetchId!==globalVersionFetchId||versionSavePending||versionNavigating)return;
+  globalSelectedVersion=res.data.selected_version;
+  globalVersionLoaded=true;
+ }catch(e){
+  if(fetchId!==globalVersionFetchId||versionSavePending||versionNavigating)return;
+  console.warn('全端末Version設定の取得エラー',e);
+  // 以前の正常値があれば維持。未取得の場合は強制移動しない。
+ }
+ applyVersionSwitchState();
+}
+async function handleVersionSwitch(e){
+ e.preventDefault();
+ if(versionSavePending||versionNavigating)return;
+ try{
+  // ボタンが表示されていても、操作のたびにログイン状態を再検証する。
+  var authResult=await supabaseClient.auth.getUser();
+  if(authResult.error)throw authResult.error;
+  var email=String(authResult.data&&authResult.data.user&&authResult.data.user.email||'').toLowerCase();
+  var admin=email===ADMIN_EMAIL.toLowerCase();
+  var stratos=email===STRATOS_AUTH_EMAIL.toLowerCase();
+  if(!admin&&!stratos){await refreshAuth();alert('Version切替は管理者・共同管理者のみ利用できます。');return;}
+  var target=versionOther(VERSION_CURRENT);
+  if(stratos){
+   // 共同管理者：端末側だけに保存。別端末・一般ユーザーの設定には触れない。
+   try{localStorage.setItem(VERSION_STRATOS_KEY,target);}
+   catch(e){alert('端末へVersion設定を保存できませんでした。ブラウザの保存設定をご確認ください。');return;}
+   versionNavigating=true;
+   window.location.replace(versionUrl(target));
+   return;
+  }
+  // 管理者：共有テーブルの1行のみ更新し、保存成功後に画面を切替。
+  if(!globalVersionLoaded){alert('全端末のVersion設定を取得できません。SQL設定を確認してください。');return;}
+  versionSavePending=true;++globalVersionFetchId;applyVersionSwitchState();
+  var writeResult=await supabaseClient.from(VERSION_TABLE)
+     .update({selected_version:target,updated_at:new Date().toISOString()})
+     .eq('id',1).select('selected_version').single();
+  if(writeResult.error)throw writeResult.error;
+  if(!writeResult.data||writeResult.data.selected_version!==target)throw Error('保存内容を確認できません。');
+  globalSelectedVersion=target;
+  globalVersionLoaded=true;
+  versionSavePending=false;
+  applyVersionSwitchState(); // ここで全端末設定へ移動
+ }catch(err){
+  console.error('Version切替エラー',err);
+  alert('Versionを切り替えられませんでした。Supabaseの設定と通信状態を確認してください。\n'+(err.message||''));
+ }finally{
+  versionSavePending=false;
+  if(!versionNavigating)applyVersionSwitchState();
+ }
+}
+function startVersionSync(){
+ if(versionSyncStarted)return;
+ versionSyncStarted=true;
+ var btn=$('versionSwitchLink');
+ if(btn)btn.addEventListener('click',handleVersionSwitch);
+ try{
+  supabaseClient.channel('monbus-version-sync-'+VERSION_CURRENT)
+   .on('postgres_changes',{event:'UPDATE',schema:'public',table:VERSION_TABLE,filter:'id=eq.1'},function(payload){
+    if(versionSavePending||versionNavigating)return;
+    var v=payload.new&&payload.new.selected_version;
+    if(versionValid(v)){
+     ++globalVersionFetchId;
+     globalSelectedVersion=v;
+     globalVersionLoaded=true;
+     applyVersionSwitchState();
+    }
+   }).subscribe();
+ }catch(e){console.warn('VersionのRealtime接続エラー',e);}
+ // Realtimeを受信できない環境でも反映。画面復帰時も即座に確認。
+ setInterval(fetchGlobalVersion,15000);
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)fetchGlobalVersion();});
+ window.addEventListener('focus',fetchGlobalVersion);
+}
+
 var currentGlobalTheme="rpg";
 function normalizeTheme(theme){return THEME_KEYS.indexOf(theme)>=0?theme:"rpg"}
 function setThemeVisual(theme){
@@ -1436,6 +1613,10 @@ async function refreshAuth(){
 
  document.body.classList.toggle("admin-mode",mainAdmin);
  document.body.classList.toggle("stratos-mode",stratos);
+ // ログイン状態が変わるたびにVersion切替の表示・非表示を同期
+ var versionControl=$("versionSwitchWrap");
+ if(versionControl)versionControl.hidden=!(mainAdmin||stratos);
+ versionAuthResolved=true;applyVersionSwitchState();
  // 権限確定後に表示設定を反映（管理者と一般は全端末設定、共同管理者だけ端末設定）。
  applyLinkedImageVisibilityForCurrentUser();
  if(mainAdmin && !globalImageSettingReady && $("imageToggleStatus"))
@@ -2070,7 +2251,7 @@ function restore(e){
  var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();
  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.characters||!x.weapons||!x.talismans)throw 0;db=x;db.characters.concat(db.weapons,db.talismans).forEach(function(a){if(!a.stats)a.stats={};STAT_KEYS.forEach(function(k){a.stats[k]=Number(a.stats[k]||0)})});saveLocal();fill();render();alert("復元しました")}catch(z){alert("正しいバックアップではありません")}e.target.value=""};r.readAsText(f)
 }
-(async function(){await recordPageView();await load();fill();await refreshAuth();startGlobalImageVisibilitySync();})();
+(async function(){var bootVersion=fetchGlobalVersion();await recordPageView();await load();fill();await refreshAuth();await bootVersion;startVersionSync();startGlobalImageVisibilitySync();})();
 $("loginButton").onclick=async function(){
  var email=$("authEmail").value.trim(),password=$("authPassword").value;
  if(!email||!password){alert("メールアドレスとパスワードを入力してください");return}
@@ -2116,6 +2297,7 @@ $("tabCalc").onclick=function(){page("calc")};$("tabData").onclick=function(){pa
   if($("oipokaPassiveGroup"))$("oipokaPassiveGroup").style.display="none";
   ["buffAtk","buffDef","buffSpd"].forEach(function(id){if($(id))$(id).value="";});
   if(window.__refreshUnifiedPickers)window.__refreshUnifiedPickers();
+  document.querySelectorAll("[data-awakening-toggle]").forEach(function(button){setAwakeningFoldState(button,false);});
   calc();
 };
 var awakeningInputIds=["awakeHp","awakeSp","awakeAtk","awakeDef","awakeSpd","awakeCrit","weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit","talismanAwakeHp","talismanAwakeSp","talismanAwakeAtk","talismanAwakeDef","talismanAwakeSpd","talismanAwakeCrit"];
@@ -2126,6 +2308,23 @@ function setAllAwakeningValues(value){
 }
 $("setAwakeZero").onclick=function(){setAllAwakeningValues(0)};
 $("setAwakeHundred").onclick=function(){setAllAwakeningValues(100)};
+
+// 覚醒値の入力欄だけを折りたたむ（入力値・計算への反映は維持）。
+function setAwakeningFoldState(button,expanded){
+  var targetId=button.getAttribute("aria-controls");
+  var panel=targetId?document.getElementById(targetId):null;
+  if(!panel)return;
+  panel.hidden=!expanded;
+  button.setAttribute("aria-expanded",expanded?"true":"false");
+  button.textContent=expanded?"覚醒値入力を閉じる ▲":"覚醒値入力を表示する ▼";
+}
+document.querySelectorAll("[data-awakening-toggle]").forEach(function(button){
+  setAwakeningFoldState(button,false);
+  button.addEventListener("click",function(){
+    setAwakeningFoldState(button,button.getAttribute("aria-expanded")!=="true");
+  });
+});
+
 if($("toggleLinkedImages"))$("toggleLinkedImages").onclick=function(){
  if(isMainAdmin()){toggleGlobalImageVisibility();return;}
  if(isStratosMember()){saveStratosImageVisibility(!getLinkedImageVisible());return;}
