@@ -761,6 +761,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
   background:linear-gradient(180deg,#fff8bb,#ffe884);
   color:#203745!important;font-weight:900;font-size:14px;
   text-decoration:none;text-shadow:none!important;
+  cursor:pointer;appearance:none;font-family:inherit;line-height:1.35;
   box-shadow:0 3px 0 #28404b,0 5px 10px #0002;
 }
 #versionSwitchStatus{font-size:11px;color:#203a47;text-align:center;margin:7px 0 0;line-height:1.45}
@@ -792,7 +793,7 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 <header><h1>モンバス計算機</h1><div class="sub">キャラ・武器・タリスマン 計算ツール</div><div class="app-version">Version 2.04</div></header>
 
 <div id="versionSwitchWrap" hidden>
-  <a id="versionSwitchLink" href="monbus_calculator_v3.html" aria-label="管理者・共同管理者向け：Version3へ切り替える">🔁 Version3へ切り替える</a>
+  <button id="versionSwitchLink" type="button" disabled aria-label="管理者・共同管理者向け：Version3へ切り替える">🔁 Version3へ切り替える</button>
   <div id="versionSwitchStatus" role="status" aria-live="polite"></div>
 </div>
 
@@ -1327,9 +1328,10 @@ function applyVersionSwitchState(){
  var wrap=$('versionSwitchWrap'),btn=$('versionSwitchLink'),status=$('versionSwitchStatus');
  if(wrap)wrap.hidden=!(admin||stratos);
  if(btn){
-  var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:true;
+  var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:(stratos&&versionAuthResolved);
   btn.textContent='🔁 Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
-  btn.setAttribute('href',versionUrl(next));
+  btn.dataset.targetVersion=next;
+  btn.disabled=!enabled || versionSavePending || !versionAuthResolved;
   btn.setAttribute('aria-disabled',(!enabled||versionSavePending)?'true':'false');
   btn.classList.toggle('version-switch-disabled',!enabled||versionSavePending);
  }
@@ -2251,7 +2253,8 @@ function restore(e){
  var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();
  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.characters||!x.weapons||!x.talismans)throw 0;db=x;db.characters.concat(db.weapons,db.talismans).forEach(function(a){if(!a.stats)a.stats={};STAT_KEYS.forEach(function(k){a.stats[k]=Number(a.stats[k]||0)})});saveLocal();fill();render();alert("復元しました")}catch(z){alert("正しいバックアップではありません")}e.target.value=""};r.readAsText(f)
 }
-(async function(){var bootVersion=fetchGlobalVersion();await recordPageView();await load();fill();await refreshAuth();await bootVersion;startVersionSync();startGlobalImageVisibilitySync();})();
+startVersionSync();
+(async function(){var bootVersion=fetchGlobalVersion();await recordPageView();await load();fill();await refreshAuth();await bootVersion;startGlobalImageVisibilitySync();})();
 $("loginButton").onclick=async function(){
  var email=$("authEmail").value.trim(),password=$("authPassword").value;
  if(!email||!password){alert("メールアドレスとパスワードを入力してください");return}
