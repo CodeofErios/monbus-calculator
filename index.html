@@ -777,6 +777,8 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 .meta-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}
 .meta-choice-grid label{display:flex;align-items:center;gap:6px;background:var(--input,#4a6269);border:1px solid var(--border,#6f8991);border-radius:8px;padding:9px 6px;font-size:13px;min-width:0;cursor:pointer}
 .meta-choice-grid input{width:18px;height:18px;flex:0 0 18px;margin:0;accent-color:var(--accent,#8ee8dd)}
+.weapon-eligibility-message{font-size:12px;line-height:1.5;color:var(--muted,#d1dadd);margin-top:8px}
+.weapon-eligibility-message.registered{color:var(--accent,#8ee8dd);font-weight:800}
 .metadata-line{font-size:11px;color:var(--muted,#d1dadd);margin:5px 0;line-height:1.6}
 #passiveRuleSettingsCard{display:none}
 body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsCard{display:block}
@@ -853,6 +855,7 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
     <option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option>
     <option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option>
   </select>
+  <div id="allowedWeaponMessage" class="weapon-eligibility-message" aria-live="polite">キャラクターを選択すると装備可能な武器種を表示します。</div>
 </div>
 <div class="unified-select" id="weaponPicker">
   <input id="weaponSearch" type="text" placeholder="武器名を入力・検索" autocomplete="off">
@@ -1157,6 +1160,10 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
   <div class="group"><label for="dataElement">属性（1つ）</label><select id="dataElement"></select></div>
   <div class="group"><label for="dataRace">種族（1つ）</label><select id="dataRace"></select></div>
   <div class="helper-text">キャラクターごとに属性と種族を登録します。両方登録すると判定準備完了です。</div>
+  <div class="group" style="margin-top:12px"><label>装備可能な武器種（複数選択可能）</label>
+    <div id="allowedWeaponChoices" class="meta-choice-grid"></div>
+    <div class="helper-text">選択した武器種だけを装備候補に表示します。未登録（すべて未チェック）の間は従来どおり全種類を表示し、登録済みキャラのみ制限します。</div>
+  </div>
 </div>
 <div id="passiveMetaGroup" class="meta-editor-box">
   <div class="group"><label for="dataTargetMode">パッシブの効果対象</label>
@@ -1199,6 +1206,8 @@ var STAT_KEYS=["hp","sp","atk","def","spd","crit"];
 var STAT_LABELS={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",crit:"クリティカル"};
 var ELEMENT_OPTIONS=["火","水","雷","風","光","闇","無"];
 var RACE_OPTIONS=["神族","魔神","魔族","魔獣","飛天","聖人","聖獣","精霊","鬼族","異端"];
+var WEAPON_TYPE_OPTIONS=["剣","槍","鈍器","杖","弓","爪","牙","羽"];
+var weaponRestrictionSchemaReady=false;
 var passiveSchemaReady=false;
 var passiveRulesGlobalEnabled=false;
 var passivePreviewEnabled=false;
@@ -1210,6 +1219,7 @@ function item(id,name,stats,weaponType,imageUrl,meta){
  meta=meta||{};
  return {id:id,name:name,weapon_type:weaponType||"",image_url:imageUrl||"",
   element:cleanChoice(meta.element,ELEMENT_OPTIONS),race:cleanChoice(meta.race,RACE_OPTIONS),
+  allowed_weapon_types:meta.allowed_weapon_types==null?null:cleanTargets(meta.allowed_weapon_types,WEAPON_TYPE_OPTIONS),
   target_mode:["unconfigured","all","limited"].indexOf(meta.target_mode)>=0?meta.target_mode:"unconfigured",
   target_elements:cleanTargets(meta.target_elements,ELEMENT_OPTIONS),
   target_races:cleanTargets(meta.target_races,RACE_OPTIONS),
@@ -1639,11 +1649,17 @@ async function saveAnnouncement(){
 }
 async function fetchCloud(){
  try{
-  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race").order("id");
+  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race,allowed_weapon_types").order("id");
   var weaponReq=supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,weapon_type,image_url").order("id");
   var talismanReq=supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
   var passiveReq=supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit,image_url,target_mode,target_elements,target_races").order("id");
   var results=await Promise.all([characterReq,weaponReq,talismanReq,passiveReq]);
+  weaponRestrictionSchemaReady=!results[0].error;
+  if(!weaponRestrictionSchemaReady){
+    // 新列のSQL未実行時も従来の属性・種族・パッシブを維持する。
+    var originalCharacterReq=await supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race").order("id");
+    if(!originalCharacterReq.error)results[0]=originalCharacterReq;
+  }
   passiveSchemaReady=!results[0].error&&!results[3].error;
   // SQL未実行でも従来計算が壊れないよう旧列にフォールバック。
   if(!passiveSchemaReady){
@@ -1668,9 +1684,11 @@ async function fetchCloud(){
   db.talismans=(results[2].data||[]).map(normalizeItem);
   db.passives=(results[3].data||[]).map(normalizeItem);
   normalizeDb();saveLocal();
-  if(!weaponTypeMissing)setCloudStatus(passiveSchemaReady
-    ?"共通データベース：接続済み（属性・種族の登録に対応）"
-    :"共通データベース：接続済み（属性・種族SQLは未設定。従来の計算を使用）");
+  if(!weaponTypeMissing)setCloudStatus(!passiveSchemaReady
+    ?"共通データベース：接続済み（属性・種族SQLは未設定。従来の計算を使用）"
+    :weaponRestrictionSchemaReady
+    ?"共通データベース：接続済み（属性・種族・装備可能武器種の登録に対応）"
+    :"共通データベース：接続済み（装備可能武器種用のSQLは未設定。従来の武器選択を使用）");
   refreshPassiveRuleDashboard();
   return true;
  }catch(e){console.error(e);setCloudStatus("⚠️ 共通データベース：接続エラー");return false}
@@ -1888,6 +1906,7 @@ function fill(){
     input.value="";
   });
   fillPassiveSelectors();
+  refreshAllowedWeaponSelection();
   calc();
   if(window.__refreshUnifiedPickers) window.__refreshUnifiedPickers();
   window._initialCalcDone=true;
@@ -1964,9 +1983,43 @@ function renderPassiveMatchDetails(c,selected,extra,guildMode){
  box.innerHTML='<div class="match-note">'+esc(mode)+'</div><div class="match-note">'+description+'</div>'+
    (lines.length?lines.join(''):'<div class="match-note">パッシブ未選択</div>');
 }
+function selectedCharacterForWeapon(){
+ return db.characters.find(function(x){return String(x.id)===$( "character").value})||null;
+}
+function weaponAllowedForCharacter(character,weapon){
+ if(!weapon)return true;
+ if(!character||!Array.isArray(character.allowed_weapon_types)||!character.allowed_weapon_types.length)return true;
+ return character.allowed_weapon_types.indexOf(weapon.weapon_type)>=0;
+}
+function weaponAllowedForCurrentCharacter(weapon){return weaponAllowedForCharacter(selectedCharacterForWeapon(),weapon)}
+function refreshAllowedWeaponSelection(){
+ var character=selectedCharacterForWeapon(),types=character&&Array.isArray(character.allowed_weapon_types)&&character.allowed_weapon_types.length
+  ?character.allowed_weapon_types:null;
+ var filter=$("weaponTypeFilter"),message=$("allowedWeaponMessage"),weaponSelect=$("weapon"),weaponSearch=$("weaponSearch");
+ if(filter){
+  Array.from(filter.options).forEach(function(opt){opt.disabled=Boolean(types)&&Boolean(opt.value)&&types.indexOf(opt.value)<0;});
+  if(types&&filter.value&&types.indexOf(filter.value)<0)filter.value="";
+ }
+ if(weaponSelect&&weaponSelect.value){
+  var current=db.weapons.find(function(w){return String(w.id)===String(weaponSelect.value)});
+  if(current&&!weaponAllowedForCharacter(character,current)){
+   weaponSelect.value="";
+   if(weaponSearch)weaponSearch.value="";
+   ["weaponAwakeHp","weaponAwakeSp","weaponAwakeAtk","weaponAwakeDef","weaponAwakeSpd","weaponAwakeCrit"].forEach(function(id){if($(id))$(id).value="";});
+  }
+ }
+ if(message){
+  message.classList.toggle("registered",Boolean(types));
+  message.textContent=!character?"キャラクターを選択すると装備可能な武器種に絞り込みます。":
+   types?"装備可能な武器種："+types.join("・"):
+   "装備可能な武器種は未登録です。登録完了までは全種類を選べます。";
+ }
+ var dropdown=$("weaponDropdown");if(dropdown)dropdown.classList.remove("open");
+}
 function calc(){
  var c=db.characters.find(function(x){return String(x.id)===$( "character").value})||item(0,"");
  var w=db.weapons.find(function(x){return String(x.id)===$( "weapon").value})||item(0,"");
+ if(!weaponAllowedForCharacter(c,w))w=item(0,"");
  var t=db.talismans.find(function(x){return String(x.id)===$( "talisman").value})||item(0,"");
 
  var selectedNames={
@@ -2158,7 +2211,9 @@ function calc(){
   function setupWeaponPicker(){
     var input=$("weaponSearch"),dropdown=$("weaponDropdown"),select=$("weapon"),typeFilter=$("weaponTypeFilter");
     if(!input||!dropdown||!select||!typeFilter)return setupUnifiedPicker("weaponSearch","weaponDropdown","weapon");
-    function allOptions(){return Array.from(select.options).filter(function(o){return o.value!=="";});}
+    function allOptions(){return Array.from(select.options).filter(function(o){
+      return o.value!==""&&weaponAllowedForCurrentCharacter(weaponForOption(o));
+    });}
     function weaponForOption(o){return db.weapons.find(function(w){return String(w.id)===String(o.value)});}
     function render(mode){
       var q=(input.value||"").trim().toLowerCase();
@@ -2184,9 +2239,15 @@ function calc(){
     input.addEventListener("focus",function(){if(input.value.trim()) {render("search");dropdown.classList.add("open");}});
     var picker=input.closest(".unified-select"),arrow=picker&&picker.querySelector(".picker-arrow");
     if(arrow)arrow.addEventListener("click",function(e){e.stopPropagation();openList();input.focus();});
-    typeFilter.addEventListener("change",function(){input.value="";select.value="";calc();openList();});
+    typeFilter.addEventListener("change",function(){
+      var types=selectedCharacterForWeapon();
+      if(typeFilter.value&&types&&Array.isArray(types.allowed_weapon_types)&&types.allowed_weapon_types.length&&types.allowed_weapon_types.indexOf(typeFilter.value)<0){
+       typeFilter.value="";return;
+      }
+      input.value="";select.value="";calc();openList();
+    });
     document.addEventListener("click",function(e){if(!e.target.closest("#weaponPicker")&&!e.target.closest("#weaponTypeFilter"))dropdown.classList.remove("open");});
-    return {render:function(){},sync:function(){var o=allOptions().find(function(x){return x.value===select.value;});if(o)input.value=o.text;},openList:openList};
+    return {render:function(){},sync:function(){var o=allOptions().find(function(x){return x.value===select.value;});if(o)input.value=o.text;else if(select.value){select.value="";input.value="";}},openList:openList};
   }
 
   window.__unifiedPickers = {
@@ -2210,6 +2271,12 @@ function calc(){
   };
 })();
 
+// キャラクターを変更した瞬間に武器種の候補を切替える。
+// 計算の change ハンドラよりも先に不適合の装備を解除する。
+$("character").addEventListener("change",function(){
+ refreshAllowedWeaponSelection();
+ if(window.__unifiedPickers&&window.__unifiedPickers.weapon)window.__unifiedPickers.weapon.sync();
+},true);
 function page(p){
  var c=p==="calc";
  var calcPage=$("calcPage"),dataPage=$("dataPage");
@@ -2285,8 +2352,9 @@ function render(){
  arr.sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ja")});
  var metadataFilterHtml=(manager==="characters"||manager==="passives")?
   '<div class="sort-bar"><select id="managerMetaFilter"><option value="all">すべて表示</option><option value="pending">'+(manager==="characters"?"属性・種族未登録のみ":"パッシブ対象未登録のみ")+'</option></select></div>':'';
+ var charWeaponFilterHtml=manager==="characters"?'<div class="sort-bar"><select id="managerWeaponReadyFilter"><option value="all">装備可能武器種：すべて</option><option value="pending">装備可能武器種：未登録のみ</option><option value="ready">装備可能武器種：登録済みのみ</option></select></div>':'';
  var weaponTypeFilterHtml=manager==="weapons"?'<div class="sort-bar"><select id="managerWeaponType"><option value="">全武器種</option><option value="剣">剣</option><option value="槍">槍</option><option value="鈍器">鈍器</option><option value="杖">杖</option><option value="弓">弓</option><option value="爪">爪</option><option value="牙">牙</option><option value="羽">羽</option><option value="__unset">未設定</option></select></div>':'';
- box.innerHTML='<div class="card"><div style="font-weight:900">登録データ：'+title+'（'+arr.length+'件）</div>'+weaponTypeFilterHtml+metadataFilterHtml+'<div class="sort-bar"><select id="dataSort"><option value="name_asc">名前：昇順</option><option value="name_desc">名前：降順</option><option value="hp_desc">HP：降順</option><option value="sp_desc">SP：降順</option><option value="atk_desc">攻撃力：降順</option><option value="def_desc">防御力：降順</option><option value="spd_desc">素早さ：降順</option><option value="crit_desc">クリティカル：降順</option><option value="id_asc">登録順</option></select></div></div>';
+ box.innerHTML='<div class="card"><div style="font-weight:900">登録データ：'+title+'（'+arr.length+'件）</div>'+weaponTypeFilterHtml+metadataFilterHtml+charWeaponFilterHtml+'<div class="sort-bar"><select id="dataSort"><option value="name_asc">名前：昇順</option><option value="name_desc">名前：降順</option><option value="hp_desc">HP：降順</option><option value="sp_desc">SP：降順</option><option value="atk_desc">攻撃力：降順</option><option value="def_desc">防御力：降順</option><option value="spd_desc">素早さ：降順</option><option value="crit_desc">クリティカル：降順</option><option value="id_asc">登録順</option></select></div></div>';
  var sort=$("dataSort");sort.onchange=function(){
    var v=this.value;
    if(v==="name_desc")arr.sort(function(a,b){return String(b.name).localeCompare(String(a.name),"ja")});
@@ -2304,11 +2372,16 @@ function render(){
  if(managerWeaponType)managerWeaponType.onchange=draw;
  var managerMetaFilter=$("managerMetaFilter");
  if(managerMetaFilter)managerMetaFilter.onchange=draw;
+ var managerWeaponReadyFilter=$("managerWeaponReadyFilter");
+ if(managerWeaponReadyFilter)managerWeaponReadyFilter.onchange=draw;
  function draw(){
    Array.from(box.querySelectorAll(".item")).forEach(function(e){e.remove()});
    var shown=arr;
    if(managerMetaFilter&&managerMetaFilter.value==="pending"){
      shown=arr.filter(function(x){return manager==="characters"?!isCharacterMetaReady(x):!isPassiveMetaReady(x)});
+   }
+   if(manager==="characters"&&managerWeaponReadyFilter&&managerWeaponReadyFilter.value!=="all"){
+    shown=shown.filter(function(x){var ready=Array.isArray(x.allowed_weapon_types)&&x.allowed_weapon_types.length>0;return managerWeaponReadyFilter.value==="ready"?ready:!ready;});
    }
    if(manager==="weapons"&&managerWeaponType&&managerWeaponType.value){var f=managerWeaponType.value;shown=arr.filter(function(x){return f==="__unset"?!(x.weapon_type||""):(x.weapon_type||"")===f;});}
    shown.forEach(function(x){
@@ -2317,7 +2390,7 @@ function render(){
     STAT_KEYS.forEach(function(k){stats+='<span data-stat="'+k+'"><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});
     stats+='</div>';
     var typeLabel=manager==="weapons"?'<div style="font-size:11px;color:#9ca8c0;margin-top:3px">武器種：'+esc(x.weapon_type||"未設定")+'</div>':
-      manager==="characters"?'<div class="metadata-line">属性：'+esc(x.element||"未設定")+' / 種族：'+esc(x.race||"未設定")+'</div>':
+      manager==="characters"?'<div class="metadata-line">属性：'+esc(x.element||"未設定")+' / 種族：'+esc(x.race||"未設定")+'<br>装備可能武器種：'+esc(Array.isArray(x.allowed_weapon_types)&&x.allowed_weapon_types.length?x.allowed_weapon_types.join("・"):"未登録")+'</div>':
       manager==="passives"?'<div class="metadata-line">対象：'+esc(x.target_mode==="all"?"全キャラクター":x.target_mode==="limited"?
        '属性 ['+x.target_elements.join('・')+'] / 種族 ['+x.target_races.join('・')+']':"未設定")+'</div>':'';
     var actionHtml='';
@@ -2361,7 +2434,7 @@ function makeChoiceOptions(){
  var el=$("dataElement"),ra=$("dataRace");
  el.innerHTML='<option value="">未設定</option>'+ELEMENT_OPTIONS.map(function(x){return '<option value="'+x+'">'+x+'</option>'}).join('');
  ra.innerHTML='<option value="">未設定</option>'+RACE_OPTIONS.map(function(x){return '<option value="'+x+'">'+x+'</option>'}).join('');
- [["targetElementChoices",ELEMENT_OPTIONS],["targetRaceChoices",RACE_OPTIONS]].forEach(function(pair){
+ [["targetElementChoices",ELEMENT_OPTIONS],["targetRaceChoices",RACE_OPTIONS],["allowedWeaponChoices",WEAPON_TYPE_OPTIONS]].forEach(function(pair){
    var grid=$(pair[0]);grid.innerHTML="";
    pair[1].forEach(function(value){
     var label=document.createElement("label"),check=document.createElement("input");
@@ -2375,7 +2448,7 @@ function resetModal(){
  $("dataName").value="";
  $("dataElement").value="";$("dataRace").value="";
  $("dataTargetMode").value="unconfigured";
- setCheckedTargets("targetElementChoices",[]);setCheckedTargets("targetRaceChoices",[]);
+ setCheckedTargets("targetElementChoices",[]);setCheckedTargets("targetRaceChoices",[]);setCheckedTargets("allowedWeaponChoices",[]);
  updateMetaEditorVisibility();
  if($("dataWeaponType"))$("dataWeaponType").value="";
  ["statHp","statSp","statAtk","statDef","statSpd","statCrit"].forEach(function(id){$(id).value=0});
@@ -2388,6 +2461,7 @@ function edit(id){
  var x=db[manager].find(function(a){return a.id===id});if(!x)return;
  editId=id;$("modalTitle").textContent="データを編集";$("dataName").value=x.name;
  $("dataElement").value=x.element||"";$("dataRace").value=x.race||"";
+ setCheckedTargets("allowedWeaponChoices",x.allowed_weapon_types||[]);
  $("dataTargetMode").value=x.target_mode||"unconfigured";
  setCheckedTargets("targetElementChoices",x.target_elements);setCheckedTargets("targetRaceChoices",x.target_races);
  updateMetaEditorVisibility();
@@ -2407,6 +2481,12 @@ async function saveItem(){
  if(manager==="characters"){
   if(!passiveSchemaReady){alert("属性・種族を保存する前に追加SQLを実行してください。");return;}
   row.element=$("dataElement").value||null;row.race=$("dataRace").value||null;
+  if(weaponRestrictionSchemaReady){
+   var weaponChoices=getCheckedTargets("allowedWeaponChoices");
+   row.allowed_weapon_types=weaponChoices.length?weaponChoices:null;
+  }else if(getCheckedTargets("allowedWeaponChoices").length){
+   alert("装備可能武器種を保存するには、先にSupabaseの追加SQLを実行してください。");return;
+  }
  }
  if(manager==="passives"){
   if(!passiveSchemaReady){alert("パッシブ対象を保存する前に追加SQLを実行してください。");return;}
