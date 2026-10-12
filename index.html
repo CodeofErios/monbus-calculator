@@ -1072,7 +1072,7 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
 <div class="card" id="passiveRuleSettingsCard">
   <div class="dashboard-title">パッシブ対象判定の管理</div>
   <div id="passiveRuleProgress" class="metadata-line">登録状況を確認中…</div>
-  <div class="hint" style="display:block!important">準備中は従来の計算式を維持します。管理者が「全端末で対象判定を有効化」を押すまでは一般ユーザーの計算には影響しません。</div>
+  <div class="hint" style="display:block!important">OFF時は対象に関係なく全パッシブを適用します。登録途中でも管理者はONにでき、未登録データは暫定的に従来どおり無条件適用します。確認モードONの端末だけは先に判定を試せます。</div>
   <div class="toggle-line">
     <input type="checkbox" id="passivePreview">
     <label for="passivePreview">この端末だけで対象判定を試す（管理者・共同管理者）</label>
@@ -1958,9 +1958,14 @@ function setResultThumb(id,itemData){
 function passiveMatchingActive(){return passiveSchemaReady&&(passiveRulesGlobalEnabled||(canEditData()&&passivePreviewEnabled));}
 function passiveRuleMatches(p,c){
  if(!p)return false;
+ // 全端末で判定OFF + この端末の確認OFF = 全パッシブを従来どおり適用。
  if(!passiveMatchingActive())return true;
  if(!c||!c.id)return false;
+ // 移行期間中、まだ対象が未設定のパッシブや属性/種族未登録のキャラは
+ // 既存のパッシブ効果を失わないよう暫定的に無条件適用する。
+ if(p.target_mode==="unconfigured"||!p.target_mode)return true;
  if(p.target_mode==="all")return true;
+ if(!c.element||!c.race)return true;
  if(p.target_mode!=="limited")return false;
  return (Boolean(c.element)&&p.target_elements.indexOf(c.element)>=0)
     ||(Boolean(c.race)&&p.target_races.indexOf(c.race)>=0);
@@ -1974,11 +1979,11 @@ function renderPassiveMatchDetails(c,selected,extra,guildMode){
  var lines=selected.map(function(p,i){
    if(!p)return "";
    var match=passiveRuleMatches(p,c);
-   return '<div class="'+(match?'match-ok':'match-ng')+'">パッシブ'+(i+1)+'：'+esc(p.name)+' ─ '+(active?(match?'対象':'対象外'):'判定保留')+'</div>';
+   return '<div class="'+(match?'match-ok':'match-ng')+'">パッシブ'+(i+1)+'：'+esc(p.name)+' ─ '+(active?((!isPassiveMetaReady(p)||!isCharacterMetaReady(c))?'未登録・暫定適用':(match?'対象':'対象外')):'無条件適用')+'</div>';
  }).filter(Boolean);
  if(guildMode==="oipoka"&&extra){
    var eMatch=passiveRuleMatches(extra,c);
-   lines.push('<div class="'+(eMatch?'match-ok':'match-ng')+'">おいポカ追加：'+esc(extra.name)+' ─ '+(active?(eMatch?'対象':'対象外'):'判定保留')+'</div>');
+   lines.push('<div class="'+(eMatch?'match-ok':'match-ng')+'">おいポカ追加：'+esc(extra.name)+' ─ '+(active?((!isPassiveMetaReady(extra)||!isCharacterMetaReady(c))?'未登録・暫定適用':(eMatch?'対象':'対象外')):'無条件適用')+'</div>');
  }
  box.innerHTML='<div class="match-note">'+esc(mode)+'</div><div class="match-note">'+description+'</div>'+
    (lines.length?lines.join(''):'<div class="match-note">パッシブ未選択</div>');
@@ -2299,31 +2304,35 @@ function passiveRuleCounts(){return {
  totalPassives:db.passives.length
 };}
 function refreshPassiveRuleDashboard(){
- var counts=passiveRuleCounts(),complete=passiveSchemaReady&&counts.chars===counts.totalChars&&counts.passives===counts.totalPassives&&counts.totalChars>0&&counts.totalPassives>0;
+ var counts=passiveRuleCounts();
  var progress=$("passiveRuleProgress");
  if(progress)progress.textContent="キャラクター登録："+counts.chars+" / "+counts.totalChars+"件（属性・種族） / パッシブ登録："+counts.passives+" / "+counts.totalPassives+"件（対象）";
  var preview=$("passivePreview");if(preview){preview.checked=passivePreviewEnabled;preview.disabled=!passiveSchemaReady;}
  var btn=$("savePassiveRules");if(btn){
   btn.style.display=isMainAdmin()?"block":"none";
   btn.textContent=passiveRulesGlobalEnabled?"全端末で対象判定をOFFにする":"全端末で対象判定を有効化";
-  btn.disabled=!isMainAdmin()||passiveRuleSaving||!passiveSchemaReady||(!passiveRulesGlobalEnabled&&!complete)||!passiveRuleSettingsLoaded;
+  btn.disabled=!isMainAdmin()||passiveRuleSaving||!passiveSchemaReady||!passiveRuleSettingsLoaded;
  }
  var st=$("passiveRuleStatus");if(st){
   st.textContent=!passiveSchemaReady?"追加SQLが必要です。まだ判定は有効にできません。":
   !passiveRuleSettingsLoaded?"共有の判定設定を取得できません（従来の計算を維持）。":
   passiveRulesGlobalEnabled?"現在：全端末で対象判定ON（Version2の計算に適用中）":
-  "現在：全端末で対象判定OFF。登録完了後に管理者が有効化できます。";
+  passivePreviewEnabled?"現在：全端末OFF／この端末のみ確認モードON（対象で絞り込み中）":
+  "現在：全端末で対象判定OFF（すべてのパッシブを無条件適用）。登録途中でも管理者がONにできます。";
  }
 }
+var passiveRuleFetchSeq=0;
 async function loadPassiveRuleSetting(){
  if(!passiveSchemaReady){passiveRulesGlobalEnabled=false;passiveRuleSettingsLoaded=false;refreshPassiveRuleDashboard();return;}
+ var seq=++passiveRuleFetchSeq;
  try{
   var r=await supabaseClient.from("app_passive_rule_settings").select("enabled").eq("id",1).maybeSingle();
-  if(r.error)throw r.error;
-  if(!r.data)throw Error("設定用テーブルにデータがありません");
+  if(r.error||!r.data)throw (r.error||Error("設定用テーブルにデータがありません"));
+  if(seq!==passiveRuleFetchSeq||passiveRuleSaving)return;
   passiveRulesGlobalEnabled=r.data.enabled===true;
   passiveRuleSettingsLoaded=true;
  }catch(e){
+  if(seq!==passiveRuleFetchSeq||passiveRuleSaving)return;
   console.warn("パッシブ対象判定設定の取得エラー",e);
   passiveRulesGlobalEnabled=false;passiveRuleSettingsLoaded=false;
  }
@@ -2331,21 +2340,30 @@ async function loadPassiveRuleSetting(){
 }
 async function togglePassiveRulesGlobally(){
  if(!isMainAdmin()||!passiveSchemaReady||!passiveRuleSettingsLoaded||passiveRuleSaving)return;
- var count=passiveRuleCounts();
- if(!passiveRulesGlobalEnabled&&(count.chars!==count.totalChars||count.passives!==count.totalPassives||!count.totalChars||!count.totalPassives)){
-   alert("属性・種族とパッシブ対象の登録がすべて完了するまで有効化できません。");return;
- }
  var next=!passiveRulesGlobalEnabled;
- if(!confirm(next?"全端末でパッシブ対象判定を有効にします。計算結果が変わります。続けますか？":"全端末でパッシブ対象判定をOFFにして、従来の計算へ戻しますか？"))return;
- passiveRuleSaving=true;refreshPassiveRuleDashboard();
+ var counts=passiveRuleCounts();
+ var notReady=counts.chars!==counts.totalChars||counts.passives!==counts.totalPassives;
+ var message=next?'全端末でパッシブ対象判定をONにします。計算結果が変わります。':'全端末で対象判定をOFFにして、すべてのパッシブを対象条件に関係なく適用します。';
+ if(next&&notReady){
+  message+='\n\n【登録途中】キャラ '+counts.chars+'/'+counts.totalChars+'件、パッシブ '+counts.passives+'/'+counts.totalPassives+'件。未登録データは従来どおり無条件適用します。';
+ }
+ if(!confirm(message+'\n\n続けますか？'))return;
+ passiveRuleSaving=true;
+ ++passiveRuleFetchSeq;
+ refreshPassiveRuleDashboard();
  try{
-  var r=await supabaseClient.from("app_passive_rule_settings")
-   .update({enabled:next,updated_at:new Date().toISOString()}).eq("id",1).select("enabled").single();
-  if(r.error)throw r.error;
-  if(!r.data||r.data.enabled!==next)throw Error("保存を確認できませんでした");
-  passiveRulesGlobalEnabled=next;calc();
- }catch(e){console.error(e);alert("共有設定の保存に失敗しました："+(e.message||"通信エラー"));}
- finally{passiveRuleSaving=false;refreshPassiveRuleDashboard();}
+  var r=await supabaseClient.from('app_passive_rule_settings').update({enabled:next,updated_at:new Date().toISOString()}).eq('id',1).select('enabled').single();
+  if(r.error||!r.data||r.data.enabled!==next)throw (r.error||new Error('全端末設定の保存を確認できません'));
+  passiveRulesGlobalEnabled=next;
+  // OFFに切り替えた端末に以前の「確認モード」が残ると判定が続いて見えるため解除する。
+  passivePreviewEnabled=false;
+  alert('全端末の対象判定を'+(next?'ON':'OFF')+'に保存しました。');
+ }catch(e){console.error('パッシブ全端末保存失敗',e);alert('全端末設定の保存に失敗しました：'+(e.message||'通信エラー'));}
+ finally{
+  passiveRuleSaving=false;
+  refreshPassiveRuleDashboard();
+  calc();
+ }
 }
 function render(){
  var box=$("list"),arr=(db[manager]||[]).slice(),title=manager==="characters"?"キャラ":manager==="weapons"?"武器":manager==="talismans"?"タリスマン":"パッシブ";
@@ -2571,6 +2589,7 @@ try{
   }).subscribe();
 }catch(e){console.warn("パッシブ対象Realtime通信",e)}
 setInterval(function(){if(!passiveRuleSaving)loadPassiveRuleSetting();},20000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)loadPassiveRuleSetting();});
 startVersionSync();
 (async function(){var bootVersion=fetchGlobalVersion();await recordPageView();await load();fill();await refreshAuth();await bootVersion;startGlobalImageVisibilitySync();})();
 $("loginButton").onclick=async function(){
