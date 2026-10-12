@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#354e59">
 <title>モンバス計算機 Version3 | 5体同時計算</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;background:#0b1020;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
@@ -389,13 +392,7 @@ body:not(.admin-mode):not(.stratos-mode):not(.hide-linked-images) #dataPage .ima
 body.hide-linked-images #dataPage .item-thumb{display:none!important}
 body:not(.admin-mode):not(.stratos-mode).hide-linked-images #dataPage .item-name-wrap{gap:0!important}
 body.admin-mode #dataPage .item-thumb,body.stratos-mode #dataPage .item-thumb{display:block!important}
-#dataPage{color:#fff}
-#dataPage .card{border:2px solid #1e3946!important;border-radius:13px!important;box-shadow:0 3px 0 #829ca2;background:#3b5964!important}
-#dataPage .btn{border:2px solid #163846!important;border-radius:9px!important;box-shadow:0 3px 0 #263e49}
-#dataPage .btn.secondary{background:#ebf5f1!important;color:#1d3b45!important;text-shadow:none!important}
-#dataPage .btn:not(.secondary):not(.danger){background:#8cf0e3!important;color:#19343e!important;text-shadow:none!important}
-#dataPage .manager-tabs .mtab{background:#2c4651!important;color:#fff!important;border:2px solid #85a1a8!important}
-#dataPage .manager-tabs .mtab.active{background:#a0f4e7!important;color:#1b3b43!important;text-shadow:none!important}
+/* Version2とデータ管理画面を共通化：V3専用の外観上書きを撤去 */
 @media(max-width:520px){
  .v2-panel-heading{padding:7px 8px;min-height:37px}
  .v2-panel-hint{display:none}
@@ -1029,6 +1026,92 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
 .v2-passive-match .match-ok{color:#b8f5d8}
 .v2-passive-match .match-ng{color:#ffd1c9}
 #v2ModalWeaponHint{margin:8px 2px;font-size:12px;line-height:1.5;color:var(--text,#fff)}
+
+/* ========== Version3: Version2とデータ管理・丸ゴシック・ステータス色を一致させる ========== */
+/* Version2と同じフォントをVersion3の５体編成画面・モーダル・データ管理に適用する。 */
+html body, html body button, html body input, html body select, html body textarea,
+html body #v2App, html body .v2-overlay, html body .v2-dialog {
+  font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN W4","Arial Rounded MT Bold","Noto Sans JP",Meiryo,sans-serif!important;
+}
+/* 最終予測ステータス：Version2と同じラベル・数値の６色と縁取り。 */
+body[data-theme="rpg"] .v2-stat-tile.v2-hp {--stat-color:var(--stat-hp);--stat-outline:var(--stat-hp-outline)}
+body[data-theme="rpg"] .v2-stat-tile.v2-sp {--stat-color:var(--stat-sp);--stat-outline:var(--stat-sp-outline)}
+body[data-theme="rpg"] .v2-stat-tile.v2-atk {--stat-color:var(--stat-atk);--stat-outline:var(--stat-atk-outline)}
+body[data-theme="rpg"] .v2-stat-tile.v2-def {--stat-color:var(--stat-def);--stat-outline:var(--stat-def-outline)}
+body[data-theme="rpg"] .v2-stat-tile.v2-spd {--stat-color:var(--stat-spd);--stat-outline:var(--stat-spd-outline)}
+body[data-theme="rpg"] .v2-stat-tile.v2-crit {--stat-color:var(--stat-crit);--stat-outline:var(--stat-crit-outline)}
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile span,
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile strong {
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.55px var(--stat-outline)!important;
+  text-shadow:0 1px 1px var(--stat-outline)!important;
+  font-weight:900!important;
+}
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile.v2-def span,
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile.v2-def strong,
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile.v2-crit span,
+body[data-theme="rpg"] .v2-result-grid .v2-stat-tile.v2-crit strong {
+  -webkit-text-stroke:.95px var(--stat-outline)!important;
+}
+/* ルーン表示・共通バフ・５体結果一覧・覚醒値／ルーン編集も同じ色。 */
+body[data-theme="rpg"] #v2App .v2-rune-chip[data-stat] span,
+body[data-theme="rpg"] #v2App .v2-rune-chip[data-stat] strong,
+body[data-theme="rpg"] #v2App .v2-buff-grid label[data-stat],
+body[data-theme="rpg"] .v2-editor-fields label[data-stat],
+body[data-theme="rpg"] #v2OverviewTable [data-stat] {
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.4px var(--stat-outline);
+  text-shadow:0 1px 1px var(--stat-outline)!important;
+  font-weight:900!important;
+}
+body[data-theme="rpg"] #v2App .v2-buff-grid label[data-stat] input,
+body[data-theme="rpg"] .v2-editor-fields label[data-stat] input {
+  color:var(--stat-color)!important;
+  -webkit-text-stroke:.45px var(--stat-outline);
+  text-shadow:0 0 1px var(--stat-outline)!important;
+  font-weight:900!important;
+}
+body[data-theme="rpg"] #v2App .v2-buff-grid label[data-stat="def"] input,
+body[data-theme="rpg"] .v2-editor-fields label[data-stat="def"] input,
+body[data-theme="rpg"] .v2-editor-fields label[data-stat="crit"] input {
+  -webkit-text-stroke:.85px var(--stat-outline);
+}
+/* モーダル内やタイル内のラベルも選んだ丸ゴシックで統一する。 */
+body[data-theme="rpg"] .v2-stat-tile *,
+body[data-theme="rpg"] .v2-editor-fields *,
+body[data-theme="rpg"] #dataPage * {font-family:inherit}
+
+
+/* Version2のデータ管理ページは画面幅いっぱいに配置される。
+   Version3は.app内に含まれるため、データ管理だけ同じ横幅に広げる。 */
+#dataPage {
+  box-sizing:border-box;
+  width:100vw;
+  max-width:none;
+  margin-left:calc(50% - 50vw);
+}
+/* Version2と同じRPGテーマ色・背景をデータ管理画面で使用する。 */
+body[data-theme="rpg"][data-page="data"] {
+  --bg:#eef2f4;
+  --surface:#2f5060;
+  --surface-2:#1f3340;
+  --input:#34586a;
+  --border:#173447;
+  --text:#ffffff;
+  --muted:#d6e3ea;
+  --accent:#7eead6;
+  --accent-strong:#54d2c0;
+  --accent-text:#15323a;
+  --danger:#ff7ea3;
+  --shadow:#0f2430;
+  --sub:#ffe684;
+  --light:#f8fafc;
+  --line:#dce6ec;
+  background:radial-gradient(circle at 1px 1px,rgba(31,51,64,.12) 1.15px,transparent 1.25px) 0 0/18px 18px,
+    linear-gradient(180deg,#f8fafc 0%,#eef2f4 100%)!important;
+  color:#173447!important;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1121,9 +1204,9 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
     <section class="v2-frame v2-editor-panel">
       <h2 class="v2-panel-heading">バフ / デバフ</h2>
       <div class="v2-buff-grid">
-        <label>攻撃 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="atk" aria-label="攻撃力 バフ デバフ パーセント" placeholder="0"></label>
-        <label>防御 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="def" aria-label="防御力 バフ デバフ パーセント" placeholder="0"></label>
-        <label>素早さ <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="spd" aria-label="素早さ バフ デバフ パーセント" placeholder="0"></label>
+        <label data-stat="atk">攻撃 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="atk" aria-label="攻撃力 バフ デバフ パーセント" placeholder="0"></label>
+        <label data-stat="def">防御 <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="def" aria-label="防御力 バフ デバフ パーセント" placeholder="0"></label>
+        <label data-stat="spd">素早さ <input type="number" step="0.1" inputmode="decimal" class="v2-small-input" data-buff="spd" aria-label="素早さ バフ デバフ パーセント" placeholder="0"></label>
       </div>
       <div class="v2-panel-info">単位：%（マイナス入力対応）</div>
     </section>
@@ -1245,9 +1328,10 @@ body.admin-mode #passiveRuleSettingsCard,body.stratos-mode #passiveRuleSettingsC
 <div class="card" id="themeSettingsCard" style="margin-bottom:12px">
   <div class="dashboard-title">テーマカラー設定</div>
   <div class="group">
-    <label for="themePreset">背景カラー</label>
+    <label for="themePreset">テーマカラー</label>
     <select id="themePreset">
       <option value="rpg">モンバスRPG風（新）</option>
+      <option value="monbus">モンバス風</option>
       <option value="navy">ネイビー</option>
       <option value="green">グリーン</option>
       <option value="red">レッド</option>
@@ -2283,7 +2367,7 @@ function v2Render(){
  function nonzeros(obj){var vals=v2Stats.filter(function(k){return obj[k]!==0&&obj[k]!=="";});if(vals.length)return vals.map(function(k){return v2Labels[k]+" "+obj[k]+"%";}).join(" / ");return v2Stats.some(function(k){return obj[k]!=="";})?"全項目 0%":"未入力";}
  $("v2AwakePreview").innerHTML="キャラ："+esc(nonzeros(slot.awake))+"<br>武器："+esc(nonzeros(slot.weaponAwake))+"<br>タリスマン："+esc(nonzeros(slot.talismanAwake));
  $("v2PassiveStrip").innerHTML=sh.passives.map(function(id,j){var p=v2Find("passives",id);return '<button class="v2-passive-mini" type="button" data-v2-passive="'+j+'" title="'+esc(p?p.name:'パッシブを選択')+'">'+v2ItemIcon(p,"v2-passive-image","＋")+'<b>'+(p?esc(p.name):'枠'+(j+1))+'</b></button>';}).join("");
- $("v2RunesPreview").innerHTML=v2Stats.map(function(k){return '<span class="v2-rune-chip"><span>'+v2Labels[k]+'</span><strong>'+Number(sh.rune[k]).toLocaleString()+'</strong></span>';}).join("");
+ $("v2RunesPreview").innerHTML=v2Stats.map(function(k){return '<span class="v2-rune-chip" data-stat="'+k+'"><span>'+v2Labels[k]+'</span><strong>'+Number(sh.rune[k]).toLocaleString()+'</strong></span>';}).join("");
  $("v2GuildMode").value=sh.guild;
  $("v2OipokaEditor").hidden=sh.guild!=="oipoka";
  $("v2OipokaButton").textContent=sh.oipoka?"変更："+v2Name("passives",sh.oipoka):"＋ 追加パッシブ選択";
@@ -2293,7 +2377,7 @@ function v2Render(){
  $("v2ResultGrid").innerHTML=v2Stats.map(function(k,j){var n=current?Number(current[k]).toLocaleString():"—";return '<div class="v2-stat-tile '+v2StatTiles[j]+'"><span>'+v2Labels[k]+'</span><strong>'+n+'</strong></div>';}).join("");
  var summary=[['キャラ','characters',slot.character],['武器','weapons',slot.weapon],['タリスマン','talismans',slot.talisman]];
  $("v2SummaryContent").innerHTML=summary.map(function(x){var data=v2Find(x[1],x[2]);return '<div class="v2-summary-unit">'+(data&&data.image_url?v2ItemIcon(data,'v2-summary-image'):'')+'<span><b>'+x[0]+'</b>'+esc(data?data.name:'未選択')+'</span></div>';}).join("")+'<div class="v2-summary-unit"><span><b>共通パッシブ</b>'+sh.passives.filter(Boolean).length+' / 5体</span></div>';
- $("v2OverviewTable").innerHTML='<table><thead><tr><th>キャラ</th>'+v2Stats.map(function(k){return '<th>'+v2Labels[k]+'</th>';}).join("")+'</tr></thead><tbody>'+v2State.slots.map(function(s,i){var r=v2Computed[i];return '<tr data-slot="'+i+'" class="'+(i===active?'active':'')+'"><td>'+(i+1)+'. '+esc(v2Name("characters",s.character))+'</td>'+v2Stats.map(function(k){return '<td>'+(r?Number(r[k]).toLocaleString():'—')+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table>';
+ $("v2OverviewTable").innerHTML='<table><thead><tr><th>キャラ</th>'+v2Stats.map(function(k){return '<th data-stat="'+k+'">'+v2Labels[k]+'</th>';}).join("")+'</tr></thead><tbody>'+v2State.slots.map(function(s,i){var r=v2Computed[i];return '<tr data-slot="'+i+'" class="'+(i===active?'active':'')+'"><td>'+(i+1)+'. '+esc(v2Name("characters",s.character))+'</td>'+v2Stats.map(function(k){return '<td data-stat="'+k+'">'+(r?Number(r[k]).toLocaleString():'—')+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table>';
  v3ShowPassiveMatchSummary();
  var c=v2Find('characters',slot.character),allowed=v3AllowedWeaponTypes(),info=$('v2WeaponAllowedInfo');
  if(info)info.textContent=!c?'キャラクターを選択すると装備可能な武器種を表示します。':allowed?'装備可能な武器種：'+allowed.join('・'):'装備可能な武器種は未登録（全種類を選択可能）';
@@ -2353,11 +2437,11 @@ function v2OpenEditor(mode){
  var markup="";
  if(mode==="awakening"){
   [["awake","キャラクター"],["weaponAwake","武器"],["talismanAwake","タリスマン"]].forEach(function(entry){
-   markup+='<section class="v2-editor-section"><h3>'+entry[1]+'の覚醒（%）</h3><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label>'+v2Labels[k]+'<input data-awake-kind="'+entry[0]+'" data-stat="'+k+'" type="number" step="0.1" inputmode="decimal" value="'+v2State.slots[v2State.active][entry[0]][k]+'"></label>';}).join("")+'</div></section>';
+   markup+='<section class="v2-editor-section"><h3>'+entry[1]+'の覚醒（%）</h3><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label data-stat="'+k+'">'+v2Labels[k]+'<input data-awake-kind="'+entry[0]+'" data-stat="'+k+'" type="number" step="0.1" inputmode="decimal" value="'+v2State.slots[v2State.active][entry[0]][k]+'"></label>';}).join("")+'</div></section>';
   });
   markup+='<div class="v2-editor-actions"><button class="v2-button v2-button-white" data-v2-editor="awake-zero" type="button">覚醒値を全て0</button><button class="v2-button v2-button-yellow" data-v2-editor="awake-hundred" type="button">覚醒値を全て100</button></div>';
  }else if(mode==="runes"){
-  markup='<p class="v2-editor-note">数値は5体全員に共通です。ルーンは割合ではなく加算です。</p><section class="v2-editor-section"><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label>'+v2Labels[k]+'<input data-v2-rune="'+k+'" type="number" min="0" step="1" inputmode="numeric" value="'+v2State.shared.rune[k]+'"></label>';}).join("")+'</div></section>';
+  markup='<p class="v2-editor-note">数値は5体全員に共通です。ルーンは割合ではなく加算です。</p><section class="v2-editor-section"><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label data-stat="'+k+'">'+v2Labels[k]+'<input data-v2-rune="'+k+'" type="number" min="0" step="1" inputmode="numeric" value="'+v2State.shared.rune[k]+'"></label>';}).join("")+'</div></section>';
   markup+='<button type="button" class="v2-button v2-button-yellow" data-v2-editor="runes-max">初期値（最大値）に戻す</button>';
  }else if(mode==="passives"){
   markup='<p class="v2-editor-note">最大5体、全員に共通で適用します。おいポカ時の追加パッシブはギルドバトル欄で選べます。</p>';
