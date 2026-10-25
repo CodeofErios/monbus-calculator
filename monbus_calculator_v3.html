@@ -1405,6 +1405,13 @@ body[data-theme="rpg"][data-page="data"] {
     <div id="allowedWeaponChoices" class="meta-choice-grid"></div>
     <div class="helper-text">登録済みの武器種だけを武器一覧へ表示。未登録の間はすべて選べます。</div>
   </div>
+  <div class="group" id="v3PassiveLinkGroup">
+    <label for="dataLinkedPassive">紐付けるパッシブキャラクター（Version3専用）</label>
+    <input id="dataLinkedPassiveFilter" type="search" placeholder="パッシブ名を検索" autocomplete="off">
+    <select id="dataLinkedPassive"><option value="">未設定（自動選択しない）</option></select>
+    <div class="helper-text">このキャラクターを編成すると、同じ番号の共通パッシブ枠へ自動選択します。リンク先は手動で登録してください。パッシブを選んでもキャラクターは変わりません。</div>
+    <div id="v3PassiveLinkStatus" class="helper-text"></div>
+  </div>
 </div>
 <div id="passiveMetaGroup" class="meta-editor-box">
   <div class="group"><label for="dataTargetMode">パッシブ効果対象</label><select id="dataTargetMode">
@@ -1448,6 +1455,7 @@ var RACE_OPTIONS=["神族","魔神","魔族","魔獣","飛天","聖人","聖獣"
 var WEAPON_TYPE_OPTIONS=["剣","槍","鈍器","杖","弓","爪","牙","羽"];
 var weaponRestrictionSchemaReady=false;
 var passiveSchemaReady=false;
+var v3PassiveLinkSchemaReady=false;
 var passiveRulesGlobalEnabled=false;
 var passivePreviewEnabled=false;
 var passiveRuleSettingsLoaded=false;
@@ -1459,6 +1467,7 @@ function item(id,name,stats,weaponType,imageUrl,meta){
  return {id:id,name:name,weapon_type:weaponType||"",image_url:imageUrl||"",
   element:cleanChoice(meta.element,ELEMENT_OPTIONS),race:cleanChoice(meta.race,RACE_OPTIONS),
   allowed_weapon_types:meta.allowed_weapon_types==null?null:cleanTargets(meta.allowed_weapon_types,WEAPON_TYPE_OPTIONS),
+  linked_passive_id:meta.linked_passive_id==null?null:Number(meta.linked_passive_id),
   target_mode:["unconfigured","all","limited"].indexOf(meta.target_mode)>=0?meta.target_mode:"unconfigured",
   target_elements:cleanTargets(meta.target_elements,ELEMENT_OPTIONS),
   target_races:cleanTargets(meta.target_races,RACE_OPTIONS),
@@ -1797,18 +1806,25 @@ async function saveAnnouncement(){
 }
 async function fetchCloud(){
  try{
-  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race,allowed_weapon_types").order("id");
+  var characterReq=supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race,allowed_weapon_types,linked_passive_id").order("id");
   var weaponReq=supabaseClient.from("weapons").select("id,name,hp,sp,atk,def,spd,crit,weapon_type,image_url").order("id");
   var talismanReq=supabaseClient.from("talismans").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
   var passiveReq=supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit,image_url,target_mode,target_elements,target_races").order("id");
   var results=await Promise.all([characterReq,weaponReq,talismanReq,passiveReq]);
   var weaponTypeMissing=false;
   passiveSchemaReady=!results[0].error&&!results[3].error;
-  weaponRestrictionSchemaReady=!results[0].error;
-  // 古いDBで列が存在しない時も画面は開くが、編集・制限は有効化しない。
+  weaponRestrictionSchemaReady=true;
+  v3PassiveLinkSchemaReady=!results[0].error;
+  // 紐付け列のみ未作成の場合も従来の属性・種族・装備制限を維持して読み込む。
+  if(results[0].error){
+   results[0]=await supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url,element,race,allowed_weapon_types").order("id");
+   v3PassiveLinkSchemaReady=false;
+   if(!results[0].error)passiveSchemaReady=!results[3].error;
+  }
+  // その他の旧テーブルでは従来のフォールバック。
   if(results[0].error){
    results[0]=await supabaseClient.from("characters").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
-   passiveSchemaReady=false;weaponRestrictionSchemaReady=false;
+   passiveSchemaReady=false;weaponRestrictionSchemaReady=false;v3PassiveLinkSchemaReady=false;
   }
   if(results[3].error){
    results[3]=await supabaseClient.from("passives").select("id,name,hp,sp,atk,def,spd,crit,image_url").order("id");
@@ -2296,7 +2312,7 @@ var v2Labels={hp:"HP",sp:"SP",atk:"攻撃力",def:"防御力",spd:"素早さ",cr
 var v2StatTiles=["v2-hp","v2-sp","v2-atk","v2-def","v2-spd","v2-crit"];
 var v2BlankStats=function(){return {hp:"",sp:"",atk:"",def:"",spd:"",crit:""}};
 function v2NewSlot(){return {character:"",weapon:"",talisman:"",awake:v2BlankStats(),weaponAwake:v2BlankStats(),talismanAwake:v2BlankStats()};}
-function v2NewParty(){return {active:0,slots:Array.from({length:5},v2NewSlot),shared:{passives:["","","","",""],rune:{hp:3648,sp:3624,atk:2328,def:2160,spd:2328,crit:96},guild:"normal",oipoka:"",buff:{atk:0,def:0,spd:0}}};}
+function v2NewParty(){return {active:0,slots:Array.from({length:5},v2NewSlot),shared:{passives:["","","","",""],passive_auto_for:["","","","",""],rune:{hp:3648,sp:3624,atk:2328,def:2160,spd:2328,crit:96},guild:"normal",oipoka:"",buff:{atk:0,def:0,spd:0}}};}
 var v2State=v2NewParty();
 var v2Computed=[null,null,null,null,null];
 function v2SafeNumber(n,min,max){var v=Number(n);return Number.isFinite(v)?Math.min(max,Math.max(min,v)):0;}
@@ -2313,6 +2329,7 @@ function v2Load(){
   });
   var sh=raw.shared||{};
   if(Array.isArray(sh.passives))v2State.shared.passives=Array.from({length:5},function(_,i){return sh.passives[i]==null?"":String(sh.passives[i]);});
+  if(Array.isArray(sh.passive_auto_for))v2State.shared.passive_auto_for=Array.from({length:5},function(_,i){return sh.passive_auto_for[i]==null?"":String(sh.passive_auto_for[i]);});
   v2Stats.forEach(function(k){if(sh.rune&&sh.rune[k]!=null)v2State.shared.rune[k]=v2SafeNumber(sh.rune[k],0,999999999);});
   if(["normal","guild","attack","oipoka"].includes(sh.guild))v2State.shared.guild=sh.guild;
   if(sh.oipoka!=null)v2State.shared.oipoka=String(sh.oipoka);
@@ -2428,6 +2445,29 @@ function v2RenderChoices(){
   return '<button type="button" class="v2-choice" data-v2-choice="'+esc(String(x.id))+'"><span class="v2-choice-image v2-linked-img">'+v2ItemIcon(x,'v2-choice-picture')+'</span><span class="v2-choice-name">'+esc(x.name)+caption+'</span></button>';
  }).join("")+(options.length>250?'<div class="v2-choice-empty">最初の250件を表示しています。名前検索で絞り込んでください。</div>':(options.length?"":'<div class="v2-choice-empty">該当するデータがありません</div>'));
 }
+// 片方向リンク：編成キャラを選んだときだけ、同じ番号の共通パッシブ枠を更新する。
+// パッシブ枠を手動変更しても編成キャラクターには触れない。
+function v3AutoSelectLinkedPassive(slotIndex,characterId){
+ var shared=v2State.shared,which=slotIndex;
+ if(!Array.isArray(shared.passive_auto_for))shared.passive_auto_for=['','','','',''];
+ var previousAuto=shared.passive_auto_for[which];
+ var c=v2Find('characters',characterId);
+ var target=c&&c.linked_passive_id?String(c.linked_passive_id):'';
+ var targetExists=!!target&&!!v2Find('passives',target);
+ if(!targetExists){
+  if(previousAuto)shared.passives[which]='';
+  shared.passive_auto_for[which]='';
+  return;
+ }
+ // 同じパッシブが他の4枠にある場合は重複させない（共通効果は1回）。
+ if(shared.passives.some(function(x,j){return j!==which&&String(x)===target;})){
+  if(previousAuto)shared.passives[which]='';
+  shared.passive_auto_for[which]='';
+  return;
+ }
+ shared.passives[which]=target;
+ shared.passive_auto_for[which]=String(characterId);
+}
 function v2SelectChoice(id){
  var slot=v2State.slots[v2State.active],sh=v2State.shared;
  if(v2PickerMode==="characters"||v2PickerMode==="weapons"||v2PickerMode==="talismans"){
@@ -2436,12 +2476,16 @@ function v2SelectChoice(id){
    if(!candidate||!weaponAllowedForCharacter(character,candidate)){alert('選択したキャラクターはこの武器種を装備できません。');return;}
   }
   slot[v2PickerMode==="characters"?"character":v2PickerMode==="weapons"?"weapon":"talisman"]=id;
-  if(v2PickerMode==="characters")v3PruneSlotWeapon(slot);
+  if(v2PickerMode==="characters"){
+    v3PruneSlotWeapon(slot);
+    v3AutoSelectLinkedPassive(v2State.active,id);
+  }
   if(v2PickerMode==="weapons"&&id==="")slot.weaponAwake=v2BlankStats();
  }
  else if(v2PickerMode==="passives"){
   if(id && sh.passives.some(function(x,i){return x===id&&i!==v2PassiveTarget;})){alert("パッシブ5枠内では同じキャラクターを重複選択できません。");return;}
   sh.passives[v2PassiveTarget]=id;
+  if(Array.isArray(sh.passive_auto_for))sh.passive_auto_for[v2PassiveTarget]='';
  }else if(v2PickerMode==="oipoka")sh.oipoka=id;
  v2CloseModal();v2CalculateAndRender(true);trackCalculationInteraction();
  if(v2EditorMode==='passives')v2OpenEditor('passives');
@@ -2461,7 +2505,7 @@ function v2OpenEditor(mode){
   markup='<p class="v2-editor-note">数値は5体全員に共通です。ルーンは割合ではなく加算です。</p><section class="v2-editor-section"><div class="v2-editor-fields">'+v2Stats.map(function(k){return '<label data-stat="'+k+'">'+v2Labels[k]+'<input data-v2-rune="'+k+'" type="number" min="0" step="1" inputmode="numeric" value="'+v2State.shared.rune[k]+'"></label>';}).join("")+'</div></section>';
   markup+='<button type="button" class="v2-button v2-button-yellow" data-v2-editor="runes-max">初期値（最大値）に戻す</button>';
  }else if(mode==="passives"){
-  markup='<p class="v2-editor-note">最大5体、全員に共通で適用します。おいポカ時の追加パッシブはギルドバトル欄で選べます。</p>';
+  markup='<p class="v2-editor-note">最大5体、全員に共通で適用します。キャラ選択時は紐付け済みパッシブを同じ番号の枠に自動設定します。パッシブから選択した場合、キャラは変更しません。おいポカ時の追加パッシブはギルドバトル欄で選べます。</p>';
   markup+=v2State.shared.passives.map(function(id,i){return '<div class="v2-editor-passive"><span>パッシブ '+(i+1)+'：'+esc(v2Name('passives',id))+'</span><button type="button" class="v2-button v2-button-mint" data-v2-passive="'+i+'">変更</button></div>';}).join("");
  }
  $("v2EditorContent").innerHTML=markup;
@@ -2489,7 +2533,10 @@ function v2SetAwakeningAll(val){
  trackCalculationInteraction();
  v2OpenEditor('awakening');
 }
-function v2ResetSlot(){if(!confirm((v2State.active+1)+"体目のキャラクター・装備・覚醒値をリセットしますか？"))return;v2State.slots[v2State.active]=v2NewSlot();v2CalculateAndRender(true);trackCalculationInteraction();}
+function v2ResetSlot(){if(!confirm((v2State.active+1)+"体目のキャラクター・装備・覚醒値をリセットしますか？"))return;
+ var i=v2State.active,sh=v2State.shared;
+ if(sh.passive_auto_for&&sh.passive_auto_for[i]){sh.passives[i]='';sh.passive_auto_for[i]='';}
+ v2State.slots[i]=v2NewSlot();v2CalculateAndRender(true);trackCalculationInteraction();}
 function v2ResetAll(){if(!confirm("5体の編成とパーティ共通設定をすべて初期化しますか？"))return;v2State=v2NewParty();v2CalculateAndRender(true);trackCalculationInteraction();}
 function v2Bind(){
  $("v2App").addEventListener('click',function(e){
@@ -2790,7 +2837,7 @@ function render(){
     STAT_KEYS.forEach(function(k){stats+='<span><b>'+STAT_LABELS[k]+'</b><b>'+Number(x.stats[k]||0).toLocaleString()+'</b></span>'});
     stats+='</div>';
     var typeLabel=manager==="weapons"?'<div class="metadata-line">武器種：'+esc(x.weapon_type||"未設定")+'</div>':
-     manager==="characters"?'<div class="metadata-line">属性：'+esc(x.element||"未設定")+' / 種族：'+esc(x.race||"未設定")+'<br>装備可能武器種：'+esc(Array.isArray(x.allowed_weapon_types)&&x.allowed_weapon_types.length?x.allowed_weapon_types.join('・'):"未登録")+'</div>':
+     manager==="characters"?'<div class="metadata-line">属性：'+esc(x.element||"未設定")+' / 種族：'+esc(x.race||"未設定")+'<br>装備可能武器種：'+esc(Array.isArray(x.allowed_weapon_types)&&x.allowed_weapon_types.length?x.allowed_weapon_types.join('・'):"未登録")+'<br>紐付けパッシブ：'+esc(x.linked_passive_id?v2Name('passives',x.linked_passive_id):'未設定')+'</div>':
      manager==="passives"?'<div class="metadata-line">対象：'+esc(x.target_mode==="all"?"全キャラクター":x.target_mode==="limited"?('属性 ['+x.target_elements.join('・')+'] / 種族 ['+x.target_races.join('・')+']'):"未設定")+'</div>':'';
     var actionHtml='';
     if(canEditData()){
@@ -2829,6 +2876,21 @@ function updateMetaEditorVisibility(){
 function updateTargetFieldsVisibility(){
  var box=$("passiveTargetFields");if(box)box.style.display=$("dataTargetMode").value==="limited"?"block":"none";
 }
+function v3RenderPassiveLinkOptions(selectedId){
+ var select=$('dataLinkedPassive'),filter=$('dataLinkedPassiveFilter');
+ if(!select)return;
+ var keep=selectedId!==undefined?String(selectedId||''):String(select.value||'');
+ var term=filter?filter.value.trim().toLocaleLowerCase():'';
+ var items=db.passives.slice().sort(function(a,b){return String(a.name).localeCompare(String(b.name),'ja');});
+ select.innerHTML='';
+ var blank=document.createElement('option');blank.value='';blank.textContent='未設定（自動選択しない）';select.appendChild(blank);
+ items.filter(function(x){return !term||String(x.name).toLocaleLowerCase().includes(term)||String(x.id)===keep;}).forEach(function(x){
+   var opt=document.createElement('option');opt.value=String(x.id);opt.textContent=x.name;select.appendChild(opt);
+ });
+ select.value=keep;
+ var st=$('v3PassiveLinkStatus');
+ if(st)st.textContent=!v3PassiveLinkSchemaReady?'紐付け用のデータ列を取得できません。保存できません。':('紐付け状況：'+(keep&&v2Find('passives',keep)?v2Name('passives',keep):'未設定'));
+}
 function makeChoiceOptions(){
  var el=$("dataElement"),ra=$("dataRace");
  el.innerHTML='<option value="">未設定</option>'+ELEMENT_OPTIONS.map(function(x){return '<option value="'+x+'">'+x+'</option>'}).join('');
@@ -2849,6 +2911,8 @@ function resetModal(){
  setCheckedTargets('targetElementChoices',[]);setCheckedTargets('targetRaceChoices',[]);setCheckedTargets('allowedWeaponChoices',[]);
  updateMetaEditorVisibility();
  if($("dataWeaponType"))$("dataWeaponType").value="";
+ if($('dataLinkedPassiveFilter'))$('dataLinkedPassiveFilter').value='';
+ v3RenderPassiveLinkOptions('');
  ["statHp","statSp","statAtk","statDef","statSpd","statCrit"].forEach(function(id){$(id).value=0});
  pendingImageFile=null;pendingRemoveImage=false;currentEditImageUrl="";
  if($("dataImageFile"))$("dataImageFile").value="";
@@ -2860,6 +2924,8 @@ function edit(id){
  editId=id;$("modalTitle").textContent="データを編集";$("dataName").value=x.name;
  $("dataElement").value=x.element||"";$("dataRace").value=x.race||"";
  setCheckedTargets('allowedWeaponChoices',x.allowed_weapon_types||[]);
+ if($('dataLinkedPassiveFilter'))$('dataLinkedPassiveFilter').value='';
+ v3RenderPassiveLinkOptions(x.linked_passive_id||'');
  $("dataTargetMode").value=x.target_mode||'unconfigured';
  setCheckedTargets('targetElementChoices',x.target_elements);setCheckedTargets('targetRaceChoices',x.target_races);
  updateMetaEditorVisibility();
@@ -2879,6 +2945,9 @@ async function saveItem(){
  if(manager==='characters'){
   if(!passiveSchemaReady){alert('属性・種族が利用できません。Supabaseの設定を確認してください。');return;}
   row.element=$("dataElement").value||null;row.race=$("dataRace").value||null;
+  if(!v3PassiveLinkSchemaReady){alert('パッシブ紐付け列が取得できません。Supabaseの設定を確認してください。');return;}
+  row.linked_passive_id=$('dataLinkedPassive').value?Number($('dataLinkedPassive').value):null;
+  if(row.linked_passive_id&&!v2Find('passives',row.linked_passive_id)){alert('紐付け先のパッシブが見つかりません。');return;}
   if(weaponRestrictionSchemaReady){var wtypes=getCheckedTargets('allowedWeaponChoices');row.allowed_weapon_types=wtypes.length?wtypes:null;}
   else if(getCheckedTargets('allowedWeaponChoices').length){alert('武器種の登録用SQLが必要です。');return;}
  }
@@ -2951,6 +3020,10 @@ function restore(e){
  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.characters||!x.weapons||!x.talismans)throw 0;db=x;db.characters.concat(db.weapons,db.talismans).forEach(function(a){if(!a.stats)a.stats={};STAT_KEYS.forEach(function(k){a.stats[k]=Number(a.stats[k]||0)})});saveLocal();fill();render();alert("復元しました")}catch(z){alert("正しいバックアップではありません")}e.target.value=""};r.readAsText(f)
 }
 makeChoiceOptions();
+$('dataLinkedPassiveFilter').addEventListener('input',function(){v3RenderPassiveLinkOptions();});
+$('dataLinkedPassive').addEventListener('change',function(){
+ var st=$('v3PassiveLinkStatus');if(st)st.textContent='紐付け状況：'+(this.value?v2Name('passives',this.value):'未設定');
+});
 $("dataTargetMode").addEventListener('change',updateTargetFieldsVisibility);
 $("passivePreview").addEventListener('change',function(){
  if(!canEditData()){this.checked=false;return;}
