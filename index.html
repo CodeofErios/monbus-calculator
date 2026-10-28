@@ -1379,9 +1379,8 @@ function startGlobalImageVisibilitySync(){
 
 
 /* ============================================================
-   Version2 / Version3 shared switch
-   主管理者は全端末、STRATOSは端末個別、一般は全端末設定に従う。
-   DB接続・認証が未確定なら自動移動せず、誤切替を防ぐ。
+   Version2 / Version3 shared switch - 404・保存失敗対策版
+   管理者は全端末、共同管理者は端末のみ。移動先を検証してから保存する。
    ============================================================ */
 var VERSION_CURRENT='v2';
 var VERSION_TABLE='monbus_version_settings';
@@ -1389,6 +1388,8 @@ var VERSION_STRATOS_KEY='monbus_version_stratos_local_v1';
 var globalSelectedVersion='v2';
 var globalVersionLoaded=false, versionAuthResolved=false, versionSavePending=false;
 var globalVersionFetchId=0, versionNavigating=false, versionSyncStarted=false;
+var versionProbePending=false,versionRouteLastFailure='',versionRouteLastFailureAt=0;
+var versionSwitchError='';
 function versionOther(v){return v==='v3'?'v2':'v3';}
 function versionValid(v){return v==='v2'||v==='v3';}
 function versionLocalChoice(){
@@ -1400,29 +1401,62 @@ function versionEffectiveChoice(){
  return globalVersionLoaded?globalSelectedVersion:null;
 }
 function versionUrl(v){return new URL(v==='v3'?'monbus_calculator_v3.html':'index.html',window.location.href).href;}
+function versionIsStandalonePreview(){
+ if(!/^https?:$/.test(window.location.protocol))return true;
+ var host=window.location.hostname.toLowerCase(),path=window.location.pathname.toLowerCase();
+ return /(^|[.])(sandbox|chatgpt|openai)[.]/.test(host)||path.indexOf('/mnt/data/')!==-1;
+}
+function versionNotice(message){
+ versionSwitchError=message||'';
+ var status=$('versionSwitchStatus');if(status&&versionSwitchError)status.textContent=versionSwitchError;
+}
+async function versionVerifyDestination(desired){
+ if(versionIsStandalonePreview())throw Error('ダウンロードした単体HTMLでは切り替えできません。GitHub Pages上でお試しください。');
+ var url=new URL(versionUrl(desired));
+ if(url.origin!==window.location.origin)throw Error('移動先のドメインが異なります。');
+ var response=await fetch(url.href,{method:'GET',cache:'no-store',credentials:'same-origin'});
+ if(!response.ok)throw Error('切替先ファイルが見つかりません（HTTP '+response.status+'）。');
+ var html=await response.text();
+ var marker=new RegExp('VERSION_CURRENT\\s*=\\s*["\\\']'+desired+'["\\\']');
+ if(!marker.test(html)||html.indexOf('モンバス')===-1)throw Error('切替先ファイルの内容が正しいVersionではありません。');
+ return url.href;
+}
+async function versionAutoNavigate(desired){
+ if(!desired||desired===VERSION_CURRENT||versionNavigating||versionSavePending||versionProbePending)return;
+ if(versionIsStandalonePreview())return;
+ if(versionRouteLastFailure===desired&&Date.now()-versionRouteLastFailureAt<60000)return;
+ versionProbePending=true;
+ try{
+  var targetUrl=await versionVerifyDestination(desired);
+  if(versionAuthResolved&&!versionSavePending&&!versionNavigating&&versionEffectiveChoice()===desired){
+   versionNavigating=true;window.location.replace(targetUrl);
+  }
+ }catch(e){
+  versionRouteLastFailure=desired;versionRouteLastFailureAt=Date.now();
+  console.warn('Version切替先の確認失敗',e);
+  versionNotice('切替先を確認できません：'+e.message+'（GitHubで index.html と monbus_calculator_v3.html の配置を確認）');
+ }finally{versionProbePending=false;applyVersionSwitchState();}
+}
 function applyVersionSwitchState(){
  var admin=isMainAdmin(),stratos=isStratosMember();
  var wrap=$('versionSwitchWrap'),btn=$('versionSwitchLink'),status=$('versionSwitchStatus');
  if(wrap)wrap.hidden=!(admin||stratos);
  if(btn){
   var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:(stratos&&versionAuthResolved);
-  btn.textContent='🔁 Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
+  btn.textContent='Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
   btn.dataset.targetVersion=next;
-  btn.disabled=!enabled || versionSavePending || !versionAuthResolved;
-  btn.setAttribute('aria-disabled',(!enabled||versionSavePending)?'true':'false');
-  btn.classList.toggle('version-switch-disabled',!enabled||versionSavePending);
+  btn.disabled=!enabled||versionSavePending||!versionAuthResolved||versionProbePending||versionNavigating;
+  btn.setAttribute('aria-disabled',btn.disabled?'true':'false');
+  btn.classList.toggle('version-switch-disabled',btn.disabled);
  }
  if(status){
-  status.textContent=admin
-   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':'⚠️ 全端末設定を読み込めません。設定SQLを確認してください。')
-   :stratos?'共同管理者の切替はこの端末のみです。全端末の設定には影響しません。':'';
+  status.textContent=versionSwitchError || (admin
+    ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は全端末に反映されます。':'全端末設定を読み込めません。再読み込みしてください。')
+    :stratos?'共同管理者の切替はこの端末のみに反映されます。':'');
  }
  if(versionAuthResolved&&!versionSavePending&&!versionNavigating){
   var desired=versionEffectiveChoice();
-  if(desired&&desired!==VERSION_CURRENT){
-   versionNavigating=true;
-   window.location.replace(versionUrl(desired));
-  }
+  if(desired&&desired!==VERSION_CURRENT)versionAutoNavigate(desired);
  }
 }
 async function fetchGlobalVersion(){
@@ -1433,50 +1467,50 @@ async function fetchGlobalVersion(){
   if(res.error)throw res.error;
   if(!res.data||!versionValid(res.data.selected_version))throw Error('Version設定のSQLが未設定です。');
   if(fetchId!==globalVersionFetchId||versionSavePending||versionNavigating)return;
-  globalSelectedVersion=res.data.selected_version;
-  globalVersionLoaded=true;
+  globalSelectedVersion=res.data.selected_version;globalVersionLoaded=true;
+  versionSwitchError='';
  }catch(e){
   if(fetchId!==globalVersionFetchId||versionSavePending||versionNavigating)return;
   console.warn('全端末Version設定の取得エラー',e);
-  // 以前の正常値があれば維持。未取得の場合は強制移動しない。
+  if(!globalVersionLoaded)versionNotice('全端末設定を読み込めません：'+(e.message||'通信エラー'));
  }
  applyVersionSwitchState();
 }
 async function handleVersionSwitch(e){
  e.preventDefault();
- if(versionSavePending||versionNavigating)return;
+ if(versionSavePending||versionNavigating||versionProbePending)return;
+ versionSwitchError='';
+ var btn=$('versionSwitchLink');if(btn)btn.disabled=true;
  try{
-  // ボタンが表示されていても、操作のたびにログイン状態を再検証する。
   var authResult=await supabaseClient.auth.getUser();
   if(authResult.error)throw authResult.error;
   var email=String(authResult.data&&authResult.data.user&&authResult.data.user.email||'').toLowerCase();
-  var admin=email===ADMIN_EMAIL.toLowerCase();
-  var stratos=email===STRATOS_AUTH_EMAIL.toLowerCase();
-  if(!admin&&!stratos){await refreshAuth();alert('Version切替は管理者・共同管理者のみ利用できます。');return;}
+  var admin=email===ADMIN_EMAIL.toLowerCase(),stratos=email===STRATOS_AUTH_EMAIL.toLowerCase();
+  if(!admin&&!stratos){await refreshAuth();throw Error('管理者・共同管理者としてログインしてください。');}
   var target=versionOther(VERSION_CURRENT);
+  // 移動先の存在を確認。404へ全端末を誘導する事故を防ぐ。
+  var targetUrl=await versionVerifyDestination(target);
   if(stratos){
-   // 共同管理者：端末側だけに保存。別端末・一般ユーザーの設定には触れない。
    try{localStorage.setItem(VERSION_STRATOS_KEY,target);}
-   catch(e){alert('端末へVersion設定を保存できませんでした。ブラウザの保存設定をご確認ください。');return;}
-   versionNavigating=true;
-   window.location.replace(versionUrl(target));
-   return;
+   catch(storageError){throw Error('端末への保存に失敗しました。ブラウザの保存設定を確認してください。');}
+   versionNavigating=true;window.location.replace(targetUrl);return;
   }
-  // 管理者：共有テーブルの1行のみ更新し、保存成功後に画面を切替。
-  if(!globalVersionLoaded){alert('全端末のVersion設定を取得できません。SQL設定を確認してください。');return;}
+  if(!globalVersionLoaded){
+   await fetchGlobalVersion();
+   if(!globalVersionLoaded)throw Error('Supabaseの全端末設定を読み込めません。');
+  }
   versionSavePending=true;++globalVersionFetchId;applyVersionSwitchState();
   var writeResult=await supabaseClient.from(VERSION_TABLE)
-     .update({selected_version:target,updated_at:new Date().toISOString()})
-     .eq('id',1).select('selected_version').single();
+    .update({selected_version:target,updated_at:new Date().toISOString()})
+    .eq('id',1).select('selected_version').single();
   if(writeResult.error)throw writeResult.error;
-  if(!writeResult.data||writeResult.data.selected_version!==target)throw Error('保存内容を確認できません。');
-  globalSelectedVersion=target;
-  globalVersionLoaded=true;
-  versionSavePending=false;
-  applyVersionSwitchState(); // ここで全端末設定へ移動
+  if(!writeResult.data||writeResult.data.selected_version!==target)throw Error('保存内容を確認できません。管理者ログインとSupabaseの権限を確認してください。');
+  globalSelectedVersion=target;globalVersionLoaded=true;
+  versionNavigating=true;window.location.replace(targetUrl);
  }catch(err){
   console.error('Version切替エラー',err);
-  alert('Versionを切り替えられませんでした。Supabaseの設定と通信状態を確認してください。\n'+(err.message||''));
+  var msg='Version切替に失敗しました：'+(err.message||'不明なエラー');
+  versionNotice(msg);alert(msg);
  }finally{
   versionSavePending=false;
   if(!versionNavigating)applyVersionSwitchState();
@@ -1485,22 +1519,18 @@ async function handleVersionSwitch(e){
 function startVersionSync(){
  if(versionSyncStarted)return;
  versionSyncStarted=true;
- var btn=$('versionSwitchLink');
- if(btn)btn.addEventListener('click',handleVersionSwitch);
+ var btn=$('versionSwitchLink');if(btn)btn.addEventListener('click',handleVersionSwitch);
  try{
   supabaseClient.channel('monbus-version-sync-'+VERSION_CURRENT)
    .on('postgres_changes',{event:'UPDATE',schema:'public',table:VERSION_TABLE,filter:'id=eq.1'},function(payload){
     if(versionSavePending||versionNavigating)return;
     var v=payload.new&&payload.new.selected_version;
     if(versionValid(v)){
-     ++globalVersionFetchId;
-     globalSelectedVersion=v;
-     globalVersionLoaded=true;
-     applyVersionSwitchState();
+     ++globalVersionFetchId;globalSelectedVersion=v;globalVersionLoaded=true;
+     versionSwitchError='';applyVersionSwitchState();
     }
    }).subscribe();
  }catch(e){console.warn('VersionのRealtime接続エラー',e);}
- // Realtimeを受信できない環境でも反映。画面復帰時も即座に確認。
  setInterval(fetchGlobalVersion,15000);
  document.addEventListener('visibilitychange',function(){if(!document.hidden)fetchGlobalVersion();});
  window.addEventListener('focus',fetchGlobalVersion);
