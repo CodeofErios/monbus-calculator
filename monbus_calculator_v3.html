@@ -461,6 +461,8 @@ body.admin-mode #versionSwitchWrap,body.stratos-mode #versionSwitchWrap{display:
 #versionSwitchLink.version-switch-disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
 #versionSwitchLink:focus-visible{outline:3px solid #19a69a;outline-offset:3px}
 #versionSwitchLink:active{transform:translateY(2px);box-shadow:0 1px 0 #28404b}
+#versionRouteNotice{border:2px solid #c8a548;border-radius:10px;background:#fff8d6;color:#544321;padding:9px 12px;margin:5px 0 12px;font-size:12px;font-weight:700;line-height:1.6;text-align:center}
+#versionRouteNotice[hidden]{display:none!important}
 
 
 
@@ -1112,6 +1114,113 @@ body[data-theme="rpg"][data-page="data"] {
   color:#173447!important;
 }
 
+
+/* ===== Version3: 端末内プリセットと自由な個別比較 ===== */
+.v3-preset-panel{margin:14px 0;padding:13px 12px 16px;color:#f5feff}
+.v3-preset-panel .v2-panel-heading{margin:0 0 8px}
+.v3-preset-help{color:#d7f2f4;font-size:12px;line-height:1.65;margin:8px 3px 12px}
+.v3-preset-save-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:8px;margin:8px 0 12px}
+.v3-preset-panel input,.v3-preset-panel select{box-sizing:border-box;width:100%;min-width:0;height:44px;border-radius:10px;border:2px solid #3a6974;background:#fbfffe;color:#15323c;padding:6px 10px;font-family:inherit;font-size:15px;font-weight:800}
+.v3-preset-panel button{font-family:inherit}
+.v3-preset-panel .v2-button{width:auto;min-height:43px;padding:7px 12px}
+.v3-preset-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+.v3-preset-actions .v2-button{width:100%;font-size:12px;padding:7px 3px}
+.v3-preset-label{display:block;font-size:13px;font-weight:900;color:#eefaff;margin:6px 0}
+.v3-preset-label select{display:block;margin-top:6px}
+.v3-preset-status{font-size:12px;line-height:1.55;min-height:20px;color:#fff4b5;margin:8px 3px 0}
+.v3-compare-panel{margin:15px 0 0;padding:12px 9px;background:linear-gradient(180deg,#274856,#1e3948);border:2px solid #84c4bf;border-radius:12px}
+.v3-compare-panel[hidden]{display:none!important}
+.v3-compare-panel h3{font-size:17px;color:#fff4ba;margin:0 0 8px}
+.v3-compare-pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.v3-compare-pickers label{display:block;font-size:12px;color:#d7f9f4;font-weight:800;line-height:1.4}
+.v3-compare-pickers select{margin-top:6px}
+.v3-compare-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0 10px}
+.v3-compare-card{min-width:0;padding:9px;background:#e7f4f2;border:2px solid #9ac8c8;border-radius:10px;color:#193e4b}
+.v3-compare-card b{display:block;font-size:13px;line-height:1.5;word-break:break-word}
+.v3-compare-card small{display:block;font-size:11px;line-height:1.55;margin-top:5px;word-break:break-word}
+.v3-compare-scroll{width:100%;overflow-x:auto}
+.v3-compare-table{width:100%;min-width:410px;border-collapse:separate;border-spacing:0;font-size:13px;text-align:right;color:#173742;border:2px solid #b1d2d2;border-radius:10px;overflow:hidden}
+.v3-compare-table th,.v3-compare-table td{padding:9px 7px;border-bottom:1px solid #bdd5d4;background:#f6fffd;white-space:nowrap;font-variant-numeric:tabular-nums}
+.v3-compare-table th{background:#b2eadf;color:#1a3b48;font-weight:950}
+.v3-compare-table tr:last-child td{border-bottom:0}
+.v3-compare-table th:first-child,.v3-compare-table td:first-child{text-align:left;font-weight:900}
+.v3-compare-table td.v3-diff-pos{color:#127444;font-weight:950}
+.v3-compare-table td.v3-diff-neg{color:#c22e42;font-weight:950}
+.v3-compare-table td.v3-diff-zero{color:#5c6671;font-weight:900}
+.v3-compare-explain{margin:10px 2px 0;font-size:11px;color:#e1f1f3;line-height:1.65}
+.v3-compare-empty{padding:14px 9px;color:#e9f4f5;line-height:1.6;font-size:13px}
+/* 比較A/Bとも編成と保存済みプリセットを選択できる。 */
+.v3-compare-source-pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0 12px}
+.v3-compare-source-pickers label{font-size:13px;font-weight:900;color:#fff6c7;line-height:1.55}
+.v3-compare-source-pickers select{display:block;margin-top:5px}
+.v3-compare-section-heading{font-size:15px;color:#fafffc;font-weight:950;margin:15px 0 6px}
+.v3-compare-table td.v3-stat-name{font-weight:950;letter-spacing:-.03em}
+/* 最終予測ステータスの項目名と同じ6色・縁取りを適用する。 */
+body[data-theme="rpg"] .v3-compare-table td.v3-stat-name[data-stat]{
+ color:var(--stat-color)!important;
+ -webkit-text-stroke:.55px var(--stat-outline)!important;
+ text-shadow:0 1px 1px var(--stat-outline)!important;
+ font-weight:950!important;
+}
+body[data-theme="rpg"] .v3-compare-table td.v3-stat-name[data-stat="def"],
+body[data-theme="rpg"] .v3-compare-table td.v3-stat-name[data-stat="crit"]{
+ -webkit-text-stroke:1px var(--stat-outline)!important;
+}
+.v3-compare-all{background:#294853;border:2px solid #91c8c5;border-radius:11px;margin:16px 0 2px;overflow:hidden}
+.v3-compare-all>summary{cursor:pointer;list-style:revert;padding:12px 13px;background:#365d67;font-size:14px;font-weight:950;color:#fff6b8}
+.v3-compare-all[open]>summary{border-bottom:1px solid #91c8c5}
+.v3-compare-all-description{color:#e7f5f1;font-size:12px;line-height:1.6;margin:10px 12px}
+.v3-compare-all-body{padding:0 9px 10px}
+/* 任意の1体比較も全10体一覧と同じ折り畳み式。初期状態は閉じる。 */
+.v3-compare-single{margin-top:13px}
+.v3-compare-single-body{padding:12px 10px 12px}
+.v3-compare-single .v3-compare-explain{margin-bottom:0}
+/* 比較AとBを横並びに配置し、各5体を同じ高さの行で見比べる。 */
+.v3-compare-all-body{padding:0 7px 10px}
+.v3-roster-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px;align-items:stretch;color:#1b3843;font-variant-numeric:tabular-nums}
+.v3-roster-heading{margin:0;min-width:0;overflow-wrap:anywhere;display:flex;align-items:center;padding:10px 9px;font-size:13px;line-height:1.35;font-weight:950;background:#a9e8da;color:#193c45;border:2px solid #a4d1c9;border-bottom:1px solid #bedad2;border-radius:10px 10px 0 0}
+.v3-roster-heading.v3-roster-b{background:#ffe7a9;color:#584013;border-color:#efd4a2}
+.v3-roster-member{min-width:0;padding:8px 8px 10px;border-left:2px solid #a4d1c9;border-right:2px solid #a4d1c9;border-bottom:1px solid #c8dcd8;background:#f6fffd}
+.v3-roster-member.v3-roster-b{border-color:#efd4a2;background:#fff9ec}
+.v3-roster-member.v3-roster-final{border-bottom:2px solid #a4d1c9;border-radius:0 0 10px 10px}
+.v3-roster-member.v3-roster-final.v3-roster-b{border-bottom-color:#efd4a2}
+.v3-roster-name-line{display:flex;align-items:flex-start;gap:4px;line-height:1.3;min-height:24px;max-width:100%;overflow-wrap:anywhere}
+.v3-roster-badge{display:inline-block;flex:0 0 auto;min-width:27px;text-align:center;font-size:10px;line-height:1.4;background:#2b6e73;color:white;border-radius:5px;padding:2px 3px;font-weight:950}
+.v3-roster-b .v3-roster-badge{background:#936717}
+.v3-roster-name{font-size:12px;font-weight:950;min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.v3-roster-equips{display:block;font-size:10px;line-height:1.4;margin:4px 0 6px 2px;color:#4a6871;font-weight:600;overflow-wrap:anywhere}
+.v3-roster-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 6px;margin-top:5px}
+.v3-roster-tile{min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;padding:5px 2px;border:1px solid #c0dad4;border-radius:6px;background:#e9f8f4}
+.v3-roster-b .v3-roster-tile{background:#fff1d2;border-color:#ecdba8}
+.v3-roster-tile-label{font-size:11px;line-height:1.2;font-weight:950;overflow-wrap:anywhere;color:#35525c}
+body[data-theme="rpg"] .v3-roster-tile-label[data-stat]{color:var(--stat-color)!important;-webkit-text-stroke:.38px var(--stat-outline)!important;text-shadow:0 1px 1px var(--stat-outline)!important}
+body[data-theme="rpg"] .v3-roster-tile-label[data-stat="def"],
+body[data-theme="rpg"] .v3-roster-tile-label[data-stat="crit"]{-webkit-text-stroke:.75px var(--stat-outline)!important}
+.v3-roster-tile-value{font-size:13px;line-height:1.2;font-weight:950;color:#193a43;max-width:100%;overflow-wrap:anywhere;letter-spacing:-.025em}
+.v3-roster-tile-value.v3-roster-empty{color:#879599}
+@media(max-width:640px){
+ .v3-compare-all-body{padding:0 4px 9px}
+ .v3-roster-duo{column-gap:6px}
+ .v3-roster-heading{padding:8px 6px;font-size:11px}
+ .v3-roster-member{padding:7px 5px 9px}
+ .v3-roster-name-line{gap:3px;min-height:21px}
+ .v3-roster-badge{min-width:23px;font-size:9px;padding:1px 3px}
+ .v3-roster-name{font-size:10px}
+ .v3-roster-equips{display:none}
+ .v3-roster-tiles{gap:4px 4px;margin-top:5px}
+ .v3-roster-tile{min-height:47px;padding:5px 1px;gap:2px;border-radius:5px}
+ .v3-roster-tile-label{font-size:clamp(7px,2.2vw,9px);line-height:1.18;letter-spacing:-.04em}
+ .v3-roster-tile-value{font-size:clamp(9px,2.6vw,12px);letter-spacing:-.06em}
+}
+@media(max-width:365px){
+ .v3-roster-duo{column-gap:4px}
+ .v3-roster-member{padding:5px 3px 7px}
+ .v3-roster-tiles{gap:3px}
+ .v3-roster-tile{padding:4px 0;min-height:45px}
+}
+@media(max-width:480px){.v3-preset-save-row{grid-template-columns:1fr}.v3-preset-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.v3-compare-pickers,.v3-compare-cards,.v3-compare-source-pickers{grid-template-columns:1fr}}
+
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1140,6 +1249,7 @@ body[data-theme="rpg"][data-page="data"] {
   <button id="versionSwitchLink" type="button" disabled aria-label="管理者・共同管理者向け：Version2へ切り替える">Version2へ切り替える</button>
   <div id="versionSwitchStatus" role="status" aria-live="polite"></div>
 </div>
+<div id="versionRouteNotice" hidden role="status" aria-live="polite"></div>
 
 <div class="tabs">
 <button id="tabCalc" class="tab active" type="button">計算ツール</button>
@@ -1234,6 +1344,59 @@ body[data-theme="rpg"][data-page="data"] {
     <summary> 5体の最終予測ステータス一覧（タップで表示）</summary>
     <div class="v2-results-overflow" id="v2OverviewTable"></div>
   </details>
+
+
+  <section class="v2-frame v3-preset-panel" id="v3PresetPanel" aria-labelledby="v3PresetTitle">
+    <h2 class="v2-panel-heading" id="v3PresetTitle">パーティプリセット・ステータス比較</h2>
+    <p class="v3-preset-help">編成5枠のキャラクター・武器・タリスマンに加え、覚醒値・パッシブ・ルーン・ギルド補正・バフもまとめて端末に保存します。パーティ合計値の比較は行いません。</p>
+    <div class="v3-preset-save-row">
+      <input id="v3PresetName" type="text" maxlength="40" placeholder="プリセット名（例：ギルドバトル用）" aria-label="新しいプリセット名" autocomplete="off">
+      <button type="button" id="v3PresetSave" class="v2-button v2-button-mint">現在の編成を保存</button>
+    </div>
+    <label class="v3-preset-label" for="v3PresetSelect">保存済みプリセット
+      <select id="v3PresetSelect" aria-label="保存済みプリセットを選択"><option value="">保存済みプリセットはありません</option></select>
+    </label>
+    <div class="v3-preset-actions">
+      <button type="button" id="v3PresetCompareToggle" class="v2-button v2-button-yellow">比較を開く</button>
+      <button type="button" id="v3PresetLoad" class="v2-button v2-button-mint">編成を呼び出す</button>
+      <button type="button" id="v3PresetOverwrite" class="v2-button v2-button-white">現在の編成で上書き</button>
+      <button type="button" id="v3PresetRename" class="v2-button v2-button-white">名前を変更</button>
+      <button type="button" id="v3PresetDelete" class="v2-button v2-button-outline">削除</button>
+    </div>
+    <div id="v3PresetStatus" class="v3-preset-status" role="status" aria-live="polite">この端末のブラウザ内に保存します。別端末とは共有されません。</div>
+    <div id="v3ComparePanel" class="v3-compare-panel" hidden>
+      <h3>比較Aと比較Bを選択</h3>
+      <div class="v3-compare-source-pickers">
+        <label for="v3CompareSourceA">比較A（基準）
+          <select id="v3CompareSourceA" aria-label="比較Aの編成またはプリセット"></select>
+        </label>
+        <label for="v3CompareSourceB">比較B（比較先）
+          <select id="v3CompareSourceB" aria-label="比較Bの編成またはプリセット"></select>
+        </label>
+      </div>
+      <p class="v3-compare-explain">両方とも「現在の編成」または任意の保存済みプリセットを選べます。比較しても編成は変更されません。</p>
+      <details id="v3CompareSingleDetails" class="v3-compare-all v3-compare-single">
+        <summary>任意のキャラクター1体同士を比較（タップで開く）</summary>
+        <div class="v3-compare-single-body">
+          <div class="v3-compare-pickers">
+            <label for="v3PresetSlot">比較Aのキャラクター
+              <select id="v3PresetSlot" aria-label="比較Aの比較キャラクター"></select>
+            </label>
+            <label for="v3CurrentSlot">比較Bのキャラクター
+              <select id="v3CurrentSlot" aria-label="比較Bの比較キャラクター"></select>
+            </label>
+          </div>
+          <div id="v3CompareResults" aria-live="polite"></div>
+          <p class="v3-compare-explain">差は「比較B − 比較A」です。保存済みプリセットの数値は保存時点の最終予測値を使用します。</p>
+        </div>
+      </details>
+      <details id="v3CompareAllDetails" class="v3-compare-all">
+        <summary>比較A・B 全10体を横並びで一覧表示（タップで開く）</summary>
+        <p class="v3-compare-all-description">比較Aの5体を左側、比較Bの5体を右側に並べ、<strong>最大10体の最終予測ステータスを同時に確認</strong>できます。パーティ合計値は表示しません。</p>
+        <div id="v3CompareAllResults" class="v3-compare-all-body"></div>
+      </details>
+    </div>
+  </section>
 
   <div class="v2-actions">
     <button type="button" data-v2="reset-slot" class="v2-button v2-button-white">選択枠をリセット</button>
@@ -1546,6 +1709,7 @@ var VERSION_STRATOS_KEY='monbus_version_stratos_local_v1';
 var globalSelectedVersion='v2';
 var globalVersionLoaded=false, versionAuthResolved=false, versionSavePending=false;
 var globalVersionFetchId=0, versionNavigating=false, versionSyncStarted=false;
+var versionProbePending=false,versionRouteLastFailure='',versionRouteLastFailureAt=0;
 function versionOther(v){return v==='v3'?'v2':'v3';}
 function versionValid(v){return v==='v2'||v==='v3';}
 function versionLocalChoice(){
@@ -1557,6 +1721,45 @@ function versionEffectiveChoice(){
  return globalVersionLoaded?globalSelectedVersion:null;
 }
 function versionUrl(v){return new URL(v==='v3'?'monbus_calculator_v3.html':'index.html',window.location.href).href;}
+function versionIsStandalonePreview(){
+ // ダウンロードした単体HTML、ChatGPT上のプレビューなどには相方のHTMLがない場合がある。
+ if(!/^https?:$/.test(window.location.protocol))return true;
+ var host=window.location.hostname.toLowerCase(),path=window.location.pathname.toLowerCase();
+ return /(^|[.])(sandbox|chatgpt|openai)[.]/.test(host)||path.indexOf('/mnt/data/')!==-1;
+}
+function versionNotice(message){
+ var box=$('versionRouteNotice');
+ if(box){box.textContent=message||'';box.hidden=!message;}
+}
+async function versionVerifyDestination(desired){
+ if(versionIsStandalonePreview())throw Error('プレビュー／単体HTMLのため自動切替を行いません。');
+ var url=new URL(versionUrl(desired));
+ if(url.origin!==window.location.origin)throw Error('移動先のドメインが一致しません。');
+ // 404ページや、見かけ上200を返す別のHTMLへ誤移動しないよう中身まで確認する。
+ var response=await fetch(url.href,{method:'GET',cache:'no-store',credentials:'same-origin'});
+ if(!response.ok)throw Error('移動先のファイルがありません（HTTP '+response.status+'）。');
+ var html=await response.text();
+ var marker=new RegExp('VERSION_CURRENT\\s*=\\s*[\"\']'+desired+'[\"\']');
+ if(!marker.test(html)||html.indexOf('モンバス')===-1){throw Error('移動先が正しいモンバス計算機ではありません。');}
+ return url.href;
+}
+async function versionAutoNavigate(desired){
+ if(!desired||desired===VERSION_CURRENT||versionNavigating||versionSavePending||versionProbePending)return;
+ if(versionIsStandalonePreview())return; // 単体プレビューではVersion3を表示したままにする。
+ if(versionRouteLastFailure===desired&&Date.now()-versionRouteLastFailureAt<60000)return;
+ versionProbePending=true;
+ try{
+  var url=await versionVerifyDestination(desired);
+  if(versionAuthResolved&&!versionSavePending&&!versionNavigating&&versionEffectiveChoice()===desired){
+   versionNavigating=true;
+   window.location.replace(url);
+  }
+ }catch(e){
+  versionRouteLastFailure=desired;versionRouteLastFailureAt=Date.now();
+  console.warn('Version切替先を確認できないため画面を維持',e);
+  versionNotice('Version'+(desired==='v2'?'2':'3')+'への自動切替を停止しました。GitHubで index.html と monbus_calculator_v3.html が同じ場所にあるか確認してください。');
+ }finally{versionProbePending=false;}
+}
 function applyVersionSwitchState(){
  var admin=isMainAdmin(),stratos=isStratosMember();
  var wrap=$('versionSwitchWrap'),btn=$('versionSwitchLink'),status=$('versionSwitchStatus');
@@ -1565,21 +1768,18 @@ function applyVersionSwitchState(){
   var next=versionOther(VERSION_CURRENT),enabled=admin?globalVersionLoaded:(stratos&&versionAuthResolved);
   btn.textContent=' Version'+(next==='v2'?'2':'3')+'へ切り替える（'+(admin?'全端末':'この端末')+'）';
   btn.dataset.targetVersion=next;
-  btn.disabled=!enabled || versionSavePending || !versionAuthResolved;
-  btn.setAttribute('aria-disabled',(!enabled||versionSavePending)?'true':'false');
-  btn.classList.toggle('version-switch-disabled',!enabled||versionSavePending);
+  btn.disabled=!enabled || versionSavePending || !versionAuthResolved || versionProbePending;
+  btn.setAttribute('aria-disabled',(!enabled||versionSavePending||versionProbePending)?'true':'false');
+  btn.classList.toggle('version-switch-disabled',!enabled||versionSavePending||versionProbePending);
  }
  if(status){
   status.textContent=admin
-   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':' 全端末設定を読み込めません。設定SQLを確認してください。')
+   ? (versionSavePending?'全端末へ保存中…':globalVersionLoaded?'管理者の切替は一般ユーザーを含む全端末に反映されます。':'全端末設定を読み込めません。設定SQLを確認してください。')
    :stratos?'共同管理者の切替はこの端末のみです。全端末の設定には影響しません。':'';
  }
  if(versionAuthResolved&&!versionSavePending&&!versionNavigating){
   var desired=versionEffectiveChoice();
-  if(desired&&desired!==VERSION_CURRENT){
-   versionNavigating=true;
-   window.location.replace(versionUrl(desired));
-  }
+  if(desired&&desired!==VERSION_CURRENT)versionAutoNavigate(desired);
  }
 }
 async function fetchGlobalVersion(){
@@ -1595,15 +1795,13 @@ async function fetchGlobalVersion(){
  }catch(e){
   if(fetchId!==globalVersionFetchId||versionSavePending||versionNavigating)return;
   console.warn('全端末Version設定の取得エラー',e);
-  // 以前の正常値があれば維持。未取得の場合は強制移動しない。
  }
  applyVersionSwitchState();
 }
 async function handleVersionSwitch(e){
  e.preventDefault();
- if(versionSavePending||versionNavigating)return;
+ if(versionSavePending||versionNavigating||versionProbePending)return;
  try{
-  // ボタンが表示されていても、操作のたびにログイン状態を再検証する。
   var authResult=await supabaseClient.auth.getUser();
   if(authResult.error)throw authResult.error;
   var email=String(authResult.data&&authResult.data.user&&authResult.data.user.email||'').toLowerCase();
@@ -1611,26 +1809,27 @@ async function handleVersionSwitch(e){
   var stratos=email===STRATOS_AUTH_EMAIL.toLowerCase();
   if(!admin&&!stratos){await refreshAuth();alert('Version切替は管理者・共同管理者のみ利用できます。');return;}
   var target=versionOther(VERSION_CURRENT);
+  // 保存前に移動先HTMLを確かめる。存在しないURLを全端末へ配信しないため。
+  var targetUrl;
+  try{targetUrl=await versionVerifyDestination(target);}
+  catch(checkError){alert('切替先を確認できなかったためVersion設定は変更していません。\n'+checkError.message+'\nGitHubの同じフォルダに2つのHTMLを配置してください。');return;}
   if(stratos){
-   // 共同管理者：端末側だけに保存。別端末・一般ユーザーの設定には触れない。
    try{localStorage.setItem(VERSION_STRATOS_KEY,target);}
-   catch(e){alert('端末へVersion設定を保存できませんでした。ブラウザの保存設定をご確認ください。');return;}
+   catch(storageError){alert('端末へVersion設定を保存できませんでした。ブラウザの保存設定をご確認ください。');return;}
    versionNavigating=true;
-   window.location.replace(versionUrl(target));
+   window.location.replace(targetUrl);
    return;
   }
-  // 管理者：共有テーブルの1行のみ更新し、保存成功後に画面を切替。
   if(!globalVersionLoaded){alert('全端末のVersion設定を取得できません。SQL設定を確認してください。');return;}
   versionSavePending=true;++globalVersionFetchId;applyVersionSwitchState();
   var writeResult=await supabaseClient.from(VERSION_TABLE)
-     .update({selected_version:target,updated_at:new Date().toISOString()})
-     .eq('id',1).select('selected_version').single();
+    .update({selected_version:target,updated_at:new Date().toISOString()})
+    .eq('id',1).select('selected_version').single();
   if(writeResult.error)throw writeResult.error;
   if(!writeResult.data||writeResult.data.selected_version!==target)throw Error('保存内容を確認できません。');
-  globalSelectedVersion=target;
-  globalVersionLoaded=true;
-  versionSavePending=false;
-  applyVersionSwitchState(); // ここで全端末設定へ移動
+  globalSelectedVersion=target;globalVersionLoaded=true;
+  versionNavigating=true;
+  window.location.replace(targetUrl);
  }catch(err){
   console.error('Version切替エラー',err);
   alert('Versionを切り替えられませんでした。Supabaseの設定と通信状態を確認してください。\n'+(err.message||''));
@@ -1650,14 +1849,11 @@ function startVersionSync(){
     if(versionSavePending||versionNavigating)return;
     var v=payload.new&&payload.new.selected_version;
     if(versionValid(v)){
-     ++globalVersionFetchId;
-     globalSelectedVersion=v;
-     globalVersionLoaded=true;
+     ++globalVersionFetchId;globalSelectedVersion=v;globalVersionLoaded=true;
      applyVersionSwitchState();
     }
    }).subscribe();
  }catch(e){console.warn('VersionのRealtime接続エラー',e);}
- // Realtimeを受信できない環境でも反映。画面復帰時も即座に確認。
  setInterval(fetchGlobalVersion,15000);
  document.addEventListener('visibilitychange',function(){if(!document.hidden)fetchGlobalVersion();});
  window.addEventListener('focus',fetchGlobalVersion);
@@ -2412,6 +2608,7 @@ function v2Render(){
  $("v2SummaryContent").innerHTML=summary.map(function(x){var data=v2Find(x[1],x[2]);return '<div class="v2-summary-unit">'+(data&&data.image_url?v2ItemIcon(data,'v2-summary-image'):'')+'<span><b>'+x[0]+'</b>'+esc(data?data.name:'未選択')+'</span></div>';}).join("")+'<div class="v2-summary-unit"><span><b>共通パッシブ</b>'+sh.passives.filter(Boolean).length+' / 5体</span></div>';
  $("v2OverviewTable").innerHTML='<table><thead><tr><th>キャラ</th>'+v2Stats.map(function(k){return '<th data-stat="'+k+'">'+v2Labels[k]+'</th>';}).join("")+'</tr></thead><tbody>'+v2State.slots.map(function(s,i){var r=v2Computed[i];return '<tr data-slot="'+i+'" class="'+(i===active?'active':'')+'"><td>'+(i+1)+'. '+esc(v2Name("characters",s.character))+'</td>'+v2Stats.map(function(k){return '<td data-stat="'+k+'">'+(r?Number(r[k]).toLocaleString():'—')+'</td>';}).join("")+'</tr>';}).join("")+'</tbody></table>';
  v3ShowPassiveMatchSummary();
+ v3PresetRenderComparison();
  var c=v2Find('characters',slot.character),allowed=v3AllowedWeaponTypes(),info=$('v2WeaponAllowedInfo');
  if(info)info.textContent=!c?'キャラクターを選択すると装備可能な武器種を表示します。':allowed?'装備可能な武器種：'+allowed.join('・'):'装備可能な武器種は未登録（全種類を選択可能）';
  v2ApplyImageVisibility();
@@ -2586,7 +2783,259 @@ function v2Bind(){
   else{page('calc');setTimeout(function(){document.getElementById(target==='party'?'v2PartyArea':'v2ResultArea').scrollIntoView({behavior:'smooth',block:'start'});},10);}
  });});
 }
-function v2Init(){v2Load();v2Ready=true;v2Bind();v2CalculateAndRender(false);}
+
+/* ===== Version3: 端末内プリセット保存 / 任意の2枠を個別比較 ===== */
+var V3_PRESET_KEY='monbus_v3_party_presets_v1';
+var V3_PRESET_MAX=50;
+var v3Presets=[],v3PresetSelectedId='';
+function v3PresetCopy(obj){return JSON.parse(JSON.stringify(obj));}
+function v3PresetMessage(s){var el=$('v3PresetStatus');if(el)el.textContent=s;}
+function v3PresetRead(){
+ try{
+  var data=JSON.parse(localStorage.getItem(V3_PRESET_KEY)||'[]');
+  return Array.isArray(data)?data.filter(function(p){return p&&typeof p.id==='string'&&typeof p.name==='string'&&p.state&&Array.isArray(p.state.slots)&&Array.isArray(p.results);}).slice(0,V3_PRESET_MAX):[];
+ }catch(e){console.warn('プリセット読み込み失敗',e);return []}
+}
+function v3PresetCommit(list){
+ try{
+  localStorage.setItem(V3_PRESET_KEY,JSON.stringify(list));
+  v3Presets=list;
+  return true;
+ }catch(e){console.warn('プリセット保存失敗',e);alert('端末への保存に失敗しました。ブラウザの保存領域・空き容量を確認してください。');return false;}
+}
+function v3PresetGetSelected(){return v3Presets.find(function(p){return p.id===v3PresetSelectedId;})||null;}
+function v3PresetSnapshot(){
+ v2CalculateAndRender(true);
+ return {
+  state:v3PresetCopy(v2State),
+  results:v2Computed.map(function(r){return r?v3PresetCopy(r):null;}),
+  names:v2State.slots.map(function(slot){return {
+   character:v2Name('characters',slot.character),
+   weapon:v2Name('weapons',slot.weapon),
+   talisman:v2Name('talismans',slot.talisman)
+  };})
+ };
+}
+function v3PresetUniqueId(){return String(Date.now())+'-'+Math.random().toString(36).slice(2,10);}
+function v3PresetRefresh(){
+ var select=$('v3PresetSelect');if(!select)return;
+ var old=v3PresetSelectedId;
+ select.replaceChildren();
+ var empty=document.createElement('option');empty.value='';empty.textContent=v3Presets.length?'プリセットを選択':'保存済みプリセットはありません';select.appendChild(empty);
+ v3Presets.forEach(function(p){var opt=document.createElement('option');opt.value=p.id;opt.textContent=p.name;select.appendChild(opt);});
+ v3PresetSelectedId=v3Presets.some(function(p){return p.id===old;})?old:'';
+ select.value=v3PresetSelectedId;
+ $('v3PresetCompareToggle').disabled=!v3Presets.length;
+ ['v3PresetLoad','v3PresetOverwrite','v3PresetRename','v3PresetDelete'].forEach(function(id){$(id).disabled=!v3PresetSelectedId;});
+ v3PresetRenderComparison();
+}
+function v3PresetSaveNew(){
+ var name=$('v3PresetName').value.trim().slice(0,40);
+ if(!name){alert('プリセット名を入力してください。');$('v3PresetName').focus();return;}
+ if(!v2State.slots.some(function(s){return Boolean(v2Find('characters',s.character));})){alert('キャラクターを1体以上選択してから保存してください。');return;}
+ if(v3Presets.length>=V3_PRESET_MAX){alert('プリセットは最大50件です。不要なプリセットを削除してください。');return;}
+ var shot=v3PresetSnapshot();
+ var preset={id:v3PresetUniqueId(),name:name,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),state:shot.state,results:shot.results,names:shot.names};
+ if(!v3PresetCommit(v3Presets.concat([preset])))return;
+ v3PresetSelectedId=preset.id;
+ $('v3PresetName').value='';
+ v3PresetRefresh();
+ v3PresetMessage('「'+name+'」をこの端末に保存しました。5枠と共通設定を記録しています。');
+}
+function v3PresetOverwrite(){
+ var preset=v3PresetGetSelected();if(!preset)return;
+ if(!confirm('「'+preset.name+'」を現在の5体編成と設定、計算結果で上書きしますか？'))return;
+ var shot=v3PresetSnapshot();
+ var updated=v3Presets.map(function(p){return p.id===preset.id?Object.assign({},p,shot,{updatedAt:new Date().toISOString()}):p;});
+ if(v3PresetCommit(updated)){v3PresetRefresh();v3PresetMessage('「'+preset.name+'」を上書きしました。');}
+}
+function v3PresetRename(){
+ var preset=v3PresetGetSelected();if(!preset)return;
+ var name=prompt('新しいプリセット名',preset.name);if(name===null)return;
+ name=name.trim().slice(0,40);if(!name){alert('名前を入力してください。');return;}
+ var updated=v3Presets.map(function(p){return p.id===preset.id?Object.assign({},p,{name:name,updatedAt:new Date().toISOString()}):p;});
+ if(v3PresetCommit(updated)){v3PresetRefresh();v3PresetMessage('プリセット名を「'+name+'」に変更しました。');}
+}
+function v3PresetDelete(){
+ var preset=v3PresetGetSelected();if(!preset)return;
+ if(!confirm('「'+preset.name+'」をこの端末から削除しますか？\n削除すると元に戻せません。'))return;
+ if(v3PresetCommit(v3Presets.filter(function(p){return p.id!==preset.id;}))){v3PresetSelectedId='';v3PresetRefresh();v3PresetMessage('プリセットを削除しました。現在編集中の5体は変更していません。');}
+}
+function v3PresetRestoreState(raw){
+ // 保存内容が一部壊れたり古くなっても、正常なフィールドだけを読み込む。
+ var fresh=v2NewParty();
+ if(!raw||!Array.isArray(raw.slots))return fresh;
+ fresh.active=v2SafeNumber(Math.floor(Number(raw.active)||0),0,4);
+ raw.slots.slice(0,5).forEach(function(slot,i){
+  if(!slot||typeof slot!=='object')return;
+  ['character','weapon','talisman'].forEach(function(key){
+   var id=slot[key]==null?'':String(slot[key]);
+   fresh.slots[i][key]=id&&v2Find(key==='character'?'characters':key==='weapon'?'weapons':'talismans',id)?id:'';
+  });
+  ['awake','weaponAwake','talismanAwake'].forEach(function(key){
+   v2Stats.forEach(function(st){
+    var val=slot[key]&&slot[key][st];
+    fresh.slots[i][key][st]=val===''||val==null?'':v2SafeNumber(val,-100,999999);
+   });
+  });
+  v3PruneSlotWeapon(fresh.slots[i]);
+ });
+ var sh=raw.shared||{};
+ if(Array.isArray(sh.passives))fresh.shared.passives=Array.from({length:5},function(_,i){var id=sh.passives[i]==null?'':String(sh.passives[i]);return v2Find('passives',id)?id:'';});
+ if(Array.isArray(sh.passive_auto_for))fresh.shared.passive_auto_for=Array.from({length:5},function(_,i){return sh.passive_auto_for[i]==null?'':String(sh.passive_auto_for[i]);});
+ v2Stats.forEach(function(k){if(sh.rune&&sh.rune[k]!=null)fresh.shared.rune[k]=v2SafeNumber(sh.rune[k],0,999999999);});
+ if(['normal','guild','attack','oipoka'].includes(sh.guild))fresh.shared.guild=sh.guild;
+ if(sh.oipoka!=null){var id=String(sh.oipoka);fresh.shared.oipoka=v2Find('passives',id)?id:'';}
+ ['atk','def','spd'].forEach(function(k){if(sh.buff&&sh.buff[k]!=null)fresh.shared.buff[k]=v2SafeNumber(sh.buff[k],-100,999999);});
+ return fresh;
+}
+function v3PresetLoadSelected(){
+ var preset=v3PresetGetSelected();if(!preset)return;
+ if(!confirm('現在編集中の5体編成と共通設定を「'+preset.name+'」で置き換えますか？\n保存していない変更は失われます。'))return;
+ v2State=v3PresetRestoreState(preset.state);
+ v2CalculateAndRender(true);
+ v3PresetRenderComparison();
+ v3PresetMessage('「'+preset.name+'」を編成画面に呼び出しました。登録データの最新値で再計算しています。');
+}
+function v3PresetSlotChoices(select,slots,names){
+ if(!select)return;
+ var old=select.value;
+ select.replaceChildren();
+ for(var i=0;i<5;i++){
+  var opt=document.createElement('option');opt.value=String(i);
+  var name=(names&&names[i]&&names[i].character)||(slots&&slots[i]?v2Name('characters',slots[i].character):'未選択');
+  opt.textContent=(i+1)+'体目：'+name;
+  select.appendChild(opt);
+ }
+ select.value=/^[0-4]$/.test(old)?old:'0';
+}
+function v3PresetFormat(n){return typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('ja-JP'):'—';}
+function v3PresetResolveSource(value){
+ if(value==='current')return {id:'current',name:'現在の編成',slots:v2State.slots,names:null,results:v2Computed};
+ if(typeof value!=='string'||value.slice(0,7)!=='preset:')return null;
+ var id=value.slice(7);
+ var p=v3Presets.find(function(x){return x.id===id;});
+ if(!p||!p.state||!Array.isArray(p.state.slots))return null;
+ return {id:value,name:p.name,slots:p.state.slots,names:p.names||null,results:p.results||[]};
+}
+function v3PresetRenderSources(){
+ var selA=$('v3CompareSourceA'),selB=$('v3CompareSourceB');
+ if(!selA||!selB)return;
+ var oldA=selA.value,oldB=selB.value;
+ function fill(sel){
+  sel.replaceChildren();
+  var now=document.createElement('option');now.value='current';now.textContent='現在の編成（編集中）';sel.appendChild(now);
+  v3Presets.forEach(function(p){
+   var opt=document.createElement('option');opt.value='preset:'+p.id;opt.textContent='プリセット：'+p.name;sel.appendChild(opt);
+  });
+ }
+ fill(selA);fill(selB);
+ // 既存の選択を維持。初回だけ管理メニューで選択中のプリセットを比較Aの初期値にする。
+ var preferred=v3PresetSelectedId&&v3Presets.some(function(p){return p.id===v3PresetSelectedId;})?'preset:'+v3PresetSelectedId:(v3Presets.length?'preset:'+v3Presets[0].id:'current');
+ selA.value=v3PresetResolveSource(oldA)?oldA:preferred;
+ selB.value=v3PresetResolveSource(oldB)?oldB:'current';
+}
+function v3PresetRenderSlotNames(){
+ var a=v3PresetResolveSource($('v3CompareSourceA').value),b=v3PresetResolveSource($('v3CompareSourceB').value);
+ v3PresetSlotChoices($('v3PresetSlot'),a&&a.slots,a&&a.names);
+ v3PresetSlotChoices($('v3CurrentSlot'),b&&b.slots,b&&b.names);
+}
+function v3PresetSlotData(source,index){
+ var slot=source&&source.slots&&source.slots[index]||{};
+ var saved=source&&source.names&&source.names[index]||{};
+ function label(key,table){return saved[key]||v2Name(table,slot[key]);}
+ return {
+  character:label('character','characters'),weapon:label('weapon','weapons'),talisman:label('talisman','talismans'),
+  stats:slot.character&&source&&source.results&&source.results[index]||null
+ };
+}
+function v3PresetCompareCards(a,b,ai,bi,infoA,infoB){
+ return '<div class="v3-compare-cards">'+
+  '<div class="v3-compare-card"><b>比較A '+(ai+1)+'体目：'+esc(infoA.character)+'</b><small>武器：'+esc(infoA.weapon)+'<br>タリスマン：'+esc(infoA.talisman)+'</small></div>'+
+  '<div class="v3-compare-card"><b>比較B '+(bi+1)+'体目：'+esc(infoB.character)+'</b><small>武器：'+esc(infoB.weapon)+'<br>タリスマン：'+esc(infoB.talisman)+'</small></div>'+
+  '</div>';
+}
+function v3PresetCompareTable(aStats,bStats){
+ var rows=v2Stats.map(function(k){
+  var rawA=aStats[k],rawB=bStats[k];
+  var a=rawA==null?NaN:Number(rawA),b=rawB==null?NaN:Number(rawB);
+  var valid=Number.isFinite(a)&&Number.isFinite(b);
+  var diff=b-a;
+  var delta=valid?(diff>0?'+':'')+v3PresetFormat(diff):'—';
+  var dclass=!valid?'v3-diff-zero':diff>0?'v3-diff-pos':diff<0?'v3-diff-neg':'v3-diff-zero';
+  return '<tr><td class="v3-stat-name" data-stat="'+k+'">'+v2Labels[k]+'</td><td>'+v3PresetFormat(a)+'</td><td>'+v3PresetFormat(b)+'</td><td class="'+dclass+'">'+delta+'</td></tr>';
+ }).join('');
+ return '<div class="v3-compare-scroll"><table class="v3-compare-table"><thead><tr><th>項目</th><th>比較A</th><th>比較B</th><th>差 (B−A)</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function v3PresetRenderComparison(){
+ var area=$('v3ComparePanel'),results=$('v3CompareResults');
+ if(!area||area.hidden||!results)return;
+ v3PresetRenderSources();
+ var a=v3PresetResolveSource($('v3CompareSourceA').value),b=v3PresetResolveSource($('v3CompareSourceB').value);
+ if(!a||!b){results.innerHTML='<div class="v3-compare-empty">比較A・Bを選んでください。</div>';return;}
+ v3PresetRenderSlotNames();
+ var ai=Number($('v3PresetSlot').value)||0,bi=Number($('v3CurrentSlot').value)||0;
+ var infoA=v3PresetSlotData(a,ai),infoB=v3PresetSlotData(b,bi);
+ var cards=v3PresetCompareCards(a,b,ai,bi,infoA,infoB);
+ var message='<div class="v3-compare-empty">両方の比較枠にキャラクターを選択すると、6ステータスの差を表示します。</div>';
+ results.innerHTML=cards+(infoA.stats&&infoB.stats?v3PresetCompareTable(infoA.stats,infoB.stats):message);
+ // 折り畳み表示中は重い5体分の表を更新しない。開いた時と編成変更時だけ更新する。
+ v3PresetRenderAllComparison();
+}
+function v3PresetRenderAllComparison(){
+ var details=$('v3CompareAllDetails'),container=$('v3CompareAllResults');
+ if(!details||!container||!details.open||$('v3ComparePanel').hidden)return;
+ var a=v3PresetResolveSource($('v3CompareSourceA').value),b=v3PresetResolveSource($('v3CompareSourceB').value);
+ if(!a||!b){container.innerHTML='<div class="v3-compare-empty">比較A・Bを選んでください。</div>';return;}
+ // 左右それぞれ5体を縦に並べ、A1とB1・A2とB2…が同じ高さに揃うグリッド。
+ // 一方の編成枠が空でも、もう一方の数値は独立して表示する。
+ function row(group,index){
+  var isB=group.key==='B';
+  var info=v3PresetSlotData(group.source,index);
+  var occupied=Boolean(group.source.slots&&group.source.slots[index]&&group.source.slots[index].character);
+  var name=occupied?info.character:'未選択';
+  var classes='v3-roster-member '+(isB?'v3-roster-b':'v3-roster-a')+(index===4?' v3-roster-final':'');
+  var cells=v2Stats.map(function(k){
+   var raw=info.stats&&info.stats[k];
+   var valid=raw!==null&&raw!==undefined&&raw!==''&&Number.isFinite(Number(raw));
+   return '<div class="v3-roster-tile"><span class="v3-roster-tile-label" data-stat="'+k+'">'+v2Labels[k]+'</span>'+
+    '<strong class="v3-roster-tile-value'+(valid?'':' v3-roster-empty')+'">'+(valid?v3PresetFormat(Number(raw)):'—')+'</strong></div>';
+  }).join('');
+  return '<section class="'+classes+'" aria-label="比較'+group.key+' '+(index+1)+'体目 '+esc(name)+'">'+
+   '<div class="v3-roster-name-line"><span class="v3-roster-badge">'+group.key+(index+1)+'</span><span class="v3-roster-name">'+esc(name)+'</span></div>'+
+   (occupied?'<span class="v3-roster-equips">武器：'+esc(info.weapon)+' / タリスマン：'+esc(info.talisman)+'</span>':'')+
+   '<div class="v3-roster-tiles">'+cells+'</div></section>';
+ }
+ var html='<div class="v3-roster-duo" role="group" aria-label="比較A・B、全10体のステータスを横並びで一覧表示">'+
+  '<h4 class="v3-roster-heading v3-roster-a">比較A：'+esc(a.name)+'</h4>'+
+  '<h4 class="v3-roster-heading v3-roster-b">比較B：'+esc(b.name)+'</h4>';
+ var groupA={key:'A',source:a},groupB={key:'B',source:b};
+ for(var i=0;i<5;i++)html+=row(groupA,i)+row(groupB,i);
+ container.innerHTML=html+'</div>';
+}
+function v3PresetBind(){
+ v3Presets=v3PresetRead();
+ $('v3PresetSave').addEventListener('click',v3PresetSaveNew);
+ $('v3PresetSelect').addEventListener('change',function(){v3PresetSelectedId=this.value;v3PresetRefresh();});
+ $('v3PresetLoad').addEventListener('click',v3PresetLoadSelected);
+ $('v3PresetOverwrite').addEventListener('click',v3PresetOverwrite);
+ $('v3PresetRename').addEventListener('click',v3PresetRename);
+ $('v3PresetDelete').addEventListener('click',v3PresetDelete);
+ $('v3PresetCompareToggle').addEventListener('click',function(){
+  var panel=$('v3ComparePanel');panel.hidden=!panel.hidden;
+  this.textContent=panel.hidden?'比較を開く':'比較を閉じる';
+  v3PresetRenderComparison();
+  if(!panel.hidden)panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+ });
+ $('v3CompareSourceA').addEventListener('change',v3PresetRenderComparison);
+ $('v3CompareSourceB').addEventListener('change',v3PresetRenderComparison);
+ $('v3PresetSlot').addEventListener('change',v3PresetRenderComparison);
+ $('v3CurrentSlot').addEventListener('change',v3PresetRenderComparison);
+ $('v3CompareAllDetails').addEventListener('toggle',v3PresetRenderAllComparison);
+ v3PresetRefresh();
+}
+
+function v2Init(){v2Load();v2Ready=true;v2Bind();v3PresetBind();v2CalculateAndRender(false);}
 
 /* 画像表示：管理者は共有DB、共同管理者は端末保存、一般は共有DBのON/OFFに従う */
 var v2GlobalImagesEnabled=false,v2GlobalReady=false,v2GlobalPending=false,v2GlobalVersion=0,v2LastImageVisibility=null;
