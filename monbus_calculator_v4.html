@@ -4729,7 +4729,7 @@ html body[data-theme="rpg"][data-color-theme="stratos_color"] .v2-dialog :is(
   <div class="mb-heading"><div><h2 id="mbForumTitle">みんなのスレッド</h2><p>Version3・Version4 共通掲示板 ／ 最大100スレッド</p></div><button type="button" id="mbReload" class="mb-action">更新</button></div>
   <div id="mbForumStatus" class="mb-status" role="status" aria-live="polite">スレッドを読み込んでいます…</div>
   <div class="mb-identity"><div id="mbLoginInfo" class="mb-caption">閲覧はログイン不要。投稿には匿名認証が必要です。</div><button type="button" id="mbEnablePosting" class="mb-action mb-auth">匿名で投稿を有効化</button><div id="mbCaptcha" hidden></div></div>
-  <div id="mbThreadIndex">
+  <div id="mbForumAdminSettings" class="mb-identity" hidden style="margin:10px 0;padding:12px"><label style="display:flex;align-items:center;gap:9px"><input type="checkbox" id="mbAllowAnonymous" style="width:20px;height:20px"> 匿名での返信を許可する（管理人のみ設定可能）</label><p id="mbAllowAnonymousStatus" class="mb-tip"></p></div><div id="mbThreadIndex">
     <details class="mb-create" id="mbNewThreadFold"><summary>＋ 新しいスレッドを作成</summary>
       <form id="mbNewThreadForm" class="mb-form">
         <label>表示名（公開）<input id="mbAuthorName" type="text" maxlength="18" placeholder="例：冒険者" autocomplete="nickname" required></label>
@@ -7173,12 +7173,27 @@ function mbFail(e,defaultText){
  if(/row-level security|permission denied|42501/i.test(m))return '投稿権限がありません。ログインとSupabaseのRLS設定を確認してください。';
  return m||defaultText||'通信エラーです。';
 }
-function mbUpdateAuthUI(){
+var mbAnonymousAllowed=true;
+ function mbCanStartThread(){return isMainAdmin()||isStratosMember();}
+ async function mbLoadForumSettings(){
+  try{var r=await supabaseClient.from('mb_forum_settings').select('allow_anonymous').eq('id',1).single();
+   if(r.error)throw r.error; mbAnonymousAllowed=r.data.allow_anonymous!==false;
+  }catch(e){console.warn('匿名設定の読み込み',e);mbAnonymousAllowed=false;}
+  var area=$('mbForumAdminSettings'),cb=$('mbAllowAnonymous'),status=$('mbAllowAnonymousStatus');
+  if(area)area.hidden=!isMainAdmin();
+  if(cb)cb.checked=mbAnonymousAllowed;
+  if(status)status.textContent=mbAnonymousAllowed?'匿名返信：許可':'匿名返信：停止';
+  mbUpdateAuthUI();
+ }
+ function mbUpdateAuthUI(){
  var e=$('mbLoginInfo'),b=$('mbEnablePosting');if(!e||!b)return;
  var user=currentUser,ready=!!(user&&user.id);
  e.textContent=ready?'投稿用認証済み（'+(user.is_anonymous?'匿名ユーザー':'ログインユーザー')+'）。公開時には表示名のみ表示されます。':'閲覧はログイン不要。書き込む場合だけ投稿用アカウントを準備します。';
- b.hidden=ready;
+ b.hidden=ready||!mbAnonymousAllowed;
+ if(!ready&&!mbAnonymousAllowed)e.textContent='匿名での返信は現在停止中です。ログインしたユーザーのみ返信できます。';
  $('mbReportPanel').hidden=!isMainAdmin();
+ var fold=$('mbNewThreadFold');if(fold){fold.hidden=!mbCanStartThread();fold.style.display=mbCanStartThread()?'':'none';}
+ var adminSettings=$('mbForumAdminSettings');if(adminSettings)adminSettings.hidden=!isMainAdmin();
 }
 function mbFillPresets(){
  ['mbThreadPreset','mbReplyPreset'].forEach(function(id){
@@ -7211,7 +7226,7 @@ function mbImportRecord(record){
 }
 async function mbEnsureUser(){
  var auth=await supabaseClient.auth.getUser();
- if(auth.data&&auth.data.user){currentUser=auth.data.user;mbForumUserId=currentUser.id;mbUpdateAuthUI();return currentUser;}
+ if(auth.data&&auth.data.user){currentUser=auth.data.user;mbForumUserId=currentUser.id;mbUpdateAuthUI();return currentUser;}if(!mbAnonymousAllowed)throw Error('匿名返信は現在停止中です。ログインが必要です。');
  if(MB_TURNSTILE_SITE_KEY&&!mbCaptchaToken){mbSetupCaptcha();throw Error('画像認証を完了してから投稿を有効化してください。');}
  var opts=mbCaptchaToken?{options:{captchaToken:mbCaptchaToken}}:undefined;
  var r=await supabaseClient.auth.signInAnonymously(opts);
@@ -7234,7 +7249,7 @@ function mbSetupCaptcha(){
  }
 }
 function mbPageOpened(){
- mbUpdateAuthUI();mbFillPresets();
+ mbUpdateAuthUI();mbFillPresets();mbLoadForumSettings();
  if(!mbForumLoaded)mbLoadThreads();
  if(MB_TURNSTILE_SITE_KEY&&!currentUser)mbSetupCaptcha();
 }
@@ -7249,7 +7264,7 @@ async function mbLoadThreads(){
    return '<button type="button" class="mb-forum-item" data-mb-open="'+t.id+'"><span class="mb-item-title">'+esc(t.title)+'</span><span class="mb-item-meta">'+esc(t.display_name)+' ｜ '+mbFmtDate(t.created_at)+(t.is_locked?' ｜ 返信停止':'')+(t.is_hidden?' ｜ 非表示':'')+'</span>'+(t.preset_name?'<span class="mb-preset-badge">プリセットあり</span>':'')+'</button>';
   }).join(''):'<div class="mb-empty">まだスレッドはありません。最初の話題を投稿できます。</div>';
   mbStatus('公開スレッド：'+mbForumThreads.length+' / 最大100件（Version3・Version4共通）');
-  $('mbNewThreadFold').style.display=mbForumThreads.length>=100?'none':'';
+  $('mbNewThreadFold').style.display=(mbForumThreads.length>=100||!mbCanStartThread())?'none':'';
   if(isMainAdmin())mbLoadReports();
  }catch(e){console.warn('スレッド一覧エラー',e);mbStatus(mbFail(e,'読み込み失敗'));$('mbThreadList').innerHTML='<div class="mb-empty">スレッドを読み込めませんでした。</div>';}
  finally{mbForumBusy=false;}
@@ -7259,7 +7274,7 @@ function mbControls(t,type){
  var id=Number(t.id);
  return '<div class="mb-commands">'+
   '<button type="button" class="mb-action" data-mb-report="'+type+':'+id+'">報告</button>'+
-  ((owner||admin)?'<button type="button" class="mb-action" data-mb-delete="'+type+':'+id+'">削除</button>':'')+
+  ((admin||(type==='reply'&&owner))?'<button type="button" class="mb-action" data-mb-delete="'+type+':'+id+'">削除</button>':'')+
   (admin?'<button type="button" class="mb-action" data-mb-hide="'+type+':'+id+'">'+(t.is_hidden?'再表示':'非表示')+'</button>':'')+
   (admin&&type==='thread'?'<button type="button" class="mb-action" data-mb-lock="'+id+'">'+(t.is_locked?'返信再開':'返信停止')+'</button>':'')+'</div>';
 }
@@ -7283,7 +7298,7 @@ async function mbOpenThread(id){
  }catch(e){mbStatus(mbFail(e,'スレッド取得エラー'));$('mbTopicContent').innerHTML='<div class="mb-empty">表示できません。</div>';}
 }
 var mbForumThreadDetail=null,mbForumReplies=[];
-async function mbSubmitThread(ev){ev.preventDefault();if(mbForumBusy)return;
+async function mbSubmitThread(ev){ev.preventDefault();if(!mbCanStartThread()){alert('スレッド作成は管理人・共同管理者のみです。');return;}if(mbForumBusy)return;
  var name=$('mbAuthorName').value.trim(),title=$('mbTitle').value.trim(),content=$('mbBody').value.trim();
  if(!name||name.length>18||title.length<4||title.length>80||!content||content.length>1000){alert('入力文字数を確認してください。');return;}
  if(mbIsUrl(title)||mbIsUrl(content)){alert('不正投稿対策のため外部リンクは書き込めません。');return;}
@@ -7302,7 +7317,7 @@ async function mbSubmitReply(ev){ev.preventDefault();if(mbForumBusy||!mbForumAct
  var content=$('mbReplyBody').value.trim();if(content.length<1||content.length>1000){alert('本文は1～1000文字で入力してください。');return;}
  if(mbIsUrl(content)){alert('外部リンクを含む投稿はできません。');return;}
  mbForumBusy=true;try{
-  var user=await mbEnsureUser(),extra=mbPresetFromSelect('mbReplyPreset');
+  var user=await mbEnsureUser();if(!mbAnonymousAllowed&&user.is_anonymous)throw Error('匿名返信は現在停止中です。');var extra=mbPresetFromSelect('mbReplyPreset');
   var r=await supabaseClient.from('mb_forum_replies').insert(Object.assign({thread_id:mbForumActiveId,user_id:user.id,display_name:($('mbAuthorName').value.trim()||'名無し').slice(0,18),content:content},extra));
   if(r.error)throw r.error;$('mbReplyForm').reset();mbStatus('返信を投稿しました。');var id=mbForumActiveId;mbForumBusy=false;await mbOpenThread(id);
  }catch(e){alert(mbFail(e,'返信失敗'));mbStatus(mbFail(e,'返信失敗'));}
@@ -7314,7 +7329,7 @@ async function mbReport(type,id){
  try{var user=await mbEnsureUser();var r=await supabaseClient.from('mb_forum_reports').insert({reporter_id:user.id,target_type:type,target_id:Number(id),reason:reason});if(r.error)throw r.error;alert('報告を受け付けました。管理者が確認します。');if(isMainAdmin())mbLoadReports();}
  catch(e){alert(mbFail(e,'報告できませんでした。'));}
 }
-async function mbDelete(type,id){if(!confirm('この'+(type==='thread'?'スレッド（返信も含む）':'返信')+'を削除しますか？'))return;
+async function mbDelete(type,id){if(type==='thread'&&!isMainAdmin()){alert('スレッドを削除できるのは管理人のみです。');return;}if(!confirm('この'+(type==='thread'?'スレッド（返信も含む）':'返信')+'を削除しますか？'))return;
  try{var table=type==='thread'?'mb_forum_threads':'mb_forum_replies',r=await supabaseClient.from(table).delete().eq('id',Number(id));if(r.error)throw r.error;
   if(type==='thread'){mbForumActiveId=null;$('mbThreadIndex').hidden=false;$('mbThreadDetail').hidden=true;mbForumLoaded=false;await mbLoadThreads();}
   else await mbOpenThread(mbForumActiveId);
@@ -7342,6 +7357,16 @@ function mbForumInit(){
  $('mbReload').addEventListener('click',function(){if(mbForumActiveId&&$('mbThreadIndex').hidden)mbOpenThread(mbForumActiveId);else mbLoadThreads();});
  $('mbBackToThreads').addEventListener('click',function(){mbForumActiveId=null;$('mbThreadIndex').hidden=false;$('mbThreadDetail').hidden=true;mbLoadThreads();});
  $('mbEnablePosting').addEventListener('click',async function(){try{var u=await mbEnsureUser();if(u)mbStatus('投稿の準備ができました。');}catch(e){mbStatus(mbFail(e,'匿名認証に失敗'));alert(mbFail(e,'匿名認証に失敗'));}});
+ $('mbAllowAnonymous').addEventListener('change',async function(){
+  if(!isMainAdmin()){this.checked=mbAnonymousAllowed;return;}
+  var desired=this.checked;this.disabled=true;
+  try{var r=await supabaseClient.from('mb_forum_settings').update({allow_anonymous:desired,updated_at:new Date().toISOString()}).eq('id',1).select('allow_anonymous').single();
+   if(r.error)throw r.error;mbAnonymousAllowed=r.data.allow_anonymous!==false;
+   $('mbAllowAnonymousStatus').textContent=mbAnonymousAllowed?'匿名返信：許可':'匿名返信：停止';
+   mbUpdateAuthUI();
+  }catch(e){alert(mbFail(e,'設定を変更できませんでした。'));this.checked=mbAnonymousAllowed;}
+  finally{this.disabled=false;}
+ });
  $('mbNewThreadForm').addEventListener('submit',mbSubmitThread);
  $('mbReplyForm').addEventListener('submit',mbSubmitReply);
  $('threadsPage').addEventListener('click',function(e){
@@ -7352,7 +7377,7 @@ function mbForumInit(){
   var hide=e.target.closest('[data-mb-hide]');if(hide){var a=hide.dataset.mbHide.split(':');mbModerate(a[0],a[1],'is_hidden');return;}
   var lock=e.target.closest('[data-mb-lock]');if(lock)mbModerate('thread',lock.dataset.mbLock,'is_locked');
  });
- supabaseClient.auth.onAuthStateChange(function(){setTimeout(mbUpdateAuthUI,50);});
+ supabaseClient.auth.onAuthStateChange(function(){setTimeout(function(){mbUpdateAuthUI();mbLoadForumSettings();},50);});
 }
 
 mbForumInit();
