@@ -6691,7 +6691,7 @@ function page(p){
  });
  if(home){loadUsageStats();loadAnnouncement();}
  if(d){render();loadAdminDashboard();}
- if(t){mbPageOpened();}
+  if(t){mbPageOpened();}else if(typeof mbStopForumLive==='function'){mbStopForumLive();}
 }
 function setManager(t){manager=t;document.querySelectorAll(".mtab").forEach(function(b){b.classList.toggle("active",b.dataset.type===t)});render()}
 function render(){
@@ -7240,9 +7240,70 @@ function mbSetupCaptcha(){
   sc.onload=install;sc.onerror=function(){mbCaptchaLoading=false;mbStatus('画像認証に接続できませんでした。');};document.head.appendChild(sc);
  }
 }
+/* Thread and replies live updates (V3/V4 shared Supabase tables).
+   Realtime events drive fast refreshes. A 12-second poll provides fallback when
+   WebSocket connections are blocked, without requiring manual Update clicks. */
+var mbForumLiveChannel=null,mbForumLiveTimer=null,mbForumLiveDebounce=null;
+var mbForumLiveSyncing=false,mbForumLivePending=false,mbForumLiveStarted=false;
+function mbForumIsVisible(){
+ return document.body.dataset.page==='threads'&&document.visibilityState!=='hidden';
+}
+function mbForumLiveSchedule(delay){
+ if(!mbForumIsVisible())return;
+ clearTimeout(mbForumLiveDebounce);
+ mbForumLiveDebounce=setTimeout(function(){mbForumLiveDebounce=null;mbForumRefreshVisible();},delay===undefined?250:delay);
+}
+async function mbForumRefreshVisible(){
+ if(!mbForumIsVisible())return;
+ if(mbForumLiveSyncing||mbForumBusy){mbForumLivePending=true;return;}
+ mbForumLiveSyncing=true;
+ try{
+  if(mbForumActiveId&&$('mbThreadDetail')&&!$('mbThreadDetail').hidden){
+   await mbOpenThread(mbForumActiveId);
+  }else{
+   await mbLoadThreads();
+  }
+ }catch(e){console.warn('掲示板自動更新エラー',e);}
+ finally{
+  mbForumLiveSyncing=false;
+  if(mbForumLivePending){
+   mbForumLivePending=false;
+   mbForumLiveSchedule(650);
+  }
+ }
+}
+function mbStartForumLive(){
+ if(mbForumLiveStarted)return;
+ mbForumLiveStarted=true;
+ // Updates appear on all clients as soon as the Supabase event arrives.
+ if(supabaseClient&&typeof supabaseClient.channel==='function'){
+  try{
+   mbForumLiveChannel=supabaseClient.channel('monbus-forum-live-'+Math.random().toString(36).slice(2))
+    .on('postgres_changes',{event:'*',schema:'public',table:'mb_forum_threads'},function(){mbForumLiveSchedule(180);})
+    .on('postgres_changes',{event:'*',schema:'public',table:'mb_forum_replies'},function(){mbForumLiveSchedule(180);})
+    .subscribe(function(status){
+     // Retry polling continues even if realtime disconnects.
+     if(status==='SUBSCRIBED')mbForumLiveSchedule(140);
+    });
+  }catch(e){console.warn('リアルタイム接続エラー、定期更新で代替',e);}
+ }
+ mbForumLiveTimer=setInterval(function(){mbForumLiveSchedule(0);},12000);
+}
+function mbStopForumLive(){
+ mbForumLiveStarted=false;
+ if(mbForumLiveTimer){clearInterval(mbForumLiveTimer);mbForumLiveTimer=null;}
+ if(mbForumLiveDebounce){clearTimeout(mbForumLiveDebounce);mbForumLiveDebounce=null;}
+ if(mbForumLiveChannel){
+  var channel=mbForumLiveChannel;mbForumLiveChannel=null;
+  try{var p=supabaseClient.removeChannel(channel);if(p&&typeof p.catch==='function')p.catch(function(){});}catch(e){}
+ }
+ mbForumLivePending=false;
+}
 function mbPageOpened(){
  mbUpdateAuthUI();mbFillPresets();mbLoadForumSettings();
- if(!mbForumLoaded)mbLoadThreads();
+ // Reopening the page always fetches fresh data, even after earlier visits.
+ mbForumLiveSchedule(0);
+ mbStartForumLive();
  if(MB_TURNSTILE_SITE_KEY&&!currentUser)mbSetupCaptcha();
 }
 async function mbLoadThreads(){
@@ -7370,6 +7431,12 @@ function mbForumInit(){
   var lock=e.target.closest('[data-mb-lock]');if(lock)mbModerate('thread',lock.dataset.mbLock,'is_locked');
  });
  supabaseClient.auth.onAuthStateChange(function(){setTimeout(function(){mbUpdateAuthUI();mbLoadForumSettings();},50);});
+  document.addEventListener('visibilitychange',function(){
+   if(mbForumIsVisible())mbForumLiveSchedule(0);
+  });
+  window.addEventListener('focus',function(){
+   if(mbForumIsVisible())mbForumLiveSchedule(0);
+  });
 }
 
 mbForumInit();
